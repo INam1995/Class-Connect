@@ -3,7 +3,9 @@ const app = express()
 import cors from 'cors';
 import connectDB from './models/db.js';
 import authRouter from './routes/auth.js'
+
 import folderRouter from './routes/folderAuth.js'
+
 
 app.use(express.json());
 

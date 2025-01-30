@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
+import { useNavigate } from "react-router-dom";
+import Login from './Login';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,7 +27,6 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     let validationErrors = {};
     if (!formData.name) validationErrors.name = "Name is required.";
     if (!formData.username) validationErrors.username = "Username is required.";
@@ -41,7 +41,7 @@ const Register = () => {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      // Submit data
+
       try {
         const response = await fetch('http://localhost:5000/api/auth/register', {
           method: 'POST',
@@ -54,15 +54,8 @@ const Register = () => {
         alert('Registration successful!');
         // navigate('./dashboard')
         navigate('/dashboard', { replace: true });
-        // setFormData({
-        //   name: '',
-        //   username: '',
-        //   email: '',
-        //   password: '',
-        //   course: '',
-        //   college: '',
-        // });
-        // setErrors({});
+       
+
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.message}`);
