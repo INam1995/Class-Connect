@@ -8,7 +8,7 @@ const Dashboard = () => {
   const [folderName, setFolderName] = useState('');
   const [subjectName, setSubjectName] = useState('');
 
-  // Fetch folders from the backend
+
   useEffect(() => {
     const fetchFolders = async () => {
       try {
@@ -21,7 +21,7 @@ const Dashboard = () => {
     fetchFolders();
   }, []);
 
-  // Create a new folder
+  
   const handleCreateFolder = async () => {
     if (folderName && subjectName) {
       try {
