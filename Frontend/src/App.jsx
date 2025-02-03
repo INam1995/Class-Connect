@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import Dashboard from './Components/Dashboard';
 
+import Dashboard from './Components/Dashboard';
 
 import Home from "./Pages/Home"
 import Register from './Components/Register';
