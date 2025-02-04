@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Login from './Login';
+import {useNavigate} from 'react-router-dom'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +10,6 @@ const Register = () => {
     course: "",
     college: "",
   });
-
   const [errors, setErrors] = useState({});
 
   const handleChange = async (e) => {
@@ -20,6 +19,7 @@ const Register = () => {
       [name]: value,
     }));
   };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +56,7 @@ const Register = () => {
           course: '',
           college: '',
         });
+        navigate('/login', { replace: true });
         setErrors({});
       } else {
         const errorData = await response.json();
@@ -176,7 +177,7 @@ const Register = () => {
   {/* Already Registered Button */}
   <button
     type="button"
-    onClick={() => (window.location.href = "/login")} // Redirect to the login page
+    onClick={() => navigate('/login', { replace: true })} // Redirect to the login page
     style={{
       width: "45%",
       padding: "10px",

@@ -1,83 +1,84 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthContext"; // ✅ Ensure correct import path
 
+import Dashboard from "./Dashboard";
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Get login function from AuthContext
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    if (!email || !password) {
-      setError("Please fill out all fields.");
+    if (!emailOrUsername || !password) {
+      setError("Both email/username and password are required.");
       return;
     }
 
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailOrUsername, username: emailOrUsername, password }),
+        credentials: "include",
       });
 
       const data = await response.json();
-      console.log(data);
+      console.log("Server Response:", data); // Debugging
+      console.log(data.user)
 
-      if (!response.ok) {
-        setError(data.message || "Login failed.");
-        setEmail(""); 
-        setPassword(""); 
+      if (response.ok) {
+        if (!data.token || !data.user) {
+          setError("Invalid response from server. Please try again.");
+          return;
+        }
+
+        login(data.user, data.token); // ✅ Store user & token globally
+        // alert("Login successful!");
+        navigate("/dashboard", {replace:true}); // ✅ Redirect to profile
       } else {
-       
-        setError("");
-        console.log("Logged in successfully");
-       
+        setError(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      setError("Something went wrong. Please try again.");
-      setEmail(""); 
-      setPassword(""); 
+      console.error("Error during login:", error);
+      setError("Something went wrong. Please try again later.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h1 className="text-3xl font-bold text-center mb-6">Welcome to the Page</h1>
-        <h2 className="text-2xl font-semibold mb-4 text-gray-700">Log in</h2>
-        <div className="space-y-4">
-          <input
-            type="text"
-            placeholder="Email"
-            className="w-full px-4 py-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="mt-6">
-          <button
-            className="w-full px-4 py-3 text-lg font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-500"
-            onClick={handleLogin}
-          >
+    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+      <div className="bg-white p-4 rounded shadow-lg w-100" style={{ maxWidth: "400px" }}>
+        <h2 className="text-center text-primary">Log in</h2>
+        {error && <p className="text-danger text-center">{error}</p>}
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <input
+              type="text"
+              placeholder="Email or Username"
+              className="form-control"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              placeholder="Password"
+              className="form-control"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary w-100">
             Log in
           </button>
-          {error && (
-            <p className="text-red-500 text-sm text-center mt-3">{error}</p>
-          )}
-          <p className="text-sm text-center mt-3">
-            Don't have an account? <Link to="/register">Register</Link>
-          </p>
-        </div>
+        </form>
       </div>
     </div>
   );

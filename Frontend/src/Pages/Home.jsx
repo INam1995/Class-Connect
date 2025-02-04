@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '../Components/NavbarComponent.jsx'
+import Navbar from '../Components/Navbar.jsx'
 import Slider from '../Components/Slider.jsx';
 
 const Home = () => {

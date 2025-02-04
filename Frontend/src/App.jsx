@@ -1,19 +1,22 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {  Routes, Route } from 'react-router-dom';
 import Home from "./Pages/Home"
 import Register from './Components/Register';
 import Login from './Components/Login'
-// import Home from '@/pages/Home.jsx';
+import Folder from './Components/Folder';
+import Dashboard from './Components/Dashboard';
 
 function App() {
   return (
     <>
-    <BrowserRouter>
+    
       <Routes>
         <Route path="/" element={<Home />} /> 
         <Route path="/register" element={<Register />} /> 
+        <Route path="/dashboard" element={<Dashboard />} /> 
         <Route path="/login" element={<Login />} />
+        <Route path="/folder/:folderId" element={<Folder />} />
       </Routes>
-    </BrowserRouter>
+    
     </>
   )
 }
