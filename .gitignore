@@ -1,0 +1,20 @@
+<<<<<<< HEAD
+# Node.js dependencies
+Backend/node_modules/
+Frontend/node_modules/
+
+
+Backend/.env
+Frontend/.env
+
+.git
+=======
+# Frontend-specific (Vite React)
+Frontend/node_modules/
+Frontend/dist/
+
+# Backend-specific (Express, Node.js)
+Backend/node_modules/
+Backend/.env
+.git
+>>>>>>> 1591b1842856f55562c4029942ad1889fe50efa4
