@@ -225,6 +225,17 @@ const FolderDetail = () => {
           <p className="text-gray-500">No PDFs found for this folder.</p>
         )}
       </div>
+      <div className="mt-5">
+  <button
+    onClick={() => {
+      navigate(`/chatroom/${folderId}`);  // ✅ Corrected syntax
+      console.log("Chat initiated!");
+    }}
+    className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600"
+  >
+    Start Chat
+  </button>
+</div>
     </div>
   );
 };
