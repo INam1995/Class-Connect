@@ -7,6 +7,7 @@ import {
   deleteChatRoom,
   getAllChatRooms,
   saveMessages,
+  editMessage 
 } from "../Controllers/chatcontroller.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
@@ -17,7 +18,7 @@ const router = express.Router();
 
 // ✅ Send message
 router.post("/messages/:folderId", authMiddleware, sendMessage);
-
+router.put("/messages/:messageId", authMiddleware, editMessage);
 // ✅ Fetch messages from a chat room
 router.get("/messages/:folderId", authMiddleware, getMessages);
 

@@ -149,7 +149,32 @@ export const deleteMessage = async (req, res) => {
     res.status(500).json({ message: "Error deleting message", error });
   }
 };
+// controllers/chatcontroller.js
 
+export const editMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { text } = req.body;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found." });
+    }
+
+    if (message.sender.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to edit this message." });
+    }
+
+    message.text = text;
+    await message.save();
+
+    res.status(200).json({ message: "Message edited successfully.", data: message });
+  } catch (error) {
+    console.error("Error editing message:", error);
+    res.status(500).json({ message: "Error editing message", error });
+  }
+};
 // ✅ Delete a Chat Room (Only admin can delete)
 export const deleteChatRoom = async (req, res) => {
   try {
