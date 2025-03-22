@@ -1,5 +1,8 @@
 import Folder from "../models/folder.js";
-import AuthMiddleware from "../middleware/authMiddleware.js";
+import User from "../models/user.js"
+import { io } from '../index.js';
+import { sendNotification } from "../utils/notificationService.js";
+
 export const createFolder = async (req, res) => {
   try {
     const { name, subject, uniqueKey } = req.body;
@@ -42,8 +45,9 @@ export const joinFolder = async (req, res) => {
   try {
     const { key } = req.body;
     const userId = req.user._id;
+    console.log("userr",userId)
 
-    const folder = await Folder.findOne({ uniqueKey: key });
+    const folder = await Folder.findOne({ uniqueKey: key }).populate('members');
     if (!folder) {
       return res.status(404).json({ message: "Folder not found" });
     }
@@ -57,7 +61,23 @@ export const joinFolder = async (req, res) => {
     folder.members.push(userId);
     await folder.save();
 
-    res.status(200).json({ message: "Folder joined successfully", folder });
+    const newUser = await User.findById(userId);
+
+    // Notify all existing members via email (optional)
+    folder.members.forEach(member => {
+      sendNotification(member.email, `A new member "${newUser.name}" has joined the folder "${folder.name}".`);
+    });
+
+    // Emit real-time notification to all members
+    io.emit('notification', {
+      type: 'MEMBER_JOINED',
+      message: `A new member "${newUser.name}" has joined the folder "${folder.name}".`,
+      folderId: folder._id,
+      timestamp: new Date(),
+    });
+    console.log("Notification sent:", `A new member "${newUser.name}" has joined the folder "${folder.name}".`);
+
+    res.status(200).json({ message: "You have successfully joined the folder.", folder });
   } catch (error) {
     console.error("Error joining folder:", error);
     res.status(500).json({ message: "Error joining folder", error });
@@ -127,6 +147,7 @@ export const leaveFolder = async (req, res) => {
     res.status(500).json({ message: "Error leaving folder", error });
   }
 };
+
 export const getFolderById = async (req, res) => {
   try {
     const folderId = req.params.folderId;

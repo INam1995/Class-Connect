@@ -82,7 +82,7 @@ const Dashboard = () => {
       });
 
       const data = await response.json();
-      if (response.ok && data.folder) {
+      if (response.ok===200 && data.folder) {
         setJoinedFolders((prev) => [...prev, data.folder]);  
         alert("Joined folder successfully!");
       } else {
@@ -153,10 +153,10 @@ const Dashboard = () => {
 
   const navigate = useNavigate(); // ✅ Correct way to use navigate
 
-const handleFolderClick = (folderId) => {
-  console.log("Navigating to folder:", folderId);
-  navigate(`/folder/${folderId}`);
-};
+  const handleFolderClick = (folderId) => {
+    console.log("Navigating to folder:", folderId);
+    navigate(`/folder/${folderId}`);
+  };
 
 
   return (
