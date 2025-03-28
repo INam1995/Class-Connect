@@ -66,7 +66,10 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+<<<<<<< HEAD
     console.log("Logout");
+=======
+>>>>>>> newpro
     res.clearCookie("token", { sameSite: "none", secure: true }).status(200).json({
       message: "User logged out successfully!",
     });
@@ -74,4 +77,7 @@ export const logout = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> newpro

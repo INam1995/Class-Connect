@@ -22,6 +22,11 @@ function NavbarComponent() {
           <Nav.Link as={Link} to="/">Home</Nav.Link>
           <Nav.Link as={Link} to="/features">Features</Nav.Link>
           <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
+<<<<<<< HEAD
+=======
+          <Nav.Link as={Link} to={`/discussion`}>Discussion</Nav.Link>
+
+>>>>>>> newpro
         </Nav>
         <Nav>
           {user ? ( // ✅ Show profile icon if logged in

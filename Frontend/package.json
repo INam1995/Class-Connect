@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@babel/preset-react": "^7.26.3",
+<<<<<<< HEAD
     "@tailwindcss/vite": "^4.0.0",
     "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
@@ -32,5 +33,43 @@
     "globals": "^15.14.0",
     "tailwindcss": "^4.0.0",
     "vite": "^6.0.5"
+=======
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@formatjs/intl-relativetimeformat": "^11.4.10",
+    "@mui/icons-material": "^6.4.3",
+    "@mui/material": "^6.4.3",
+    "@reduxjs/toolkit": "^2.5.1",
+    "@tailwindcss/vite": "^4.0.5",
+    "axios": "^1.7.9",
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "emoji-picker-react": "^4.12.2",
+    "html-react-parser": "^5.2.2",
+    "javascript-time-ago": "^2.5.11",
+    "react": "^18.3.1",
+    "react-bootstrap": "^2.10.9",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.5.0",
+    "react-quill": "^2.0.0",
+    "react-redux": "^9.2.0",
+    "react-responsive-modal": "^6.4.2",
+    "react-router-dom": "^7.1.5",
+    "react-time-ago": "^7.3.3",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.20.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.18",
+    "globals": "^15.14.0",
+    "tailwindcss": "^4.0.5",
+    "vite": "^6.1.0"
+>>>>>>> newpro
   }
 }
