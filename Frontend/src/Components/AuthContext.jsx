@@ -48,8 +48,5 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-<<<<<<< HEAD
-=======
 export default AuthContext;
 
->>>>>>> newpro

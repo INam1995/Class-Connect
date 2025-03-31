@@ -1,6 +1,4 @@
-//import { Avatar } from "@material-ui/core";
-import { Search, ExpandMore, Close } from "@mui/icons-material";
-import { Avatar, Button, Input } from "@mui/material";
+import { Avatar } from "@mui/material";
 
 import React from "react";
 import { useSelector } from "react-redux";

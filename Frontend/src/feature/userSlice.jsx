@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Search, ExpandMore, Close } from "@mui/icons-material";
-import { Avatar, Button, Input } from "@mui/material";
 
 export const userSlice = createSlice({
   name: "user",

@@ -1,11 +1,6 @@
 import Folder from '../models/folder.js';
 import cloudinary from '../utils/cloudinary.js'; 
-<<<<<<< HEAD
-import { sendNotification } from '../utils/notificationService.js';
 import { io } from '../index.js'; // Import the Socket.IO instance
-=======
-
->>>>>>> newpro
 
 export const getPdfs = async (req, res) => {
   const { folderId } = req.params;
@@ -21,14 +16,12 @@ export const getPdfs = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 // Controller function to handle PDF upload to a folder
 export const uploadPdfToFolder = async (req, res) => {
   const { folderId } = req.params; 
 
   try {
     // Get the authenticated user from req.user (set by authMiddleware)
-    const { _id: userId } = req.user;
 
     // Find the folder and populate its members
     const folder = await Folder.findById(folderId).populate('members');
@@ -51,52 +44,18 @@ export const uploadPdfToFolder = async (req, res) => {
 
     // Upload the file to Cloudinary
     const result = await cloudinary.uploader.upload(file.path, {
-=======
-
-// Controller function to handle PDF upload to a folder
-export const uploadPdfToFolder = async (req, res) => {
-  console.log("hey0")
-  const { folderId } = req.params; 
-  try {
-    // Get the authenticated user from req.user (set by authMiddleware)
-    const userId = req.user._id;
-    // Find the folder
-    const folder = await Folder.findById(folderId);
-    if (!folder) {
-      return res.status(404).json({ message: "Folder not found" });
-    }
-    console.log("folder",folder.createdBy)
-    // Check if the folder belongs to the authenticated user
-    if (folder.createdBy.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Forbidden: You do not have permission to upload to this folder" });
-    }
-    // Access the uploaded file via req.file (multer attaches it here)
-    const file = req.file;
-    if (!file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-    //  Upload the file to Cloudinary
-     const result = await cloudinary.uploader.upload(file.path, {
->>>>>>> newpro
-      resource_type: 'raw', // Automatically detect the file type (PDF, image, etc.)
+      resource_type: 'auto', // Automatically detect the file type (PDF, image, etc.)
       folder: `pdfs/${folderId}`, 
       timeout: 60000,
       type: "upload",
       flags: "attachment",
     });
-<<<<<<< HEAD
     // console.log("result",result);
 
-=======
->>>>>>> newpro
     // Ensure folder.pdfs is defined
     if (!folder.pdfs) {
       folder.pdfs = []; 
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> newpro
     // Save the PDF information to the folder
     const pdf = {
       name: file.originalname, 
@@ -104,7 +63,6 @@ export const uploadPdfToFolder = async (req, res) => {
       publicId: result.public_id, 
       createdAt: new Date(),
     };
-<<<<<<< HEAD
     console.log("pdf",pdf);
 
     // Push the PDF data into the folder's pdfs array
@@ -123,18 +81,11 @@ export const uploadPdfToFolder = async (req, res) => {
       folderId: folder._id,
     });
 
-=======
-    // Push the PDF data into the folder's pdfs array
-    folder.pdfs.push(pdf);
-    await folder.save();
-    console.log("hey")
->>>>>>> newpro
     res.status(200).json({ message: "PDF uploaded successfully", pdf });
   } catch (error) {
     console.error("Error uploading PDF:", error);
     res.status(500).json({ message: "Server error" });
   }
-<<<<<<< HEAD
 };
 
 
@@ -172,6 +123,4 @@ export const updatePdfProgress = async (req, res) => {
     console.error("Error updating PDF progress:", error);
     res.status(500).json({ message: "Server error" });
   }
-=======
->>>>>>> newpro
 };

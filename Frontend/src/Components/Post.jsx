@@ -1,9 +1,9 @@
 
 import "./css/Post.css";
 import React, { useState } from "react";
-import { Avatar, Button } from "@mui/material";
+import { Avatar } from "@mui/material";
 import { 
-  Search, ExpandMore, Close as CloseIcon, 
+  
   ArrowDownward, ArrowUpward, ChatBubble, 
   MoreHoriz, RepeatOne, Share, Favorite, ThumbDown 
 } from "@mui/icons-material";
@@ -60,23 +60,7 @@ window.location.reload();
     }
   };
   
-  // const handleSubmit = async () => {
-  //   if (post?._id && answer !== "") {
-  //     try {
-  //       console.log("124");
-  //       await api.post("/api/answers", {
-  //         answer:ans,
-  //         questionId: post?._id,
-  //       });
-  //       console.log(req.data);
-  //       alert("Answer added successfully");
-  //       setIsModalOpen(false);
-  //       window.location.href("/");
-  //     } catch (error) {
-  //       console.error("Error adding answer:", error);
-  //     }
-  //   }
-  // };
+  
 
   const handleLike = async (answerId) => {
     try {

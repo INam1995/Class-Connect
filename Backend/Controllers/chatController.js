@@ -1,6 +1,5 @@
 import ChatRoom from "../models/chatRoom.js";
 import Message from "../models/message.js";
-import User from "../models/user.js";
 import Folder from "../models/folder.js";
 
 export const sendMessage = async (req, res) => {
@@ -108,24 +107,6 @@ export const markMessagesAsSeen = async (req, res) => {
     res.status(500).json({ message: "Error updating seen status", error });
   }
 };
-
-// ✅ Mark Messages as Seen
-// export const markMessagesAsSeen = async (req, res) => {
-//   try {
-//     const { folderId } = req.params;
-//     const userId = req.user._id;
-
-//     await Message.updateMany(
-//       { folder: folderId, seenBy: { $ne: userId } },
-//       { $addToSet: { seenBy: userId } }
-//     );
-//     req.io.to(folderId).emit("messages_seen", { folderId, userId });
-//     res.status(200).json({ message: "Messages marked as seen." });
-//   } catch (error) {
-//     console.error("Error updating seen status:", error);
-//     res.status(500).json({ message: "Error updating seen status", error });
-//   }
-// };
 
 // ✅ Delete a Message (Only sender can delete)
 export const deleteMessage = async (req, res) => {

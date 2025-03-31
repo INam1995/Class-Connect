@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import CreateOrJoinFolderModal from "./CreateOrJoinFolderModal";
 import FolderGrid from "./foldergrid";
 import { useNavigate } from "react-router-dom";
+import WhiteboardModal from "./WhiteboardModal.jsx"; 
 
 const Dashboard = () => {
   const [createdFolders, setCreatedFolders] = useState([]);
@@ -10,6 +11,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
+  // const [whiteboardRoomId, setWhiteboardRoomId] = useState("");
+
 
   // Fetch created and joined folders when the component mounts
   useEffect(() => {
@@ -40,7 +44,8 @@ const Dashboard = () => {
     };
 
     fetchFolders();
-  }, [isModalOpen]);
+  // }, [isModalOpen]);
+  }, [isModalOpen, isWhiteboardOpen]);
 
   // Handle folder creation
   const handleCreateFolder = async (folderName, subjectName, uniqueKeyhere) => {
@@ -82,11 +87,7 @@ const Dashboard = () => {
       });
 
       const data = await response.json();
-<<<<<<< HEAD
       if (response.ok===200 && data.folder) {
-=======
-      if (response.ok && data.folder) {
->>>>>>> newpro
         setJoinedFolders((prev) => [...prev, data.folder]);  
         alert("Joined folder successfully!");
       } else {
@@ -155,19 +156,16 @@ const Dashboard = () => {
     }
   };
 
+  const handleOpenWhiteboard = () => {
+    setIsWhiteboardOpen(true);
+  };
+
   const navigate = useNavigate(); // ✅ Correct way to use navigate
 
-<<<<<<< HEAD
   const handleFolderClick = (folderId) => {
     console.log("Navigating to folder:", folderId);
     navigate(`/folder/${folderId}`);
   };
-=======
-const handleFolderClick = (folderId) => {
-  console.log("Navigating to folder:", folderId);
-  navigate(`/folder/${folderId}`);
-};
->>>>>>> newpro
 
 
   return (
@@ -176,12 +174,20 @@ const handleFolderClick = (folderId) => {
       <div className="flex flex-col items-center min-h-screen p-6 bg-gray-50">
         <h1 className="text-3xl font-bold text-gray-500 mb-6">📂 My Folders</h1>
 
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mb-4"
-          onClick={() => setIsModalOpen(true)}
-        >
-          ➕ Create / Join Folder
-        </button>
+         <div className="flex gap-4 mb-4">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            onClick={() => setIsModalOpen(true)}
+          >
+            ➕ Create / Join Folder
+          </button>
+          <button
+            className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600"
+            onClick={() => handleOpenWhiteboard("global-whiteboard")}
+          >
+            🎨 Open Whiteboard
+          </button>
+        </div>
 
         {loading ? (
           <p className="text-lg text-gray-600">⏳ Loading folders...</p>
@@ -215,6 +221,11 @@ const handleFolderClick = (folderId) => {
         onClose={() => setIsModalOpen(false)}
         onCreateFolder={handleCreateFolder}
         onJoinFolder={handleJoinFolder}
+      />
+      <WhiteboardModal
+        isOpen={isWhiteboardOpen}
+        onClose={() => setIsWhiteboardOpen(false)}
+        roomId="global-whiteboard"
       />
     </>
   );

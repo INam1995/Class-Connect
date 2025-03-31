@@ -14,8 +14,6 @@ const folderSchema = new mongoose.Schema({
       createdAt: { type: Date, default: Date.now },
     }
   ],
-  
-  
 },{timestamps:true});
 
 const Folder = mongoose.model('Folder', folderSchema);

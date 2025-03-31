@@ -4,13 +4,10 @@ import Register from './Components/Register';
 import Login from './Components/Login'
 import Folder from './Components/Folder';
 import Dashboard from './Components/Dashboard';
-<<<<<<< HEAD
 
-=======
 import Discussion from './Components/Discussion';
 import AllChats from './Components/AllChats';
 import ChatRoom from './Components/chatRoom'; 
->>>>>>> newpro
 function App() {
   return (
     <>
@@ -21,14 +18,11 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} /> 
         <Route path="/login" element={<Login />} />
         <Route path="/folder/:folderId" element={<Folder />} />
-<<<<<<< HEAD
-=======
         <Route path="/discussion" element={<Discussion />} />
         <Route path="/chats" element={<AllChats />} /> {/* Add this route */}
-          <Route path="/chatroom/:folderId" element={<ChatRoom />} />
+        <Route path="/chatroom/:folderId" element={<ChatRoom />} />
           
 
->>>>>>> newpro
       </Routes>
     
     </>

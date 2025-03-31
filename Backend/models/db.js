@@ -6,6 +6,7 @@ const dbURI = process.env.MONGO_URI; // Use the env variable
 
 const connectDB = async () => {
   try {
+
     await mongoose.connect(dbURI, {
     });
     console.log(`Database connected successfully`);

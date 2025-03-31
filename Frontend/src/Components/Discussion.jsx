@@ -1,18 +1,3 @@
-// import React from "react";
-// import { useParams } from "react-router-dom";
-
-// const Discussion = () => {
-//   const { folderId } = useParams();
-
-//   return (
-//     <div className="p-5">
-//       <h1 className="text-2xl font-bold">Discussion for Folder</h1>
-//       <p>Start your discussion here...</p>
-//     </div>
-//   );
-// };
-
-// export default Discussion;
 import React from 'react'
 import QuoraHeader from './QuoraHeader'
 import "./css/Quora.css"

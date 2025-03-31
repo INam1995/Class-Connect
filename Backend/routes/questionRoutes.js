@@ -34,31 +34,7 @@ router.post("/", async (req, res) => {
     });
   }
 });
-// router.get("/", async (req, res) => {
-//   try {
-//     const questionsWithAnswers = await Question.aggregate([
-//       {
-//         $lookup: {
-//           from: "answers", // The MongoDB collection name (must be lowercase)
-//           localField: "_id", // The field in the "questions" collection
-//           foreignField: "questionId", // The field in the "answers" collection
-//           as: "allAnswers", // Name of the output array
-//         },
-//       },
-//       {
-//         $sort: { createdAt: -1 }, // Sort questions by newest first
-//       },
-//     ]);
 
-//     res.status(200).send(questionsWithAnswers);
-//   } catch (error) {
-//     console.error("Error fetching questions with answers:", error);
-//     res.status(500).send({
-//       status: false,
-//       message: "Unexpected error fetching questions",
-//     });
-//   }
-// });
 router.get("/", async (req, res) => {
   try {
     const questionsWithAnswers = await Question.aggregate([
@@ -98,19 +74,5 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Get all questions with answers
-// router.get("/", async (req, res) => {
-//   try {
-//     const questions = await Question.find().populate("answers"); // Populating answers
-
-//     res.status(200).json(questions);
-//   } catch (e) {
-//     console.error(e);
-//     res.status(500).json({
-//       status: false,
-//       message: "Unexpected error while fetching questions",
-//     });
-//   }
-// });
 
 export default router;
