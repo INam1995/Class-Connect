@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import axios from "axios";
 import { io } from 'socket.io-client';
 import { useParams, useNavigate } from "react-router-dom";
 import { IoIosNotifications } from "react-icons/io";
+import { useDropzone } from "react-dropzone";
+import { FaFilePdf } from "react-icons/fa";
 
 const FolderDetail = () => {
   const { folderId } = useParams();
@@ -70,6 +72,15 @@ const FolderDetail = () => {
     };
     fetchFolderDetails();
   }, [folderId]);
+
+  const onDrop = useCallback((acceptedFiles) => {
+    setPdfFile(acceptedFiles[0]);
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: ".pdf",
+    onDrop,
+  });
 
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
@@ -150,7 +161,33 @@ const FolderDetail = () => {
       console.error("Error updating progress:", error);
     }
   };
+  const trackDownload = async (e, pdf) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
+          pdf.path
+        )}&pdfId=${pdf._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob", // Handle file as a binary stream
+        }
+      );
 
+      // Create a download link
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${pdf.name}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      alert("Download tracked successfully!");
+    } catch (error) {
+      console.error("Error tracking download:", error);
+    }
+  };
   const calculateOverallProgress = () => {
     const totalPdfs = folder.pdfs.length;
     if (totalPdfs === 0) return 0;
@@ -204,9 +241,23 @@ const FolderDetail = () => {
       </div>
 
       <div className="mt-5">
-        <input type="file" accept="application/pdf" onChange={handleFileChange} className="mb-3" />
-        <button 
-          onClick={handleUploadPdf} 
+        <div
+          {...getRootProps()}
+          className="border-dashed border-2 p-5 mb-3 cursor-pointer text-center relative"
+        >
+          <input {...getInputProps()} />
+          <p>Drag & Drop PDF files here or click to select</p>
+          
+          {pdfFile && (
+            <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center">
+              <FaFilePdf size={50} color="red" /> {/* PDF icon */}
+              <p className="ml-2">{pdfFile.name}</p> {/* File name */}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={handleUploadPdf}
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           disabled={uploading}
         >
@@ -261,8 +312,11 @@ const FolderDetail = () => {
                     View PDF
                   </a>
 
-                  <a 
-                    href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}`} 
+                  <a
+                    href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
+                      pdf.path
+                    )}&pdfId=${pdf._id}`}
+                    onClick={(e) => trackDownload(e, pdf)}
                     className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
                   >
                     Download PDF
