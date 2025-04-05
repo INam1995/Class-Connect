@@ -3,7 +3,6 @@ import Folder from "../models/folder.js";
 
 export const getAllUsers = async (req, res) => {
   try {
-    // console.log("Received request with query params:", req.query); // Debugging Log
 
     const { filterType, role } = req.query;
     let filter = {};
@@ -24,8 +23,6 @@ export const getAllUsers = async (req, res) => {
     } else {
       sortOptions = { lastLogin: -1, createdAt: -1 }; // Default: Most recent login first
     }
-
-    // console.log("Filtering users with:", filter, "Sorting:", sortOptions); // Debugging Log
 
     // ✅ Fetch users with filters and sorting
     
@@ -67,7 +64,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// 🚀 Promote User to Admin (Only Super Admin Can Do This)
 // 🚀 Promote User to Admin (Only Super Admin Can Do This)
 export const promoteToAdmin = async (req, res) => {
   try {
