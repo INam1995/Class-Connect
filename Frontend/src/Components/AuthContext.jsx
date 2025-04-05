@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -33,8 +34,8 @@ export const AuthProvider = ({ children }) => {
     try {
       
      const token = localStorage.getItem("token"); // ✅ Get token from storage
+
      if (!token) {
-      // console.error("No token found in localStorage");
       return;
      }
 
@@ -71,5 +72,3 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-export default AuthContext;
-
