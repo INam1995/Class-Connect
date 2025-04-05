@@ -1,6 +1,5 @@
-import Notification from "../models/notification.js"; // Import Notification model
+import Notification from "../models/notification.js"; 
 
-// ✅ Controller function to fetch notifications
 export const getNotifications = async (req, res) => {
     try {
         // Fetch the latest 10 notifications from MongoDB, sorted by most recent
