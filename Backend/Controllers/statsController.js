@@ -77,7 +77,7 @@ export const getUserStats = async (req, res) => {
             } 
           },
           { $sort: { completedCount: -1 } }, // Sort by most completed
-          { $limit: 5 } // Get top 5 users (adjust as needed)
+          { $limit: 5 } // Get top 5 users 
         ]);
     
         res.status(200).json({ mostActiveUsers: users });
