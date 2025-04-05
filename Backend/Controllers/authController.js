@@ -48,7 +48,6 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
-    // console.log("user", user)
 
     if (!user.password) {
       return res.status(500).json({ message: "User password is missing." });
@@ -67,7 +66,6 @@ export const login = async (req, res) => {
       process.env.SECRET,
       { expiresIn: "3d" }
     );
-
     const today = new Date().toISOString().split("T")[0]; // Get today's date
     const activityIndex = user.activityLog.findIndex(
       (log) => log.date.toISOString().split("T")[0] === today
@@ -85,7 +83,6 @@ export const login = async (req, res) => {
     await user.save();
     const { password, ...userData } = user._doc;
 
-    
     res.status(200).json({
       message: "Login successful",
       token,  // Send token directly
@@ -98,8 +95,8 @@ export const login = async (req, res) => {
 };
 export const logout = async (req, res) => {
   try {
+
     const user = await User.findById(req.user._id);
-    
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
     }
