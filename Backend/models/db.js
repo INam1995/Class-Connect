@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'; 
-dotenv.config(); // Add this at the top
+dotenv.config(); 
 
 import mongoose from 'mongoose';
-const dbURI = process.env.MONGO_URI; // Use the env variable
+const dbURI = process.env.MONGO_URI; 
 
 const connectDB = async () => {
   try {
@@ -12,7 +12,7 @@ const connectDB = async () => {
     console.log(`Database connected successfully`);
   } catch (error) {
     console.error('Error connecting to the database:', error);
-    process.exit(1); // Exit process with failure
+    process.exit(1); 
   }
 };
 
