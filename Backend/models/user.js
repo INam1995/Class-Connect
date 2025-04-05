@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema(
      },
      isBlocked: {
        type: Boolean, default: false
-     }, // Track if user is blocked
+     }, 
      location: {
       latitude: { type: Number, default: null },
       longitude: { type: Number, default: null },
