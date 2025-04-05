@@ -106,7 +106,7 @@ const Login = () => {
             className="btn btn-primary w-100"
             disabled={!emailOrUsername.trim() || !password.trim() || password.length < 6}
           >
-            Log in
+            Log In
           </button>
         </form>
       </div>
