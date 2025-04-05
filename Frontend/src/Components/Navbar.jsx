@@ -1,25 +1,64 @@
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import {Link} from 'react-router-dom'
+import React from "react";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import { Link, useNavigate } from "react-router-dom";
+import { Dropdown } from "react-bootstrap";
+import { useAuth } from "./AuthContext"; // ✅ Ensure correct import path
 
-function ColorSchemesExample() {
+function NavbarComponent() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate(); // ✅ Now `useNavigate()` is inside a Router component
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true }); // ✅ Redirect to home page
+  };
   return (
-    <>
-      <Navbar bg="dark" data-bs-theme="dark">
-        <Container>
-          <Navbar.Brand href="#home">Ed-Tech Platform</Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#features">Features</Nav.Link>
-            <Nav.Link href="#pricing">Pricing</Nav.Link>
-            <Nav.Link as={Link} to='/register'>SignUp/SignIn</Nav.Link>
-          </Nav>
-        </Container>
-      </Navbar>
-      <br />
-    </>
+    <Navbar bg="dark" data-bs-theme="dark">
+      <Container>
+        <Navbar.Brand as={Link} to="/">Ed-Tech Platform</Navbar.Brand>
+        <Nav className="me-auto">
+          <Nav.Link as={Link} to="/">Home</Nav.Link>
+          <Nav.Link as={Link} to="/features">Features</Nav.Link>
+          <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
+          <Nav.Link as={Link} to={`/discussion`}>Discussion</Nav.Link>
+
+        </Nav>
+        <Nav>
+          {user ? ( // ✅ Show profile icon if logged in
+            <Dropdown align="end">
+              <Dropdown.Toggle variant="link" id="profile-dropdown" style={{ color: "white" }}>
+                <div
+                  className="profile-icon"
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    backgroundColor: "gray",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span style={{ color: "white" }}>👤</span>
+                </div>
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
+                <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : (
+            <Nav.Link as={Link} to="/register">SignUp/SignIn</Nav.Link>
+          )}
+        </Nav>
+      </Container>
+    </Navbar>
   );
 }
 
-export default ColorSchemesExample;
+export default NavbarComponent;

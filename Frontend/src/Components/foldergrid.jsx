@@ -1,5 +1,3 @@
-import React from "react";
-
 const FolderGrid = ({ title, folders, color, onFolderClick, onDelete, deleteLabel = "Delete" }) => (
   <div>
     <h2 className={`text-2xl font-bold ${color} mb-4`}>{title}</h2>
@@ -8,7 +6,7 @@ const FolderGrid = ({ title, folders, color, onFolderClick, onDelete, deleteLabe
         {folders.map((folder) => (
           <div key={folder._id} className="flex flex-col items-center bg-white shadow-lg rounded-lg p-4 transition duration-300 hover:scale-105">
             <button
-              onClick={() => onFolderClick(folder._id)}
+              onDoubleClick={() => onFolderClick(folder._id)} // ✅ Fix: Trigger double-click correctly
               className="w-20 h-20 flex items-center justify-center text-xl bg-opacity-30 rounded-lg shadow-md"
             >
               📂
