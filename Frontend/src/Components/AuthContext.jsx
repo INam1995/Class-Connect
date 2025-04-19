@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -34,11 +33,11 @@ export const AuthProvider = ({ children }) => {
     try {
       
      const token = localStorage.getItem("token"); // ✅ Get token from storage
-
      if (!token) {
+      // console.error("No token found in localStorage");
       return;
      }
-
+    //  console.log("token ", token);
       const response = await axios.post(
         "http://localhost:5000/api/auth/logout",
         {}, 
@@ -47,7 +46,7 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` } // Send token in headers
         }
       );
-      
+      console.log("token   ". token)
   
       console.log("Logout Response:", response);
       
@@ -57,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
     } catch (error) {
       console.error("Logout failed", error.response?.data || error.message);
+      window.location.href = '/login';
     }
   };
 

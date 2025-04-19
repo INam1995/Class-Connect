@@ -113,6 +113,7 @@ export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.user._id;
+    console.log("messageId", messageId)
 
     const message = await Message.findById(messageId);
     if (!message) {
@@ -122,7 +123,6 @@ export const deleteMessage = async (req, res) => {
     if (message.sender.toString() !== userId) {
       return res.status(403).json({ message: "Unauthorized to delete this message." });
     }
-
     await Message.findByIdAndDelete(messageId);
     res.status(200).json({ message: "Message deleted successfully." });
   } catch (error) {

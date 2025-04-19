@@ -74,12 +74,21 @@ const FolderDetail = () => {
   }, [folderId]);
 
   const onDrop = useCallback((acceptedFiles) => {
-    setPdfFile(acceptedFiles[0]);
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      if (file.type === 'application/pdf') {
+        setPdfFile(file);
+      } else {
+        alert('Please upload only PDF files');
+      }
+    }
   }, []);
-
   const { getRootProps, getInputProps } = useDropzone({
-    accept: ".pdf",
+    accept: {
+      'application/pdf': ['.pdf']
+    },
     onDrop,
+    maxFiles: 1,
   });
 
   const handleFileChange = (e) => {

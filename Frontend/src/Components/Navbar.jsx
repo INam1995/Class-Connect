@@ -10,9 +10,9 @@ function NavbarComponent() {
   const { user, logout } = useAuth();
   const navigate = useNavigate(); // ✅ Now `useNavigate()` is inside a Router component
 
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true }); // ✅ Redirect to home page
+  const handleLogout = async () => {
+    await logout(); // ✅ Ensure logout completes before navigating
+    navigate("/", { replace: true });
   };
   return (
     <Navbar bg="dark" data-bs-theme="dark">
@@ -20,10 +20,8 @@ function NavbarComponent() {
         <Navbar.Brand as={Link} to="/">Ed-Tech Platform</Navbar.Brand>
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/">Home</Nav.Link>
-          <Nav.Link as={Link} to="/features">Features</Nav.Link>
+          <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
           <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
-          <Nav.Link as={Link} to={`/discussion`}>Discussion</Nav.Link>
-
         </Nav>
         <Nav>
           {user ? ( // ✅ Show profile icon if logged in

@@ -174,10 +174,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
 
 // ✅ Start Server
-const port = process.env.PORT || 5000;
-server.listen(port, () => {
-  console.log(`🚀 Server is running on port ${port}`);
-});
+
 export const emitUserRegistered = (userName) => {
   io.emit('user-registered', { message: `New user registered: ${userName}` });
 };
@@ -189,5 +186,8 @@ export const emitFileUploaded = (fileName) => {
 export const emitFileDownloaded = (fileName) => {
   io.emit('file-downloaded', { message: `⬇️ ${fileName} has been downloaded.` });
 };
-
+const port = process.env.PORT || 5000;
+server.listen(port, () => {
+  console.log(` Server is running on port ${port}`);
+});
 export { io };

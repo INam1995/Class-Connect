@@ -12,7 +12,7 @@ export const AuthMiddleware =async(req, res, next) => {
     const decoded = jwt.verify(token1, process.env.SECRET);
 
     req.user = await User.findById(decoded._id); // Fetch user from DB
-   
+    // console.log("user",  req.user)
     if (!req.user) {
       return res.status(403).json({ message: "Invalid token: No user found" });
     }

@@ -6,6 +6,9 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import Profile from "./Pages/profile";
 import Folder from "./Components/Folder";
 import Login from './Components/Login'
+import Discussion from './Components/Discussion';
+import AllChats from './Components/AllChats';
+import ChatRoom from './Components/chatRoom'
 // import Home from '@/pages/Home.jsx';
 // ProtectedRoute: Redirects to login if user is not authenticated
 function ProtectedRoute({ children }) {
@@ -31,6 +34,10 @@ function App() {
         <Route path="/admin" element={<AdminDashboard/>} />
         <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
+        <Route path="/discussion" element={<Discussion />} />
+        <Route path="/chats" element={<AllChats />} /> {/* Add this route */}
+        <Route path="/chatroom/:folderId" element={<ChatRoom />} />
+          
       </Routes>
     
     </>
