@@ -77,6 +77,7 @@ Once part of a group, members can:
 ---
 
 ## 🧩 Project Structure
+```bash
 ClassConnect/
 │
 ├── backend/
@@ -97,13 +98,13 @@ ClassConnect/
 ├── package.json
 └── README.md
 
-
+```
 
 ---
 
 ## Flow Chart
 
-<img src="https://github.com/user-attachments/assets/e27145a0-18ea-493d-b265-13c3c82d9963" alt="App Preview" style="width: 70%; height:60% ; border-radius: 10px;" />
+<img src="https://github.com/user-attachments/assets/e27145a0-18ea-493d-b265-13c3c82d9963" alt="App Preview" style="width: 80%; height:30% ; border-radius: 10px;" />
 
 ## 🚀 Getting Started
 
