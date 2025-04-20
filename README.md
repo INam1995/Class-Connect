@@ -1,20 +1,59 @@
 # 📚 Class Connect
 
-**Class Connect** is a comprehensive, centralized platform designed to streamline communication and coordination between students, teachers, and administrators. Built with scalability and usability in mind, it allows real-time updates, document sharing, announcements, and class-specific collaboration.
+## 🧾 Project Overview
+**Class Connect** is a collaborative platform built to revolutionize the way students learn, share, and engage academically. It enables students to create or join study groups, share valuable resources, and collaborate via real-time chat, polls, and video calls. With a mix of productivity and social learning features like progress tracking, public discussion forums, and a smart virtual whiteboard, Class Connect enhances both personal and group-based learning.
 
 ---
 
-## ✨ Features
+## 📄 Project Description
 
-- 👥 **User Roles**: Support for Student, Teacher, and Admin roles with custom dashboards.
-- 📢 **Announcements**: Teachers and Admins can post announcements; students get real-time updates.
-- 🗂️ **Resource Sharing**: Upload and access study materials (PDFs, links, images).
-- 💬 **Discussion Boards**: Class-specific chatrooms or discussion forums.
-- 📆 **Calendar Integration**: Schedule classes, assignments, and events.
-- 🛡️ **Authentication & Authorization**: Secure login system with JWT/Session-based auth.
-- 🔔 **Notifications**: Real-time alerts for updates, announcements, and submissions.
-- 📊 **Analytics**: Dashboard insights for attendance, student activity, and resource usage.
-- 🌐 **Responsive UI**: Clean, mobile-first interface using modern frontend tools.
+**Class Connect** is an interactive web-based application that fosters a connected and efficient learning environment for students. It supports everything from resource sharing to real-time collaboration, making it a powerful academic tool.
+
+### After Logging In: 
+Students are redirected to their **personal profile dashboard**, where they can:
+- **Create or Join Study Groups**
+  - *Create groups based on subjects or specific topics.*
+  - *Invite friends to join using a unique group key.*
+
+### Inside a Study Group:
+Once part of a group, members can:
+- **Share Study Resources**
+  - *Upload notes, PDFs, books, and presentations.*
+- **Chat & Collaborate**
+  - *Engage in real-time group discussions.*
+  - *React to messages.*
+  - *Conduct quick **polls** to gather opinions.*
+- **Schedule Video Meetings**
+  - *Plan group study sessions using the integrated meeting scheduler.*
+- **Get Notifications**
+  - *Receive instant updates when a new resource is added or a new member joins.*
+
+### Productivity Tools:
+- **Track Your Progress**
+  - *Mark study materials as completed.*
+  - *Get **daily reminders** based on your progress.*
+- **Set Personal Reminders**
+  - *Create to-do lists tailored to your academic needs.*
+
+### Public Collaboration:
+- **Public Resource Space**
+  - *Share and explore handwritten notes globally.*
+  - *Use **subject-wise filters** to find relevant content.*
+  - *Rate and discuss public resources.*
+- **General Discussion Room**
+  - *Open-topic discussions for all users.*
+  - *Non-logged-in users can **read-only**; logged-in users can actively participate.*
+
+### Additional Features:
+- **Dark Mode**
+  - *For comfortable reading during late-night study sessions.*
+- **Multilingual Support**
+  - *Use the platform in your preferred language.*
+- **Digital Whiteboard**
+  - *Draw, write, erase, and annotate images in real time.*
+  - *Basic features are free; **premium templates** are available for enhanced creativity.*
+- **PDF Summarizer**
+  - *Upload any PDF and summarize it by entering a custom word limit.*
 
 ---
 
@@ -32,9 +71,8 @@
 - Socket.IO (for real-time communication)
 
 ### Optional Integrations:
-- AWS S3 / Cloudinary (for file uploads)
-- Google Calendar API (event scheduling)
-- Nodemailer / Twilio (for email/SMS alerts)
+- Cloudinary (for file uploads)
+- Gemini (for Summarization)
 
 ---
 
@@ -50,7 +88,7 @@
 
 - Node.js and npm
 - MongoDB instance (local or Atlas)
-- Git
+- Git & VS Code
 
 ### Installation
 
@@ -59,13 +97,13 @@ git clone https://github.com/yourusername/ClassConnect.git
 cd ClassConnect
 
 # Setup server
-cd server
+cd backend
 npm install
 npm start
 
 # Setup client
-cd ../client
+cd frontend
 npm install
-npm start
+npm run dev
 
 
