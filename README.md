@@ -82,6 +82,11 @@ Once part of a group, members can:
 
 ---
 
+## Flow Chart
+
+![Beige Minimal Flowchart Infographic Graph](https://github.com/user-attachments/assets/e27145a0-18ea-493d-b265-13c3c82d9963)
+
+
 ## 🚀 Getting Started
 
 ### Prerequisites
