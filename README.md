@@ -78,6 +78,26 @@ Once part of a group, members can:
 
 ## 🧩 Project Structure
 
+ClassConnect/
+│
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── utils/
+│   └── server.js
+│
+├── frontend/
+│   ├── components/
+│   ├── pages/
+│   ├── utils/
+│   ├── hooks/
+│   └── App.jsx
+│
+├── .env
+├── package.json
+└── README.md
+
 
 
 ---
