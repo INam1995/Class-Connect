@@ -103,7 +103,7 @@ ClassConnect/
 
 ## Flow Chart
 
-![Beige Minimal Flowchart Infographic Graph](https://github.com/user-attachments/assets/e27145a0-18ea-493d-b265-13c3c82d9963)
+<img src="https://github.com/user-attachments/assets/e27145a0-18ea-493d-b265-13c3c82d9963" alt="App Preview" style="width: 70%; height:60% ; border-radius: 10px;" />
 
 ## 🚀 Getting Started
 
