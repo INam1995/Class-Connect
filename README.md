@@ -77,7 +77,6 @@ Once part of a group, members can:
 ---
 
 ## 🧩 Project Structure
-
 ClassConnect/
 │
 ├── backend/
