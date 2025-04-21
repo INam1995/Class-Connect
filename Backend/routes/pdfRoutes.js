@@ -1,6 +1,7 @@
 import express from 'express';
 import { getPdfs , uploadPdfToFolder, updatePdfProgress } from '../Controllers/pdfController.js';
-import {AuthMiddleware} from '../middleware/authMiddleware.js'
+import AuthMiddleware from '../middleware/authMiddleware.js';
+
 import uploadPdf from '../middleware/multerMiddleware.js';
 
 const router = express.Router();

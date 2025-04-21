@@ -6,34 +6,20 @@ const activitySchema = new mongoose.Schema({
 });
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true, 
-    },
-    username: {
-      type: String,
-      required: true,
-      unique: true, 
-    },
+    name: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
     email: {
       type: String,
       required: true,
-      unique: true, 
-      match: [/\S+@\S+\.\S+/, 'Please enter a valid email address'], // Validate email format
+      unique: true,
+      match: [/\S+@\S+\.\S+/, 'Please enter a valid email address'],
     },
-    password: {
-      type: String,
-      required: true,
-      minlength: 8, 
-    },
-    course: {
-      type: String,
-      required: true,
-    },
-    college: {
-      type: String,
-      required: true, 
-    },
+    password: { type: String, required: true, minlength: 8 },
+    course: { type: String, required: true },
+    college: { type: String, required: true },
+    token: { type: String },
+    resetPasswordExpires: { type: Date },
+    image: { type: String, required: false },
     role: { 
       type: String,
       enum: ['user', 'admin', 'superadmin'], 
@@ -66,7 +52,11 @@ const userSchema = new mongoose.Schema(
     
   },
   
-  { timestamps: true } 
+  
+  { timestamps: true }
 );
-const User = mongoose.model('User', userSchema);
+
+// Check if the model already exists to avoid overwriting
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
 export default User;

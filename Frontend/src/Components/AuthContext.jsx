@@ -1,11 +1,14 @@
+// AuthContext.jsx
+
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);  // ✅ Add a loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -19,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
     }
 
-    setLoading(false);  // ✅ Finish loading once local storage check is done
+    setLoading(false);
   }, []);
 
   const login = (userData, token) => {
@@ -31,37 +34,30 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      
-     const token = localStorage.getItem("token"); // ✅ Get token from storage
-     if (!token) {
-      // console.error("No token found in localStorage");
-      return;
-     }
-    //  console.log("token ", token);
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const response = await axios.post(
         "http://localhost:5000/api/auth/logout",
-        {}, 
-        { 
-          withCredentials: true, 
-          headers: { Authorization: `Bearer ${token}` } // Send token in headers
+        {},
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("token   ". token)
-  
-      console.log("Logout Response:", response);
-      
+
       localStorage.removeItem("token");
-      localStorage.removeItem("user"); 
+      localStorage.removeItem("user");
       setUser(null);
       setIsLoggedIn(false);
     } catch (error) {
       console.error("Logout failed", error.response?.data || error.message);
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;  // ✅ Prevent rendering before loading is done
+    return <div>Loading...</div>;
   }
 
   return (
@@ -71,4 +67,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+// ✅ Export the hook to use in other components
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+export default AuthContext;

@@ -1,5 +1,6 @@
 import express from "express";
-import {AuthMiddleware} from "../middleware/authMiddleware.js";
+
+ import AuthMiddleware from "../middleware/authMiddleware.js";
 import {
   createFolder,
   joinFolder,

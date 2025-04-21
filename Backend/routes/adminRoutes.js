@@ -1,5 +1,6 @@
 import express from "express";
-import { AuthMiddleware, isSuperAdmin , isAdmin} from "../middleware/authMiddleware.js";
+import AuthMiddleware, { isSuperAdmin, isAdmin } from "../middleware/authMiddleware.js";
+
 import { getAllUsers, deleteUser, promoteToAdmin, demoteAdmin ,unblockUser, blockUser,getUserLocation} from "../Controllers/adminController.js";
 
 const router = express.Router();

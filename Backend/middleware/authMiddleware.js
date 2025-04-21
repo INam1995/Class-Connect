@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
-export const AuthMiddleware =async(req, res, next) => {
+const AuthMiddleware  =async(req, res, next) => {
 
   const token1 = req.header("Authorization")?.replace("Bearer ", "").trim();
   console.log("token", token1)
@@ -27,6 +27,7 @@ export const AuthMiddleware =async(req, res, next) => {
     return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
+export default AuthMiddleware;
 
 // Middleware to check if the user is the main admin
 export const isSuperAdmin = (req, res, next) => {

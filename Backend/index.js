@@ -20,6 +20,8 @@ import whiteboardRoutes from './routes/whiteboardRoutes.js';
 import notificationsRoutes from "./routes/noti.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
+import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
+import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
 
 const app = express();
 const server = http.createServer(app);
@@ -60,7 +62,7 @@ app.get("/", (req, res) => {
 
 // ✅ Socket.io Events
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  // console.log("User connected:", socket.id);
 
   socket.on("join_room", ({ roomId, userId }) => {
     socket.join(roomId);
@@ -96,7 +98,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    // console.log("User disconnected:", socket.id);
   });
 });
 
@@ -172,6 +174,7 @@ app.use('/api/whiteboard', whiteboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
+app.use("/api/class-notes", classNotesRouter);
 
 // ✅ Start Server
 

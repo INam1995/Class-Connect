@@ -1,10 +1,21 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import User from "../models/user.js";
-import { emitUserRegistered } from '../index.js';  // Import the io instance to emit events
-import Notification from '../models/notification.js'
+import bcrypt from 'bcryptjs';
+import User from '../models/user.js'; // Ensure the .js extension is included
+import OTP from '../models/OTP.js'; // Include the .js extension
+import jwt from 'jsonwebtoken';
+import otpGenerator from 'otp-generator';
+import mailSender from '../utils/mailSender.js';  // Include the .js extension
+import { passwordUpdated } from '../mail/templates/passwordUpdate.js';
+import { emitUserRegistered } from '../index.js';
+import Notification from '../models/notification.js';
+import dotenv from 'dotenv';
+import { sendVerificationEmail } from '../models/OTP.js'; // ✅ Add this import
+
+dotenv.config();
+
 export const register = async (req, res) => {
-  const { name, username, email, password, course, college, latitude, longitude  } = req.body;
+  const { name, username, email, password, course, college, latitude, longitude, otp } = req.body;
+
+  console.log("Request body:", req.body);
 
   try {
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -12,7 +23,25 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: "Username or Email already exists" });
     }
 
+    // Find the most recent OTP for the email
+    const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+    console.log(response);
+    if (response.length === 0) {
+      // OTP not found for the email
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      });
+    } else if (otp !== response[0].otp) {
+      // Invalid OTP
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({
       name,
       username,
@@ -21,6 +50,7 @@ export const register = async (req, res) => {
       course,
       college,
       location: { latitude, longitude },
+      otp
     });
 
     await newUser.save();
@@ -31,10 +61,11 @@ export const register = async (req, res) => {
       message: `New user registered: ${name} (${username})`,
       name: name, // Store the user's name in the notification
     });
-    // console.log(name, 'name of user')
     await notification.save();
-    emitUserRegistered(newUser)
+    emitUserRegistered(newUser);
 
+    console.log("New User:", newUser);
+    await newUser.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("Registration error:", error);
@@ -57,9 +88,6 @@ export const login = async (req, res) => {
     if (!match) {
       return res.status(401).json({ message: "Wrong credentials!" });
     }
-    // console.log("match", match)
-
-
 
     const token = jwt.sign(
       { _id: user._id, username: user.username, email: user.email, role: user.role },
@@ -93,9 +121,9 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 export const logout = async (req, res) => {
   try {
-
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
@@ -142,6 +170,7 @@ export const logout = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 // Function to update activity log with time spent
 function updateActivityLog(user, date, duration) {
   const activityIndex = user.activityLog.findIndex(
@@ -155,4 +184,66 @@ function updateActivityLog(user, date, duration) {
   }
 }
 
+// Change Password function
+export const changePassword = async (req, res) => {
+  const { userId } = req.params; // Assuming you're passing userId in the URL
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    // Check if old password matches
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password!" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully!" });
+  } catch (error) {
+    console.error("Password change error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+export const sendotp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if the email is already registered
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email is already registered" });
+    }
+
+    // Generate a 6-digit OTP
+    const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+
+    // Save the OTP to the database with the email
+    const newOtp = new OTP({
+      email,
+      otp,
+    });
+
+    await newOtp.save();
+
+    // Send the OTP to the user's email
+    await sendVerificationEmail(email, otp);
+
+    // Respond with success message
+    res.status(200).json({ message: "OTP sent successfully to your email!" });
+  } catch (error) {
+    console.error("OTP sending error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 

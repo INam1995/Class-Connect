@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext"; // Ensure correct import
 
 const Login = () => {
@@ -39,6 +39,10 @@ const Login = () => {
     setError("");
 
     if (!validateForm()) return;
+    if (!emailOrUsername || !password) {
+      setError("Both email/username and password are required.");
+      return;
+    }
 
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
@@ -109,6 +113,13 @@ const Login = () => {
             Log in
           </button>
         </form>
+
+        {/* Create Account Link */}
+        <div className="mt-3 text-center">
+          <p>
+            Don't have an account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

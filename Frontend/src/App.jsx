@@ -8,7 +8,10 @@ import Folder from "./Components/Folder";
 import Login from './Components/Login'
 import Discussion from './Components/Discussion';
 import AllChats from './Components/AllChats';
-import ChatRoom from './Components/chatRoom'
+import ChatRoom from './Components/chatRoom';
+import RegisterVerification from "./Components/RegisterVerification";
+import ClassNotes from "./Pages/ClassNotes"; // updated import
+
 // import Home from '@/pages/Home.jsx';
 // ProtectedRoute: Redirects to login if user is not authenticated
 function ProtectedRoute({ children }) {
@@ -32,11 +35,14 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} /> 
         <Route path="/folder/:folderId" element={<Folder/>} />
         <Route path="/admin" element={<AdminDashboard/>} />
+        <Route path="/register-verification" element={<RegisterVerification />} />
         <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/discussion" element={<Discussion />} />
         <Route path="/chats" element={<AllChats />} /> {/* Add this route */}
         <Route path="/chatroom/:folderId" element={<ChatRoom />} />
+        <Route path="/folder/:folderId" element={<Folder />} />
+        <Route path="/class-notes" element={<ClassNotes />} /> {/* updated component name */}
           
       </Routes>
     

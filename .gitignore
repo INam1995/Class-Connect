@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+# Node.js dependencies
+>>>>>>> 6c3adf5 (2FA Done)
 Backend/node_modules/
 Frontend/node_modules/
 
@@ -7,8 +12,12 @@ Backend/.env
 Frontend/.env
 
 .git
+<<<<<<< HEAD
 
 
+=======
+=======
+>>>>>>> 6c3adf5 (2FA Done)
 # Frontend-specific (Vite React)
 Frontend/node_modules/
 Frontend/dist/
@@ -17,3 +26,7 @@ Frontend/dist/
 Backend/node_modules/
 Backend/.env
 .git
+<<<<<<< HEAD
+=======
+>>>>>>> 1591b1842856f55562c4029942ad1889fe50efa4
+>>>>>>> 6c3adf5 (2FA Done)

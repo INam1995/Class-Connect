@@ -4,16 +4,23 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
-import { useAuth } from "./AuthContext"; // ✅ Ensure correct import path
+import { useAuth } from "./AuthContext"; // ✅ Ensure the path is correct
+
 
 function NavbarComponent() {
   const { user, logout } = useAuth();
   const navigate = useNavigate(); // ✅ Now `useNavigate()` is inside a Router component
 
-  const handleLogout = async () => {
-    await logout(); // ✅ Ensure logout completes before navigating
-    navigate("/", { replace: true });
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true }); // ✅ Redirect to home page
   };
+
+  // Handle redirect to Class Notes page
+  const handleClassNotesRedirect = () => {
+    navigate("/class-notes"); // Change this route if your ClassNotesPage has a different route
+  };
+
   return (
     <Navbar bg="dark" data-bs-theme="dark">
       <Container>
@@ -21,7 +28,15 @@ function NavbarComponent() {
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/">Home</Nav.Link>
           <Nav.Link as={Link} to="/admin">Admin</Nav.Link>
+          
+          <Nav.Link as={Link} to="/features">Features</Nav.Link>
           <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
+          <Nav.Link as={Link} to="/discussion">Discussion</Nav.Link>
+
+          {/* Class Notes Menu */}
+          <Nav.Link onClick={handleClassNotesRedirect} style={{ cursor: "pointer" }}>
+            Class Notes
+          </Nav.Link>
         </Nav>
         <Nav>
           {user ? ( // ✅ Show profile icon if logged in
