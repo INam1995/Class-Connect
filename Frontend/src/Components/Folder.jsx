@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
 import { FaFilePdf } from "react-icons/fa";
-
+import PdfEditor from './PdfEditor';
 const FolderDetail = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
@@ -20,6 +20,8 @@ const FolderDetail = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedPdfName, setSelectedPdfName] = useState(null);
   const [pdfProgress, setPdfProgress] = useState({});
+  const [viewPdfUrl, setViewPdfUrl] = useState(null);
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
 
   const socket = io("http://localhost:5000", {
     transports: ["websocket"],
@@ -91,6 +93,11 @@ const FolderDetail = () => {
     maxFiles: 1,
   });
 
+  const handleViewPdf = (pdf) => {
+    setViewPdfUrl(pdf.path);  // Use the actual path from your database
+    setIsPdfViewerOpen(true);
+  };
+  
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
   };
@@ -270,7 +277,7 @@ const FolderDetail = () => {
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
           disabled={uploading}
         >
-          {uploading ? "Uploading..." : "Upload PDF"}
+{uploading && <p className="text-sm text-gray-500">Uploading PDF...</p>}
         </button>
       </div>
 
@@ -311,15 +318,17 @@ const FolderDetail = () => {
                       onClick={() => toggleCompletion(pdf._id, false)}
                     ></button>
                   </div>
+                  {isPdfViewerOpen && viewPdfUrl && (
+  <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
+)}
 
-                  <a
-                    href={`${pdf.path}?raw=true`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    View PDF
-                  </a>
+<button
+  onClick={() => handleViewPdf(pdf)}
+  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+>
+  View PDF
+</button>
+
 
                   <a
                     href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(

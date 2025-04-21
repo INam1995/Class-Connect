@@ -35,7 +35,7 @@ export const downloadPDF = async (req, res) => {
         }
 
         emitFileDownloaded( userId); // Emit event for real-time tracking
-
+        console.log("hii")
         // Set response headers
         res.setHeader('Content-Disposition', `attachment; filename="${pdf.name}"`);
         res.setHeader('Content-Type', 'application/pdf');
