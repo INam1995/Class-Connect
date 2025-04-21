@@ -48,7 +48,6 @@ export const uploadPdfToFolder = async (req, res) => {
       folder: `pdfs/${folderId}`, 
       timeout: 60000,
       type: "upload",
-      flags: "attachment",
     });
     // console.log("result",result);
 

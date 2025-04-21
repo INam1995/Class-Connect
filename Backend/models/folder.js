@@ -12,8 +12,11 @@ const folderSchema = new mongoose.Schema({
       name: String,
       path: String, // Cloudinary URL
       createdAt: { type: Date, default: Date.now },
-      downloadedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] ,
-      // **Progress Tracking Fields**
+      downloadedBy: [{
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        date: { type: Date, default: Date.now }
+      }],
+            // **Progress Tracking Fields**
       completed: { type: Boolean, default: false }, // Track completion
       updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Who marked it completed
       progressUpdatedAt: { type: Date }, // Timestamp of update

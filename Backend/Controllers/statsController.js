@@ -19,13 +19,11 @@ export const search = async (req, res)=>{
     res.status(500).json({ message: 'Server error', error });
   }
 }
-
 export const getUserStats = async (req, res) => {
   try {
     const { timeRange } = req.query;
     let startDate = new Date();
 
-    // Determine the start date based on the time range
     switch (timeRange) {
       case 'last24hours':
         startDate.setHours(startDate.getHours() - 24);
@@ -45,58 +43,70 @@ export const getUserStats = async (req, res) => {
 
     const dateFilter = startDate ? { createdAt: { $gte: startDate } } : {};
 
-    // Count active users based on last login within the specified time range
     const activeUsersCount = await User.countDocuments(
       startDate ? { lastLogin: { $gte: startDate } } : {}
     );
 
-    // Aggregate total uploads
     const totalUploads = await Folder.aggregate([
-      { $match: dateFilter },
       { $unwind: { path: "$pdfs", preserveNullAndEmptyArrays: true } },
+      { $match: startDate ? { "pdfs.createdAt": { $gte: startDate } } : {} },
       { $count: "totalUploads" },
     ]);
-
-    // Aggregate total downloads
-    const totalDownloads = await Folder.aggregate([
-      { $unwind: { path: "$pdfs", preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: "$pdfs.downloadedBy", preserveNullAndEmptyArrays: true } },
-      { $match: dateFilter },
-      { $count: "totalDownloads" },
-    ]);
-
-    const mostActiveUsers = async (req, res) => {
-      try {
-        const users = await Folder.aggregate([
-          { $unwind: "$pdfs" }, // Flatten the PDFs array
-          { $match: { "pdfs.completed": true } }, // Only consider completed PDFs
-          { 
-            $group: { 
-              _id: "$pdfs.updatedBy", 
-              completedCount: { $sum: 1 } // Count completed PDFs per user
-            } 
-          },
-          { $sort: { completedCount: -1 } }, // Sort by most completed
-          { $limit: 5 } // Get top 5 users 
-        ]);
     
-        res.status(200).json({ mostActiveUsers: users });
-      } catch (error) {
-        console.error("Error fetching most active users:", error);
-        res.status(500).json({ message: "Server error" });
-      }
-    };
+    const totalDownloads = await Folder.aggregate([
+      { $unwind: "$pdfs" },
+      { $unwind: "$pdfs.downloadedBy" },
+      { $match: { "pdfs.downloadedBy.date": { $gte: startDate } } },
+      { $count: "totalDownloads" }
+    ]);
+    
+//     const folder = await Folder.findOne(); // Just check one document
+// console.log(folder);
+
+    // ✅ ACTUAL AGGREGATION to get most active users
+    const topPerformers = await Folder.aggregate([
+      { $unwind: "$pdfs" },
+      {
+        $match: {
+          "pdfs.completed": true,
+          "pdfs.updatedBy": { $ne: null }, // Ensure 'updatedBy' is not null
+        },
+      },
+      {
+        $group: {
+          _id: "$pdfs.updatedBy",
+          completedCount: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { completedCount: -1 },
+      },
+      {
+        $project: {
+          _id: 0,
+          completedCount: 1,
+        },
+      },
+      { $limit: 5 }, // Get top 5 performers
+    ]);
+    
+    // console.log(topPerformers);
+    
+
+    // console.log("topPerformers", topPerformers);
+
     res.status(200).json({
       activeUsersCount,
       totalUploads: totalUploads[0]?.totalUploads || 0,
       totalDownloads: totalDownloads[0]?.totalDownloads || 0,
-      mostActiveUsers,
+      topPerformers,
     });
   } catch (error) {
     console.error("Error fetching user statistics:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // Fetch general statistics
 export const getStats = async (req, res) => {
@@ -114,7 +124,7 @@ export const getStats = async (req, res) => {
         { $count: "totalDownloads" },
       ]),
     ]);
-
+    console.log("users", totalUsers)
     res.status(200).json({
       totalUsers,
       totalAdmins,
