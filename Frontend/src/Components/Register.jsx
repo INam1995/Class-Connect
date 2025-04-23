@@ -83,81 +83,104 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form className="p-6 bg-white rounded shadow-md w-full max-w-sm" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
+    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+      <div className="bg-white p-4 rounded shadow-lg w-100" style={{ maxWidth: "400px" }}>
+        <h2 className="text-center text-primary">Register</h2>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={handleChange}
+              className={`form-control ${errors.name ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+          </div>
 
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+          <div className="mb-3">
+            <input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              className={`form-control ${errors.username ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.username && <div className="invalid-feedback">{errors.username}</div>}
+          </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          <div className="mb-3">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`form-control ${errors.email ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+          </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+          <div className="mb-3">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`form-control ${errors.password ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+          </div>
 
-        <input
-          type="text"
-          name="course"
-          placeholder="Course"
-          value={formData.course}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.course && <p className="text-red-500 text-sm">{errors.course}</p>}
+          <div className="mb-3">
+            <input
+              type="text"
+              name="course"
+              placeholder="Course"
+              value={formData.course}
+              onChange={handleChange}
+              className={`form-control ${errors.course ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.course && <div className="invalid-feedback">{errors.course}</div>}
+          </div>
 
-        <input
-          type="text"
-          name="college"
-          placeholder="College"
-          value={formData.college}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.college && <p className="text-red-500 text-sm">{errors.college}</p>}
+          <div className="mb-3">
+            <input
+              type="text"
+              name="college"
+              placeholder="College"
+              value={formData.college}
+              onChange={handleChange}
+              className={`form-control ${errors.college ? "is-invalid" : ""}`}
+              required
+            />
+            {errors.college && <div className="invalid-feedback">{errors.college}</div>}
+          </div>
 
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded w-full mt-2">
-          Register
-        </button>
+          <button 
+            type="submit" 
+            className="btn btn-primary w-100"
+            disabled={!formData.name || !formData.username || !formData.email || formData.password.length < 8}
+          >
+            Register
+          </button>
+        </form>
 
-        <p className="text-sm mt-4 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login here
-          </Link>
-        </p>
-      </form>
+        <div className="mt-3 text-center">
+          <p>
+            Already have an account? <Link to="/login">Login here</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
 import { FaFilePdf } from "react-icons/fa";
 import PdfEditor from './PdfEditor';
+
 const FolderDetail = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
@@ -27,46 +28,29 @@ const FolderDetail = () => {
     transports: ["websocket"],
   });
 
-  // Listen for real-time notifications
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to Socket.IO server');
-    });
-
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-    });
-
-    socket.on('notification', (data) => {
-      console.log('Received notification:', data);
-      setNotifications(prevNotifications => [...prevNotifications, data]);
-    });
-
-    return () => {
-      socket.off('notification');
-    };
+    socket.on('connect', () => console.log('Connected to Socket.IO server'));
+    socket.on('connect_error', (error) => console.error('Connection error:', error));
+    socket.on('notification', (data) => setNotifications(prev => [...prev, data]));
+    return () => socket.off('notification');
   }, []);
 
   useEffect(() => {
     const fetchFolderDetails = async () => {
       try {
         const token = localStorage.getItem("token");
-        const url = `http://localhost:5000/api/folders/${folderId}`;
-        const response = await axios.get(url, {
+        const { data } = await axios.get(`http://localhost:5000/api/folders/${folderId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         setFolder({
-          name: response.data.name || "Untitled Folder",
-          subject: response.data.subject || "Unknown",
-          pdfs: response.data.pdfs || [],
+          name: data.name || "Untitled Folder",
+          subject: data.subject || "Unknown",
+          pdfs: data.pdfs || [],
         });
 
-        // Initialize progress state for each PDF
         const initialProgress = {};
-        response.data.pdfs.forEach((pdf) => {
-          initialProgress[pdf._id] = pdf.completed || false;
-        });
+        data.pdfs.forEach(pdf => initialProgress[pdf._id] = pdf.completed || false);
         setPdfProgress(initialProgress);
       } catch (error) {
         console.error("Error fetching folder details:", error);
@@ -76,37 +60,21 @@ const FolderDetail = () => {
   }, [folderId]);
 
   const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      if (file.type === 'application/pdf') {
-        setPdfFile(file);
-      } else {
-        alert('Please upload only PDF files');
-      }
+    if (acceptedFiles.length > 0 && acceptedFiles[0].type === 'application/pdf') {
+      setPdfFile(acceptedFiles[0]);
+    } else {
+      alert('Please upload only PDF files');
     }
   }, []);
+
   const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'application/pdf': ['.pdf']
-    },
+    accept: { 'application/pdf': ['.pdf'] },
     onDrop,
     maxFiles: 1,
   });
 
-  const handleViewPdf = (pdf) => {
-    setViewPdfUrl(pdf.path);  // Use the actual path from your database
-    setIsPdfViewerOpen(true);
-  };
-  
-  const handleFileChange = (e) => {
-    setPdfFile(e.target.files[0]);
-  };
-
   const handleUploadPdf = async () => {
-    if (!pdfFile) {
-      alert("Please select a PDF file.");
-      return;
-    }
+    if (!pdfFile) return alert("Please select a PDF file.");
 
     const formData = new FormData();
     formData.append("pdf", pdfFile);
@@ -115,28 +83,15 @@ const FolderDetail = () => {
     try {
       setUploading(true);
       const token = localStorage.getItem("token");
-      const url = `http://localhost:5000/api/pdfs/${folderId}/upload`;
-      const response = await axios.post(url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
+      const { data } = await axios.post(`http://localhost:5000/api/pdfs/${folderId}/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${token}` },
       });
-      alert("PDF uploaded successfully!");
-      setFolder((prevFolder) => ({
-        ...prevFolder,
-        pdfs: [...prevFolder.pdfs, response.data.pdf],
-      }));
-
-      setPdfProgress((prevProgress) => ({
-        ...prevProgress,
-        [response.data.pdf._id]: false,
-      }));
-
-      setUploading(false);
+      setFolder(prev => ({ ...prev, pdfs: [...prev.pdfs, data.pdf] }));
+      setPdfProgress(prev => ({ ...prev, [data.pdf._id]: false }));
       setPdfFile(null);
     } catch (error) {
       console.error("Error uploading PDF:", error);
+    } finally {
       setUploading(false);
     }
   };
@@ -146,8 +101,8 @@ const FolderDetail = () => {
     setCurrentPdf(pdfUrl);
     setSelectedPdfName(pdfUrl);
     try {
-      const response = await axios.post('http://localhost:5000/api/summarize-url', { pdfUrl });
-      setSummary(response.data.summary);
+      const { data } = await axios.post('http://localhost:5000/api/summarize-url', { pdfUrl });
+      setSummary(data.summary);
       setShowModal(true);
     } catch (error) {
       console.error(error);
@@ -160,39 +115,23 @@ const FolderDetail = () => {
   const toggleCompletion = async (pdfId, status) => {
     try {
       const token = localStorage.getItem("token");
-      const url = `http://localhost:5000/api/pdfs/${folderId}/${pdfId}/progress`;
-      await axios.patch(
-        url,
-        { completed: status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setPdfProgress((prevProgress) => ({
-        ...prevProgress,
-        [pdfId]: status,
-      }));
+      await axios.patch(`http://localhost:5000/api/pdfs/${folderId}/${pdfId}/progress`, { completed: status }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPdfProgress(prev => ({ ...prev, [pdfId]: status }));
     } catch (error) {
       console.error("Error updating progress:", error);
     }
   };
-  
+
   const trackDownload = async (e, pdf) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
-          pdf.path
-        )}&pdfId=${pdf._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob", // Handle file as a binary stream
-        }
-      );
-
-      // Create a download link
+      const response = await axios.get(`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob",
+      });
       const blob = new Blob([response.data], { type: "application/pdf" });
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
@@ -205,224 +144,114 @@ const FolderDetail = () => {
       console.error("Error tracking download:", error);
     }
   };
-  
-  const calculateOverallProgress = () => {
-    const totalPdfs = folder.pdfs.length;
-    if (totalPdfs === 0) return 0;
 
-    const completedPdfs = Object.values(pdfProgress).filter((status) => status).length;
-    return ((completedPdfs / totalPdfs) * 100).toFixed(2);
+  const calculateOverallProgress = () => {
+    const total = folder.pdfs.length;
+    const completed = Object.values(pdfProgress).filter(Boolean).length;
+    return total === 0 ? 0 : ((completed / total) * 100).toFixed(2);
   };
 
   return (
-    <div className="p-5">
-      <div className="flex justify-between items-center">
-      <div>
-  <h1 className="text-2xl font-bold">{folder.name || "Folder"}</h1>
-  <p>Subject: {folder.subject || "Unknown"}</p>
-  <p>Overall Progress: {calculateOverallProgress()}%</p>
-
-  {/* ✅ Start Chat Button */}
-  <button
-    onClick={() => navigate(`/chatroom/${folderId}`)}
-    className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
-  >
-    Start Chat
-  </button>
-</div>
-
+    <div className="p-6 max-w-5xl mx-auto text-gray-800">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-extrabold text-purple-700">{folder.name}</h1>
+          <p className="text-sm text-gray-600">Subject: {folder.subject}</p>
+          <p className="text-sm">Overall Progress: {calculateOverallProgress()}%</p>
+        </div>
         <div className="relative">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 hover:bg-gray-200 rounded-full ml-4"
-          >
-            <IoIosNotifications className="text-2xl" />
+          <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 bg-purple-100 rounded-full hover:bg-purple-200">
+            <IoIosNotifications className="text-2xl text-purple-700" />
             {notifications.length > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+              <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-1.5">
                 {notifications.length}
               </span>
             )}
           </button>
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-10">
               <div className="p-4">
-                <h3 className="font-bold mb-2">Notifications</h3>
-                {notifications.length === 0 ? (
-                  <p className="text-gray-500">No new notifications.</p>
-                ) : (
-                  <ul>
-                    {notifications.map((notification, index) => (
-                      <li key={index} className="mb-2">
-                        <p className="text-sm">{notification.message}</p>
-                        <p className="text-xs text-gray-500">
-                          {new Date(notification.timestamp).toLocaleString()}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <h3 className="font-semibold mb-2">Notifications</h3>
+                <ul className="space-y-2">
+                  {notifications.length ? notifications.map((note, idx) => (
+                    <li key={idx} className="text-sm">
+                      <p>{note.message}</p>
+                      <p className="text-xs text-gray-400">{new Date(note.timestamp).toLocaleString()}</p>
+                    </li>
+                  )) : <p className="text-gray-500">No new notifications.</p>}
+                </ul>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="mt-5">
-        <div
-          {...getRootProps()}
-          className="border-dashed border-2 p-5 mb-3 cursor-pointer text-center relative"
-        >
-          <input {...getInputProps()} />
-          <p>Drag & Drop PDF files here or click to select</p>
-          
-          {pdfFile && (
-            <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center">
-              <FaFilePdf size={50} color="red" /> {/* PDF icon */}
-              <p className="ml-2">{pdfFile.name}</p> {/* File name */}
-            </div>
-          )}
-        </div>
-
-        <button
-          onClick={handleUploadPdf}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-{uploading && <p className="text-sm text-gray-500">Uploading PDF...</p>}
-        </button>
+      <div {...getRootProps()} className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer mb-4 bg-purple-50 hover:bg-purple-100">
+        <input {...getInputProps()} />
+        <p className="text-purple-700">Drag and drop PDF or click to upload</p>
+        {pdfFile && <div className="mt-2 flex items-center justify-center space-x-2"><FaFilePdf className="text-red-500 text-xl" /><p>{pdfFile.name}</p></div>}
       </div>
 
-<<<<<<< HEAD
-      <div className="mt-6">
-        {folder.pdfs.length > 0 && (
-          <h2 className="text-xl font-semibold mb-4">Uploaded PDFs</h2>
-=======
-      <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
-        <div
-          className="bg-blue-500 h-4 rounded-full transition-all"
-          style={{ width: `${calculateOverallProgress()}%` }}
-        ></div>
-      </div>
-      <p className="text-sm text-gray-700">Overall Progress: {calculateOverallProgress()}%</p>
-
-      <div className="mt-5">
-        <button
-          onClick={() => navigate(`/chatroom/${folderId}`)}
-          className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 mb-4"
-        >
-          Start Chat
-        </button>
-
-        <h3 className="text-xl">📄 Uploaded PDFs</h3>
-        {folder.pdfs.length > 0 ? (
-          <ul>
-            {folder.pdfs.map((pdf) => (
-              <li key={pdf._id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                <p className="font-semibold">{pdf.name}</p>
-                <div className="flex space-x-4 mt-2">
-                  <div className="flex space-x-2">
-                    <button
-                      className={`w-6 h-6 rounded-full transition-all ${
-                        pdfProgress[pdf._id] ? "bg-green-500" : "bg-gray-300"
-                      }`}
-                      onClick={() => toggleCompletion(pdf._id, true)}
-                    ></button>
-                    <button
-                      className={`w-6 h-6 rounded-full transition-all ${
-                        !pdfProgress[pdf._id] ? "bg-red-500" : "bg-gray-300"
-                      }`}
-                      onClick={() => toggleCompletion(pdf._id, false)}
-                    ></button>
-                  </div>
-                  {isPdfViewerOpen && viewPdfUrl && (
-  <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
-)}
-
-<button
-  onClick={() => handleViewPdf(pdf)}
-  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+      <button onClick={handleUploadPdf} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+        {uploading ? "Uploading..." : "Upload PDF"}
+      </button>
+      <br />
+   
+      <button
+  onClick={() => navigate(`/chatroom/${folderId}`)}
+  className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
 >
-  View PDF
+  Start Chat
 </button>
 
+      
 
-                  <a
-                    href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
-                      pdf.path
-                    )}&pdfId=${pdf._id}`}
-                    onClick={(e) => trackDownload(e, pdf)}
-                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                  >
-                    Download PDF
-                  </a>
+      <div className="w-full bg-gray-300 h-3 rounded mt-4">
+        
+        <div className="bg-purple-600 h-3 rounded transition-all duration-300" style={{ width: `${calculateOverallProgress()}%` }}></div>
+      </div>
 
-                  <button
-                    onClick={() => handleSummarize(pdf.path)}
-                    className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600"
-                    disabled={loading && currentPdf === pdf.path}
-                  >
-                    {loading && currentPdf === pdf.path ? 'Summarizing...' : 'Summarize PDF'}
-                  </button>
+
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold mb-2">📄 Uploaded PDFs</h3>
+        <ul className="space-y-4">
+          {folder.pdfs.map(pdf => (
+            <li key={pdf._id} className="p-4 border rounded-lg shadow-sm bg-white">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-lg text-purple-700">{pdf.name}</span>
+                <div className="flex space-x-2">
+                  <button onClick={() => toggleCompletion(pdf._id, true)} className={`w-6 h-6 rounded-full ${pdfProgress[pdf._id] ? 'bg-green-500' : 'bg-gray-300'}`}></button>
+                  <button onClick={() => toggleCompletion(pdf._id, false)} className={`w-6 h-6 rounded-full ${!pdfProgress[pdf._id] ? 'bg-red-500' : 'bg-gray-300'}`}></button>
                 </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No PDFs found for this folder.</p>
->>>>>>> 2f3d1b77fc7774f40b521b58388c73f114a8672f
-        )}
-        {folder.pdfs.map((pdf) => (
-          <div key={pdf._id} className="flex justify-between items-center mb-3">
-            <div className="flex items-center">
-              <FaFilePdf size={20} className="text-red-600 mr-2" />
-              <span>{pdf.name}</span>
-            </div>
-
-            <div>
-              <button
-                onClick={() => handleSummarize(pdf.url)}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-              >
-                Summarize
-              </button>
-
-              <button
-                onClick={(e) => trackDownload(e, pdf)}
-                className="ml-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-              >
-                Download
-              </button>
-
-              <button
-                onClick={() => toggleCompletion(pdf._id, !pdfProgress[pdf._id])}
-                className="ml-2 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-              >
-                {pdfProgress[pdf._id] ? "Mark Incomplete" : "Mark Complete"}
-              </button>
-            </div>
-          </div>
-        ))}
+              </div>
+              
+              <div className="flex flex-wrap gap-3 mt-2">
+                <button onClick={() => handleViewPdf(pdf)} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">View PDF</button>
+                <a href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`} onClick={(e) => trackDownload(e, pdf)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Download</a>
+                <button onClick={() => handleSummarize(pdf.path)} className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600" disabled={loading && currentPdf === pdf.path}>
+                  {loading && currentPdf === pdf.path ? 'Summarizing...' : 'Summarize'}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {showModal && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg max-w-lg w-full">
-            <h2 className="text-xl font-semibold mb-4">Summary</h2>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <div>
-                <p>{summary}</p>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-                >
-                  Close
-                </button>
-              </div>
-            )}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg">
+            <h2 className="text-xl font-semibold mb-4 text-purple-700">Summary</h2>
+            <div>
+              <p className="text-gray-800 whitespace-pre-line">{summary}</p>
+              <button onClick={() => setShowModal(false)} className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {isPdfViewerOpen && viewPdfUrl && <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />}
     </div>
   );
 };
