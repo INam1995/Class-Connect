@@ -24,8 +24,7 @@ router.get("/reviews", getAllRating); // Optional if needed elsewhere
 
 router.get("/", getClassNotes);
 router.post("/upload", upload.single("file"), uploadClassNote);
-// Change this in classNotesRoutes.js
-router.post("/upload", upload.single("file"), uploadClassNote);
+router.post('/upload', AuthMiddleware, upload.single('file'), uploadClassNote);
 
 
 export default router;

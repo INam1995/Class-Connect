@@ -43,41 +43,66 @@ export const getClassNotes = async (req, res) => {
 };
 
 // ✅ Upload new class note
+
 export const uploadClassNote = async (req, res) => {
-  console.log("hey");
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    console.log("notes",req.body);
-    const { folderId, uploadedBy, topic } = req.body;
-    if (!folderId || !uploadedBy || !topic) {
+
+    const folderId = req.body.folderId;
+    const  topic  = req.body.topic;
+    const  uploadedBy  = req.body.uploadedBy; 
+    
+    if (!folderId || !topic) {
       return res.status(400).json({ message: "Missing required fields" });
     }
+    
+    // Verify the user ID is a valid format
+    if (!mongoose.Types.ObjectId.isValid(uploadedBy)) {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
 
+    // Convert to ObjectId
+    const objectIdUserId = new mongoose.Types.ObjectId(uploadedBy);
     const objectIdFolderId = new mongoose.Types.ObjectId(folderId);
-    const objectIdUserId = new mongoose.Types.ObjectId(uploadedBy); // Convert to ObjectId
 
-    // Fetch user details for uploadedBy
-    const user = await User.findById(uploadedBy); // Use the User model here
+    // Find the user
+    const user = await User.findById(objectIdUserId);
+    console.log("User query result:", user);
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
 
     const newNote = new Pdf({
       name: req.file.originalname,
       path: `/uploads/${req.file.filename}`,
       folderId: objectIdFolderId,
-      uploadedBy: objectIdUserId, // Store ObjectId
+      uploadedBy: objectIdUserId,
       topic,
       ratings: [],
     });
 
     await newNote.save();
-    res.status(201).json(newNote);
+
+    res.status(201).json({
+      message: "Class note uploaded successfully",
+      note: newNote,
+      uploadedBy: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        // Include other user fields you want to expose
+      },
+    });
   } catch (error) {
     console.error("Error uploading class note:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ 
+      message: "Server error",
+      error: error.message 
+    });
   }
 };
 

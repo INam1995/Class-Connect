@@ -192,6 +192,7 @@ const FolderDetail = () => {
         {pdfFile && <div className="mt-2 flex items-center justify-center space-x-2"><FaFilePdf className="text-red-500 text-xl" /><p>{pdfFile.name}</p></div>}
       </div>
 
+<<<<<<< HEAD
       <button onClick={handleUploadPdf} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
         {uploading ? "Uploading..." : "Upload PDF"}
       </button>
@@ -200,6 +201,52 @@ const FolderDetail = () => {
       <button
   onClick={() => navigate(`/chatroom/${folderId}`)}
   className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
+=======
+      <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
+        <div
+          className="bg-blue-500 h-4 rounded-full transition-all"
+          style={{ width: `${calculateOverallProgress()}%` }}
+        ></div>
+      </div>
+      <p className="text-sm text-gray-700">Overall Progress: {calculateOverallProgress()}%</p>
+
+      <div className="mt-5">
+        <button
+          onClick={() => navigate(`/chatroom/${folderId}`)}
+          className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 mb-4"
+        >
+          Start Chat
+        </button>
+
+        <h3 className="text-xl">📄 Uploaded PDFs</h3>
+        {folder.pdfs.length > 0 ? (
+          <ul>
+            {folder.pdfs.map((pdf) => (
+              <li key={pdf._id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                <p className="font-semibold">{pdf.name}</p>
+                <div className="flex space-x-4 mt-2">
+                  <div className="flex space-x-2">
+                    <button
+                      className={`w-6 h-6 rounded-full transition-all ${
+                        pdfProgress[pdf._id] ? "bg-green-500" : "bg-gray-300"
+                      }`}
+                      onClick={() => toggleCompletion(pdf._id, true)}
+                    ></button>
+                    <button
+                      className={`w-6 h-6 rounded-full transition-all ${
+                        !pdfProgress[pdf._id] ? "bg-red-500" : "bg-gray-300"
+                      }`}
+                      onClick={() => toggleCompletion(pdf._id, false)}
+                    ></button>
+                  </div>
+                  {isPdfViewerOpen && viewPdfUrl && (
+  <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
+)}
+
+<button
+  onClick={() => handleViewPdf(pdf)}
+  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+>>>>>>> c551efa1a64ee1f8412be0677114a946bf5f3e81
 >
   Start Chat
 </button>
@@ -223,6 +270,7 @@ const FolderDetail = () => {
                   <button onClick={() => toggleCompletion(pdf._id, true)} className={`w-6 h-6 rounded-full ${pdfProgress[pdf._id] ? 'bg-green-500' : 'bg-gray-300'}`}></button>
                   <button onClick={() => toggleCompletion(pdf._id, false)} className={`w-6 h-6 rounded-full ${!pdfProgress[pdf._id] ? 'bg-red-500' : 'bg-gray-300'}`}></button>
                 </div>
+<<<<<<< HEAD
               </div>
               
               <div className="flex flex-wrap gap-3 mt-2">
@@ -235,6 +283,45 @@ const FolderDetail = () => {
             </li>
           ))}
         </ul>
+=======
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No PDFs found for this folder.</p>
+        )}
+        {folder.pdfs.map((pdf) => (
+          <div key={pdf._id} className="flex justify-between items-center mb-3">
+            <div className="flex items-center">
+              <FaFilePdf size={20} className="text-red-600 mr-2" />
+              <span>{pdf.name}</span>
+            </div>
+
+            <div>
+              <button
+                onClick={() => handleSummarize(pdf.url)}
+                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+              >
+                Summarize
+              </button>
+
+              <button
+                onClick={(e) => trackDownload(e, pdf)}
+                className="ml-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+              >
+                Download
+              </button>
+
+              <button
+                onClick={() => toggleCompletion(pdf._id, !pdfProgress[pdf._id])}
+                className="ml-2 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+              >
+                {pdfProgress[pdf._id] ? "Mark Incomplete" : "Mark Complete"}
+              </button>
+            </div>
+          </div>
+        ))}
+>>>>>>> c551efa1a64ee1f8412be0677114a946bf5f3e81
       </div>
 
       {showModal && (

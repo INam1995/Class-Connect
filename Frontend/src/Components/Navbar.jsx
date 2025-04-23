@@ -16,7 +16,11 @@ function NavbarComponent() {
   };
 
   const handleClassNotesRedirect = () => {
+<<<<<<< HEAD
     navigate("/class-notes");
+=======
+    navigate("/class-notes/upload"); // Change this route if your ClassNotesPage has a different route
+>>>>>>> c551efa1a64ee1f8412be0677114a946bf5f3e81
   };
 
   return (
