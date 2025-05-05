@@ -1,0 +1,84 @@
+/* Post.css */
+
+.post {
+  background-color: #fff;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: 'Roboto', sans-serif;
+  transition: 0.3s;
+}
+
+.post__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.post__info h4 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.post__info small {
+  color: #888;
+}
+
+.post__body {
+  margin: 10px 0;
+}
+
+.post__btnAnswer {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background-color: #f76c6c;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.post__btnAnswer:hover {
+  background-color: #e05b5b;
+}
+
+.post__answer {
+  margin-top: 16px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.post-answer-container {
+  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.post-answered {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.post-answer {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.post__footer {
+  display: none;
+}
+
+.view-more {
+  color: #f76c6c;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 6px;
+  display: inline-block;
+}
