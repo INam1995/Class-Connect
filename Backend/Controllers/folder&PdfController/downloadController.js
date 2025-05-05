@@ -1,6 +1,6 @@
 import https from 'https';
-import Folder from '../models/folder.js';
-import { emitFileDownloaded } from '../index.js'; // Import WebSocket event
+import Folder from '../../models/folder.js';
+import { emitFileDownloaded } from '../../index.js'; // Import WebSocket event
 
 export const downloadPDF = async (req, res) => {
     try {

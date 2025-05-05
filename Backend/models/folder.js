@@ -12,6 +12,7 @@ const folderSchema = new mongoose.Schema({
       name: String,
       path: String, // Cloudinary URL
       createdAt: { type: Date, default: Date.now },
+
       downloadedBy: [{
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         date: { type: Date, default: Date.now }

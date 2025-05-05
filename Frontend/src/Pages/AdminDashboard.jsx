@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../Components/AuthContext";
+import { useAuth } from "../Components/AuthComponents/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Container, Spinner, Alert, Row, Col } from "react-bootstrap";
 import axios from "axios";
 import { io } from "socket.io-client";
 import SearchBar from "../Components/search"; // Import the SearchBar component
 import Notifications from "../Components/Notification";
-import StatisticsCards from "../Components/StatisticsCards";
-import UsersTable from "../Components/UsersTable";
-import Role from "../Components/roles";
-import { Form } from "react-bootstrap";
-import UserActivityGraph from "../Components/useractivity";
+import StatisticsCards from "../Components/AdminComponents/StatisticsCards";
+import UsersTable from "../Components/AdminComponents/UsersTable";
+import Role from "../Components/AdminComponents/roles";
+import UserActivityGraph from "../Components/AdminComponents/useractivity";
 import Navbar  from "../Components/Navbar";
 import Location from "../Components/Location";
-import MultiLevelDropdown from "../Components/MultiLevelDropdown";
+import MultiLevelDropdown from "../Components/AdminComponents/MultiLevelDropdown";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -309,7 +308,15 @@ const AdminDashboard = () => {
 </Row>
 <Row className="mb-4">
   <Col md={12}>
-    <Location />
+    <div style={{
+      border: '1px solid #ddd',
+      borderRadius: '10px',
+      overflow: 'hidden',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      height: '400px' // reduce height here
+    }}>
+      <Location />
+    </div>
   </Col>
 </Row>
 

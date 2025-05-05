@@ -4,7 +4,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
-import { useAuth } from "./AuthContext"; // ✅ Ensure correct import path
+import { useAuth } from "./AuthComponents/AuthContext"; // ✅ Ensure correct import path
 
 function NavbarComponent() {
   const { user, logout } = useAuth();
@@ -44,11 +44,14 @@ function NavbarComponent() {
               </Dropdown.Toggle>
 
               <Dropdown.Menu>
-                <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
-                <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-              </Dropdown.Menu>
+  <Dropdown.Header>{user?.username || "User"}</Dropdown.Header>
+  <Dropdown.Item as={Link} to={`/profile/${user?._id}`}>
+    Profile
+  </Dropdown.Item>
+  {/* <Dropdown.Item as={Link} to="/settings">Settings</Dropdown.Item> */}
+  <Dropdown.Divider />
+  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+</Dropdown.Menu>
             </Dropdown>
           ) : (
             <Nav.Link as={Link} to="/register">SignUp/SignIn</Nav.Link>

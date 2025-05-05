@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
 import { FaFilePdf } from "react-icons/fa";
-import PdfEditor from './PdfEditor';
+import PdfEditor from '../Components/Folder&PdfComponents/PdfEditor';
 const FolderDetail = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
@@ -96,6 +96,7 @@ const FolderDetail = () => {
   const handleViewPdf = (pdf) => {
     setViewPdfUrl(pdf.path);  // Use the actual path from your database
     setIsPdfViewerOpen(true);
+    console.log(viewPdfUrl)
   };
   
   const handleFileChange = (e) => {

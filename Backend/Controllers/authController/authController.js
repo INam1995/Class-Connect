@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
-import { emitUserRegistered } from '../index.js';  // Import the io instance to emit events
-import Notification from '../models/notification.js'
+import User from "../../models/user.js";
+import { emitUserRegistered } from '../../index.js';  // Import the io instance to emit events
+import Notification from '../../models/notification.js'
 export const register = async (req, res) => {
   const { name, username, email, password, course, college, latitude, longitude  } = req.body;
 
@@ -31,7 +31,6 @@ export const register = async (req, res) => {
       message: `New user registered: ${name} (${username})`,
       name: name, // Store the user's name in the notification
     });
-    // console.log(name, 'name of user')
     await notification.save();
     emitUserRegistered(newUser)
 
@@ -57,7 +56,6 @@ export const login = async (req, res) => {
     if (!match) {
       return res.status(401).json({ message: "Wrong credentials!" });
     }
-    // console.log("match", match)
 
 
 
@@ -105,7 +103,6 @@ export const logout = async (req, res) => {
       return res.status(400).json({ message: "User session not found!" });
     }
 
-    console.log("User sessionStart:", user.sessionStart);
 
     const sessionEnd = new Date(); // Logout time
     const sessionStart = user.sessionStart; // Stored at login

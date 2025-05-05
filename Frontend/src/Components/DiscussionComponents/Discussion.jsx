@@ -1,9 +1,9 @@
 import React from 'react'
-import QuoraHeader from './QuoraHeader'
+import QuoraHeader from '../QuoraHeader'
 import "./css/Quora.css"
-import Sidebar from './Sidebar'
+import Sidebar from '../Slider/Sidebar'
 import Feed from './Feed'
-import Widget from './Widget'
+import Widget from '../Widget'
 
 
 function Discussion() {

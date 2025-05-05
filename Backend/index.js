@@ -20,6 +20,7 @@ import whiteboardRoutes from './routes/whiteboardRoutes.js';
 import notificationsRoutes from "./routes/noti.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
+import profile from "./routes/userRoute.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +34,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
+app.set("io", io);
 // Initialize all socket events
 // initWhiteboardSocket(io);
 
@@ -172,6 +173,7 @@ app.use('/api/whiteboard', whiteboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
+app.use("/api/profile", profile);
 
 // ✅ Start Server
 

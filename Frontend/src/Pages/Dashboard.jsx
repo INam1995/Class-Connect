@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
-import CreateOrJoinFolderModal from "./CreateOrJoinFolderModal";
-import FolderGrid from "./foldergrid";
+import Navbar from "../Components/Navbar.jsx";
+import CreateOrJoinFolderModal from "../Components/Folder&PdfComponents/CreateOrJoinFolderModal.jsx";
+import FolderGrid from "../Components/Folder&PdfComponents/foldergrid.jsx";
 import { useNavigate } from "react-router-dom";
-import WhiteboardModal from "./WhiteboardModal.jsx"; 
+import WhiteboardModal from "../Components/WhiteboardModal.jsx"; 
 
 const Dashboard = () => {
   const [createdFolders, setCreatedFolders] = useState([]);

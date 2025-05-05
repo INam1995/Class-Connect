@@ -7,7 +7,7 @@ import {
   deleteFolder,
   leaveFolder,
   getFolderById
-} from "../Controllers/folderController.js"; // ✅ Import controllers
+} from "../Controllers/folder&PdfController/folderController.js"; // ✅ Import controllers
 
 const router = express.Router();
 

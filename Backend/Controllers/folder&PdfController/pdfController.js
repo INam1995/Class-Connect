@@ -1,6 +1,6 @@
-import Folder from '../models/folder.js';
-import cloudinary from '../utils/cloudinary.js'; 
-import { io } from '../index.js'; // Import the Socket.IO instance
+import Folder from '../../models/folder.js';
+import cloudinary from '../../utils/cloudinary.js'; 
+import { io } from '../../index.js'; // Import the Socket.IO instance
 
 export const getPdfs = async (req, res) => {
   const { folderId } = req.params;

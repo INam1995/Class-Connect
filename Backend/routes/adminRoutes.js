@@ -1,6 +1,6 @@
 import express from "express";
 import { AuthMiddleware, isSuperAdmin , isAdmin} from "../middleware/authMiddleware.js";
-import { getAllUsers, deleteUser, promoteToAdmin, demoteAdmin ,unblockUser, blockUser,getUserLocation} from "../Controllers/adminController.js";
+import { getAllUsers, deleteUser, promoteToAdmin, demoteAdmin ,unblockUser, blockUser,getUserLocation,getUserUploadsAndDownloads} from "../Controllers/adminController/adminController.js";
 
 const router = express.Router();
 
@@ -21,6 +21,8 @@ router.put("/block", AuthMiddleware, blockUser);
 router.put("/unblock", AuthMiddleware, unblockUser);
 
 router.get('/locations', getUserLocation);
+
+router.get('/user/:userId/stats', getUserUploadsAndDownloads);
 
 
 

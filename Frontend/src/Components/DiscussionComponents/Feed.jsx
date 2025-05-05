@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import QuoraBox from "./QuoraBox";
+import QuoraBox from "../QuoraBox";
 import Post from "./Post";
-import api from "../api";
+import api from "../../api";
 import { useAuth } from "./AuthContext";
 
 function Feed() {

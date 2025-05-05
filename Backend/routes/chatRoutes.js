@@ -8,7 +8,7 @@ import {
   getAllChatRooms,
   saveMessages,
   editMessage 
-} from "../Controllers/chatcontroller.js";
+} from "../Controllers/chatController/chatController.js";
 import {AuthMiddleware} from "../middleware/authMiddleware.js";
 
 const router = express.Router();

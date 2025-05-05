@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";  // ✅ Import Provider from react-redux
 import store from "./app/store"; // ✅ Ensure correct path to your store
 import { BrowserRouter as Router } from "react-router-dom"; 
-import { AuthProvider } from "./Components/AuthContext.jsx"; 
+import { AuthProvider } from "./Components/AuthComponents/AuthContext.jsx"; 
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";

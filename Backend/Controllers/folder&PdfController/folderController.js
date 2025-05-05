@@ -1,11 +1,9 @@
-import Folder from "../models/folder.js";
+import Folder from "../../models/folder.js";
 export const createFolder = async (req, res) => {
   try {
     const { name, subject, uniqueKey } = req.body;
-    console.log("heyy")
 
     const userId = req.user._id;
-    console.log(userId)
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized. Please log in." });
     }

@@ -1,6 +1,6 @@
-import ChatRoom from "../models/chatRoom.js";
-import Message from "../models/message.js";
-import Folder from "../models/folder.js";
+import ChatRoom from "../../models/chatRoom.js";
+import Message from "../../models/message.js";
+import Folder from "../../models/folder.js";
 
 export const sendMessage = async (req, res) => {
   try {

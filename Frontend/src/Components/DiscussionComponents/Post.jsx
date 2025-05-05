@@ -14,7 +14,7 @@ import "react-quill/dist/quill.snow.css";
 import ReactTimeAgo from "react-time-ago";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import api from "../api";
+import api from "../../api";
 import ReactHtmlParser from "html-react-parser";
 //import ReactHtmlParser from "react-html-parser";
 
