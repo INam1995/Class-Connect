@@ -1,0 +1,85 @@
+.discussion-page {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  font-family: 'Segoe UI', sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.question-form-section {
+  margin-bottom: 40px;
+}
+
+.question-form-section h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.new-question-box {
+  display: flex;
+  gap: 12px;
+}
+
+.question-list-section h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.question-card {
+  border-top: 1px solid #eee;
+  padding: 20px 0;
+}
+
+.question-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.question-left {
+  flex: 1;
+  min-width: 200px;
+}
+
+.question-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.question-subtitle {
+  color: #555;
+  font-size: 14px;
+}
+
+.question-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  margin-top: 8px;
+}
+
+.teacher-name {
+  font-size: 14px;
+  color: #444;
+}
+
+.question-right {
+  font-size: 12px;
+  color: #999;
+  min-width: 100px;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.question-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
