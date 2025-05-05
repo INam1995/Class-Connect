@@ -11,6 +11,10 @@ import AllChats from './Components/ChatComponents/AllChats.jsx';
 import ChatRoom from './Components/ChatComponents/ChatRoom.jsx';
 import RegisterVerification from "./Components/AuthComponents/RegisterVerification.jsx";
 import ClassNotes from "./Pages/ClassNotes"; // updated import
+import DiscussionBox from './Pages/Discussion.jsx';  // Displays all questions and answers
+import AddAnswerPage from './Components/DiscussionComponents/AddAnswerPage.jsx';  // Adds answers to a specific question
+import LanguageSwitcher from './Components/LanguageSelector.jsx';
+import ShowAllAnswersPage from './Components/DiscussionComponents/ShowAllAnswersPage.jsx'; 
 
 // import Home from '@/pages/Home.jsx';
 // ProtectedRoute: Redirects to login if user is not authenticated
@@ -28,7 +32,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <>
-    
+    <LanguageSwitcher />
       <Routes>
         <Route path="/" element={<Home />} /> 
         <Route path="/register" element={<Register />} /> 
@@ -43,7 +47,10 @@ function App() {
         <Route path="/chatroom/:folderId" element={<ChatRoom />} />
         <Route path="/folder/:folderId" element={<Folder />} />
         <Route path="/class-notes" element={<ClassNotes />} /> {/* updated component name */}
-          
+        <Route path="/" element={<DiscussionBox />} />
+        <Route path="/add-answer/:questionId" element={<AddAnswerPage />} />
+      
+        <Route path="/answers/:questionId" element={<ShowAllAnswersPage />} />
       </Routes>
     
     </>

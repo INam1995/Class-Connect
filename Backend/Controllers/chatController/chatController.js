@@ -231,3 +231,25 @@ export const saveMessages = async (req, res) => {
     res.status(500).json({ error: "Server error", details: error.message });
   }
 };
+
+
+export const deleteSelectedMessages = async (req, res) => {
+  console.log("🛠 Incoming DELETE request"); // Check if request reaches backend
+  console.log("📩 Request Body:", req.body); // Log incoming request data
+
+  try {
+    const { messageIds, folderId } = req.body;
+
+    if (!messageIds || !folderId) {
+      console.log("❌ Missing required fields:", { messageIds, folderId });
+      return res.status(400).json({ message: "Message IDs and Folder ID are required" });
+    }
+
+    await Message.deleteMany({ _id: { $in: messageIds }, folder: folderId });
+
+    res.status(200).json({ message: "Selected messages deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting messages:", error);
+    res.status(500).json({ message: "Error deleting messages", error });
+  }
+};

@@ -22,54 +22,73 @@ function NavbarComponent() {
   };
 
   return (
-    <Navbar bg="dark" data-bs-theme="dark">
+    <Navbar expand="lg" style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
       <Container>
-        <Navbar.Brand as={Link} to="/">Ed-Tech Platform</Navbar.Brand>
-        <Nav className="me-auto">
-          <Nav.Link as={Link} to="/">Home</Nav.Link>
-          <Nav.Link as={Link} to="/features">Features</Nav.Link>
-          <Nav.Link as={Link} to="/pricing">Pricing</Nav.Link>
-          <Nav.Link as={Link} to="/discussion">Discussion</Nav.Link>
+        <Navbar.Brand as={Link} to="/" style={{ color: "#ff6600", fontWeight: "bold", fontSize: "1.5rem" }}>
+          Learnify
+        </Navbar.Brand>
 
-          {/* Class Notes Menu */}
-          <Nav.Link onClick={handleClassNotesRedirect} style={{ cursor: "pointer" }}>
-            Class Notes
-          </Nav.Link>
-        </Nav>
-        <Nav>
-          {user ? ( // ✅ Show profile icon if logged in
-            <Dropdown align="end">
-              <Dropdown.Toggle variant="link" id="profile-dropdown" style={{ color: "white" }}>
-                <div
-                  className="profile-icon"
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "50%",
-                    backgroundColor: "gray",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <span style={{ color: "white" }}>👤</span>
-                </div>
-              </Dropdown.Toggle>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
 
-              <Dropdown.Menu>
-                <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
-                <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          ) : (
-            <Nav.Link as={Link} to="/register">SignUp/SignIn</Nav.Link>
-          )}
-        </Nav>
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/" style={navLinkStyle}>Home</Nav.Link>
+            <Nav.Link as={Link} to="/admin" style={navLinkStyle}>Admin</Nav.Link>
+            <Nav.Link as={Link} to="/features" style={navLinkStyle}>Features</Nav.Link>
+            <Nav.Link as={Link} to="/pricing" style={navLinkStyle}>Pricing</Nav.Link>
+            <Nav.Link as={Link} to="/discussion" style={navLinkStyle}>Discussion</Nav.Link>
+            <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
+              Class Notes
+            </Nav.Link>
+          </Nav>
+
+          <Nav>
+            {user ? (
+              <Dropdown align="end">
+                <Dropdown.Toggle variant="link" id="profile-dropdown" style={{ padding: 0 }}>
+                  <div
+                    className="profile-icon"
+                    style={{
+                      width: "35px",
+                      height: "35px",
+                      borderRadius: "50%",
+                      backgroundColor: "#ff6600",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {user?.username?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
+                  <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <Nav.Link as={Link} to="/register" style={navLinkStyle}>SignUp / SignIn</Nav.Link>
+            )}
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );
 }
+
+// Style for nav links
+const navLinkStyle = {
+  color: "#333",
+  fontWeight: "500",
+  margin: "0 10px",
+  padding: "8px 12px",
+  borderRadius: "8px",
+  transition: "all 0.3s ease",
+};
 
 export default NavbarComponent;

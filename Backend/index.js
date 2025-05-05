@@ -8,6 +8,7 @@ import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import connectDB from "./utils/database.js";
+// import connectDB from "./models/db.js";
 import authRouter from "./routes/authRoutes.js";
 import folderRouter from "./routes/folderRoutes.js";
 import downloadPdf from "./routes/downloadRoutes.js";

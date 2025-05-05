@@ -10,6 +10,10 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 import "./index.css";
 import App from "./App.jsx";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
+
+TimeAgo.addDefaultLocale(en); // ✅ Register the locale once
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
