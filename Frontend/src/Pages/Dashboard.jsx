@@ -4,6 +4,8 @@ import CreateOrJoinFolderModal from "../Components/Folder&PdfComponents/CreateOr
 import FolderGrid from "../Components/Folder&PdfComponents/foldergrid.jsx";
 import { useNavigate } from "react-router-dom";
 import WhiteboardModal from "../Components/WhiteboardModal.jsx"; 
+import {io} from "socket.io-client"; // Import socket.io-client
+
 
 const Dashboard = () => {
   const [createdFolders, setCreatedFolders] = useState([]);
@@ -12,40 +14,50 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
-  // const [whiteboardRoomId, setWhiteboardRoomId] = useState("");
+  const [activeTab, setActiveTab] = useState("created");
+  const [refreshKey, setRefreshKey] = useState(0);
 
+  const fetchFolders = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/folders/myfolders", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        credentials: "include",
+      });
 
-  // Fetch created and joined folders when the component mounts
-  useEffect(() => {
-    const fetchFolders = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/folders/myfolders", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          credentials: "include",
-        });
-
-        const data = await response.json();
-        
-        if (response.ok) {
-          setCreatedFolders(data.createdFolders || []);
-          setJoinedFolders(data.joinedFolders || []);
-        } else {
-          setError(data.message || "Failed to fetch folders");
-        }
-      } catch (error) {
-        setError("Something went wrong. Please try again.");
-      } finally {
-        setLoading(false);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setCreatedFolders(data.createdFolders || []);
+        setJoinedFolders(data.joinedFolders || []);
+      } else {
+        setError(data.message || "Failed to fetch folders");
       }
-    };
+    } catch (error) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  
+  
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    socket.on("progress-updated", () => {
+      setRefreshKey(prev => prev + 1); // Triggers re-fetch
+    });
+    return () => socket.disconnect();
+  }, []);
+
+  // ✅ Fetch folders with refreshKey dependency
+  useEffect(() => {
     fetchFolders();
-  // }, [isModalOpen]);
-  }, [isModalOpen, isWhiteboardOpen]);
+  }, [isModalOpen, isWhiteboardOpen, refreshKey]);
+  
 
   // Handle folder creation
   const handleCreateFolder = async (folderName, subjectName, uniqueKeyhere) => {
@@ -168,54 +180,89 @@ const Dashboard = () => {
   };
 
 
+  
   return (
-    <> 
-      <Navbar/>
-      <div className="flex flex-col items-center min-h-screen p-6 bg-gray-50">
-        <h1 className="text-3xl font-bold text-gray-500 mb-6">📂 My Folders</h1>
-
-         <div className="flex gap-4 mb-4">
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            onClick={() => setIsModalOpen(true)}
-          >
-            ➕ Create / Join Folder
-          </button>
-          <button
-            className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600"
-            onClick={() => handleOpenWhiteboard("global-whiteboard")}
-          >
-            🎨 Open Whiteboard
-          </button>
+    <>
+      <Navbar />
+      <div className="flex flex-col min-h-screen p-6 bg-gray-50">
+        {/* Header Section */}
+        <div className="flex justify-between items-center w-full mb-6">
+          {/* Left Side: My Courses Title */}
+          <h1 className="text-3xl font-bold text-gray-500">My Courses</h1>
+  
+          {/* Right Side: Buttons + Filter Tabs */}
+          <div className="flex items-center gap-4 flex-wrap justify-end">
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              onClick={() => setIsModalOpen(true)}
+            >
+              ➕ Create / Join Folder
+            </button>
+  
+            {/* Filter Tabs */}
+            {["created", "joined", "whiteboard"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  if (tab === "whiteboard") {
+                    handleOpenWhiteboard("global-whiteboard");
+                  } else {
+                    setActiveTab(tab);
+                  }
+                }}
+                className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+                  activeTab === tab
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-black border-black"
+                }`}
+              >
+                {tab === "created"
+                  ? "Created"
+                  : tab === "joined"
+                  ? "Joined"
+                  : "Whiteboard"}
+              </button>
+            ))}
+          </div>
         </div>
-
+  
+        {/* Folder Display Section */}
         {loading ? (
           <p className="text-lg text-gray-600">⏳ Loading folders...</p>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : (
           <div className="w-full max-w-6xl">
-            {/* ✅ Created Folders Section */}
-            <FolderGrid
-              title="Created Folders"
-              folders={createdFolders}
-              color="bg-yellow-200"
-              onFolderClick={handleFolderClick} // ✅ Pass the function for joined folders
-              onDelete={handleDeleteFolder} 
-              deleteLabel="Delete"
-            />
-            <FolderGrid
-              title="Joined Folders"
-              folders={joinedFolders}
-              color="bg-blue-200"
-              onFolderClick={handleFolderClick} // ✅ Pass the function
-              onDelete={handleLeaveFolder} 
-              deleteLabel="Leave"
-            />
+            {activeTab === "created" && (
+              <FolderGrid
+                title="Created Folders"
+                folders={createdFolders}
+                color="bg-yellow-200"
+                onFolderClick={handleFolderClick}
+                onDelete={handleDeleteFolder}
+                showProgress={true}  // Add this prop
+                // getProgress={(folder) => folderProgressMap[folder._id] || 0}
+                deleteLabel="Delete"
+              />
+            )}
+  
+            {activeTab === "joined" && (
+              <FolderGrid
+                title="Joined Folders"
+                folders={joinedFolders}
+                color="bg-blue-200"
+                onFolderClick={handleFolderClick}
+                onDelete={handleLeaveFolder}
+                showProgress={true}  // Add this prop
+                // getProgress={(folder) => folderProgressMap[folder._id] || 0}
+                deleteLabel="Leave"
+              />
+            )}
           </div>
         )}
       </div>
-
+  
+      {/* Modals */}
       <CreateOrJoinFolderModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

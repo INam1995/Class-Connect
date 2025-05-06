@@ -17,6 +17,7 @@ import LanguageSwitcher from './Components/LanguageSelector.jsx';
 import ShowAllAnswersPage from './Components/DiscussionComponents/ShowAllAnswersPage.jsx'; 
 import { useAuth } from './Components/AuthComponents/AuthContext.jsx';
 
+
 // import Home from '@/pages/Home.jsx';
 // ProtectedRoute: Redirects to login if user is not authenticated
 function ProtectedRoute({ children }) {
@@ -50,7 +51,6 @@ function App() {
         <Route path="/class-notes" element={<ClassNotes />} /> {/* updated component name */}
         <Route path="/" element={<DiscussionBox />} />
         <Route path="/add-answer/:questionId" element={<AddAnswerPage />} />
-      
         <Route path="/answers/:questionId" element={<ShowAllAnswersPage />} />
       </Routes>
     

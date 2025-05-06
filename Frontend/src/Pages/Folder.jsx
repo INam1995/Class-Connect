@@ -6,14 +6,24 @@ import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
 import { FaFilePdf } from "react-icons/fa";
 import PdfEditor from '../Components/Folder&PdfComponents/PdfEditor';
+
+
 const FolderDetail = () => {
   const { folderId } = useParams();
   const navigate = useNavigate();
-  const [folder, setFolder] = useState({ name: "", subject: "", pdfs: [] });
+  const [folder, setFolder] = useState({ 
+    name: "", 
+    subject: "", 
+    pdfs: [],
+    userProgressPercentage: 0,
+    completedPdfs: 0,
+    totalPdfs: 0
+  });
+  const [loading, setLoading] = useState(true);
+  
   const [pdfFile, setPdfFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [summary, setSummary] = useState('');
-  const [loading, setLoading] = useState(false);
   const [currentPdf, setCurrentPdf] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -22,6 +32,7 @@ const FolderDetail = () => {
   const [pdfProgress, setPdfProgress] = useState({});
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+  const userId = localStorage.getItem("userId");
 
   const socket = io("http://localhost:5000", {
     transports: ["websocket"],
@@ -48,31 +59,23 @@ const FolderDetail = () => {
   }, []);
 
   useEffect(() => {
-    const fetchFolderDetails = async () => {
+    const fetchFolderData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const url = `http://localhost:5000/api/folders/${folderId}`;
-        const response = await axios.get(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `/api/folders/${folderId}/user-progress`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         
-        setFolder({
-          name: response.data.name || "Untitled Folder",
-          subject: response.data.subject || "Unknown",
-          pdfs: response.data.pdfs || [],
-        });
-
-        // Initialize progress state for each PDF
-        const initialProgress = {};
-        response.data.pdfs.forEach((pdf) => {
-          initialProgress[pdf._id] = pdf.completed || false;
-        });
-        setPdfProgress(initialProgress);
+        setFolder(response.data.folder);
       } catch (error) {
-        console.error("Error fetching folder details:", error);
+        console.error("Error fetching folder:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchFolderDetails();
+
+    fetchFolderData();
   }, [folderId]);
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -85,6 +88,7 @@ const FolderDetail = () => {
       }
     }
   }, []);
+
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
       'application/pdf': ['.pdf']
@@ -169,26 +173,6 @@ const FolderDetail = () => {
     }
   };
 
-  const toggleCompletion = async (pdfId, status) => {
-    try {
-      const token = localStorage.getItem("token");
-      const url = `http://localhost:5000/api/pdfs/${folderId}/${pdfId}/progress`;
-      await axios.patch(
-        url,
-        { completed: status },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setPdfProgress((prevProgress) => ({
-        ...prevProgress,
-        [pdfId]: status,
-      }));
-    } catch (error) {
-      console.error("Error updating progress:", error);
-    }
-  };
   const trackDownload = async (e, pdf) => {
     e.preventDefault();
     try {
@@ -216,22 +200,77 @@ const FolderDetail = () => {
       console.error("Error tracking download:", error);
     }
   };
-  const calculateOverallProgress = () => {
+
+  const calculateUserProgress = () => {
+    if (!folder || !folder.pdfs) return 0;
     const totalPdfs = folder.pdfs.length;
     if (totalPdfs === 0) return 0;
 
-    const completedPdfs = Object.values(pdfProgress).filter((status) => status).length;
+    const completedPdfs = folder.pdfs.filter(pdf => pdf.userCompleted).length;
     return ((completedPdfs / totalPdfs) * 100).toFixed(2);
   };
 
+
+  const handleToggleCompletion = async (pdfId, markAsComplete) => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+
+      await axios.patch(
+        `/api/folders/${folderId}/${pdfId}/progress`,
+        { completed: markAsComplete }, // true for green button, false for red
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Emit socket event after updating progress
+      socket.emit('progress-updated', { 
+        folderId,
+        userId: userId // Make sure you have access to user ID
+      });
+  
+      // Update local state
+      setFolder(prev => {
+        const updatedPdfs = prev.pdfs.map(pdf => {
+          if (pdf._id === pdfId) {
+            return {
+              ...pdf,
+              userCompleted: markAsComplete // Set to the button's intended state
+            };
+          }
+          return pdf;
+        });
+  
+        return {
+          ...prev,
+          pdfs: updatedPdfs
+        };
+      });
+    } catch (error) {
+      console.error("Error updating progress:", error);
+    }
+  };
+  
+  if (loading) return <div>Loading...</div>;
+
+
+ 
   return (
     <div className="p-5">
       <div className="flex justify-between items-center">
-        <div>
+      <div>
           <h1 className="text-2xl font-bold">{folder.name || "Folder"}</h1>
           <p>Subject: {folder.subject || "Unknown"}</p>
-          <p>Overall Progress: {calculateOverallProgress()}%</p>
-        </div>
+          <p>Overall Progress: {calculateUserProgress()}%</p>
+
+          {/* ✅ Start Chat Button */}
+          <button
+            onClick={() => navigate(`/chatroom/${folderId}`)}
+            className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
+          >
+            Start Chat
+          </button>
+      </div>
+
         <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
@@ -296,10 +335,12 @@ const FolderDetail = () => {
       <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
         <div
           className="bg-blue-500 h-4 rounded-full transition-all"
-          style={{ width: `${calculateOverallProgress()}%` }}
+          // style={{ width: `${calculateOverallProgress()}%` }}
+          style={{ width: `${calculateUserProgress()}%` }}
         ></div>
       </div>
-      <p className="text-sm text-gray-700">Overall Progress: {calculateOverallProgress()}%</p>
+      {/* <p className="text-sm text-gray-700">Overall Progress: {calculateOverallProgress()}%</p> */}
+      <p className="text-sm text-gray-700">Overall Progress: {calculateUserProgress()}%</p>
 
       <div className="mt-5">
         <button
@@ -317,29 +358,35 @@ const FolderDetail = () => {
                 <p className="font-semibold">{pdf.name}</p>
                 <div className="flex space-x-4 mt-2">
                   <div className="flex space-x-2">
+                    {/* Green button - mark as complete */}
                     <button
+                      onClick={() => handleToggleCompletion(pdf._id, true)}
                       className={`w-6 h-6 rounded-full transition-all ${
-                        pdfProgress[pdf._id] ? "bg-green-500" : "bg-gray-300"
+                        pdf.userCompleted ? "bg-green-500" : "bg-gray-300"
                       }`}
-                      onClick={() => toggleCompletion(pdf._id, true)}
+                      title="Mark as complete"
                     ></button>
+                    
+                    {/* Red button - mark as incomplete */}
                     <button
+                      onClick={() => handleToggleCompletion(pdf._id, false)}
                       className={`w-6 h-6 rounded-full transition-all ${
-                        !pdfProgress[pdf._id] ? "bg-red-500" : "bg-gray-300"
+                        !pdf.userCompleted ? "bg-red-500" : "bg-gray-300"
                       }`}
-                      onClick={() => toggleCompletion(pdf._id, false)}
+                      title="Mark as incomplete"
                     ></button>
                   </div>
-                  {isPdfViewerOpen && viewPdfUrl && (
-  <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
-)}
 
-<button
-  onClick={() => handleViewPdf(pdf)}
-  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
->
-  View PDF
-</button>
+                  {isPdfViewerOpen && viewPdfUrl && (
+                    <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
+                  )}
+
+                  <button
+                    onClick={() => handleViewPdf(pdf)}
+                    className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                  >
+                    View PDF
+                  </button>
 
 
                   <a
@@ -359,6 +406,7 @@ const FolderDetail = () => {
                   >
                     {loading && currentPdf === pdf.path ? 'Summarizing...' : 'Summarize PDF'}
                   </button>
+
                 </div>
               </li>
             ))}

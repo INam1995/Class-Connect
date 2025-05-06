@@ -1,4 +1,4 @@
-import Question from "../models/Question.js";
+import Question from "../../models/Question.js";
 
 // ✅ Create a question (Only authenticated users)
 export const createQuestion = async (req, res) => {

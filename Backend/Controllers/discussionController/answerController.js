@@ -1,5 +1,5 @@
-import Answer from "../models/Answer.js";
-import Question from "../models/Question.js";
+import Answer from "../../models/Answer.js";
+import Question from "../../models/Question.js";
 // ✅ Get answers for a specific question
 export const getAnswers = async (req, res) => {
   try {

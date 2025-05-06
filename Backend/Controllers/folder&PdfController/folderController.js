@@ -1,4 +1,5 @@
 import Folder from "../../models/folder.js";
+
 export const createFolder = async (req, res) => {
   try {
     const { name, subject, uniqueKey } = req.body;
@@ -136,4 +137,138 @@ export const getFolderById = async (req, res) => {
     console.error("Error fetching folder details:", error);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+// Get folder with only the current user's progress
+export const getFolderWithUserProgress = async (req, res) => {
+  try {
+    const folder = await Folder.findById(req.params.folderId)
+      .lean();
+    
+    if (!folder) {
+      return res.status(404).json({ message: 'Folder not found' });
+    }
+
+    const userId = req.user._id;
+    let completedCount = 0;
+
+    // Filter to only show current user's progress
+    const pdfsWithUserProgress = folder.pdfs.map(pdf => {
+      const userProgress = pdf.progressByUser.find(
+        progress => progress.user.toString() === userId.toString()
+      );
+
+      if (userProgress?.completed) {
+        completedCount++;
+      }
+
+      return {
+        ...pdf,
+        userCompleted: userProgress?.completed || false,
+        updatedAt: userProgress?.updatedAt || null
+      };
+    });
+
+    const progressPercentage = folder.pdfs.length > 0 
+      ? Math.round((completedCount / folder.pdfs.length) * 100)
+      : 0;
+
+    res.json({
+      folder: {
+        ...folder,
+        pdfs: pdfsWithUserProgress,
+        userProgressPercentage: progressPercentage,
+        totalPdfs: folder.pdfs.length,
+        completedPdfs: completedCount
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update individual user progress
+export const updateUserProgress = async (req, res) => {
+  try {
+    const { completed } = req.body;
+    const userId = req.user._id;
+
+    const folder = await Folder.findById(req.params.folderId);
+    if (!folder) {
+      return res.status(404).json({ message: 'Folder not found' });
+    }
+
+    const pdf = folder.pdfs.id(req.params.pdfId);
+    if (!pdf) {
+      return res.status(404).json({ message: 'PDF not found' });
+    }
+
+    // Find or create user progress entry
+    let userProgress = pdf.progressByUser.find(
+      p => p.user.toString() === userId.toString()
+    );
+
+    if (userProgress) {
+      userProgress.completed = completed;
+      userProgress.updatedAt = new Date();
+    } else {
+      pdf.progressByUser.push({
+        user: userId,
+        completed,
+        updatedAt: new Date()
+      });
+    }
+
+    await folder.save();
+
+    res.json({
+      success: true,
+      pdfId: req.params.pdfId,
+      completed
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// In your folder controller
+export const getMyFolders = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get folders with progress calculation
+    const createdFolders = await Folder.find({ createdBy: userId })
+      .lean()
+      .then(folders => folders.map(addProgressData(userId)));
+
+    const joinedFolders = await Folder.find({ members: userId })
+      .lean()
+      .then(folders => folders.map(addProgressData(userId)));
+
+    res.json({ createdFolders, joinedFolders });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Helper function to calculate progress
+const addProgressData = (userId) => (folder) => {
+  const userPdfs = folder.pdfs.filter(pdf => 
+    pdf.progressByUser.some(progress => 
+      progress.user.toString() === userId.toString()
+    )
+  );
+  
+  const completedPdfs = userPdfs.filter(pdf => 
+    pdf.progressByUser.find(p => p.user.toString() === userId.toString()).completed
+  );
+
+  return {
+    ...folder,
+    progressPercentage: folder.pdfs.length > 0 
+      ? Math.round((completedPdfs.length / folder.pdfs.length) * 100)
+      : 0,
+    completedCount: completedPdfs.length,
+    totalPdfs: folder.pdfs.length
+  };
 };
