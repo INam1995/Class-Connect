@@ -1,14 +1,11 @@
-// AuthContext.jsx
-
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
-
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);  // ✅ Add a loading state
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -22,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
     }
 
-    setLoading(false);
+    setLoading(false);  // ✅ Finish loading once local storage check is done
   }, []);
 
   const login = (userData, token) => {
@@ -52,12 +49,12 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(false);
     } catch (error) {
       console.error("Logout failed", error.response?.data || error.message);
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>;  // ✅ Prevent rendering before loading is done
   }
 
   return (
@@ -67,9 +64,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Export the hook to use in other components
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-export default AuthContext;
+export const useAuth = () => useContext(AuthContext);

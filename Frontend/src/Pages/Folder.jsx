@@ -100,6 +100,7 @@ const FolderDetail = () => {
   const handleViewPdf = (pdf) => {
     setViewPdfUrl(pdf.path);  // Use the actual path from your database
     setIsPdfViewerOpen(true);
+    // console.log(viewPdfUrl)
   };
   
   const handleFileChange = (e) => {
@@ -248,7 +249,6 @@ const FolderDetail = () => {
       <div>
           <h1 className="text-2xl font-bold">{folder.name || "Folder"}</h1>
           <p>Subject: {folder.subject || "Unknown"}</p>
-          {/* <p>Overall Progress: {calculateOverallProgress()}%</p> */}
           <p>Overall Progress: {calculateUserProgress()}%</p>
 
           {/* ✅ Start Chat Button */}
@@ -314,7 +314,8 @@ const FolderDetail = () => {
 
         <button
           onClick={handleUploadPdf}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          disabled={uploading}
         >
 {uploading && <p className="text-sm text-gray-500">Uploading PDF...</p>}
         </button>
@@ -405,22 +406,18 @@ const FolderDetail = () => {
       </div>
 
       {showModal && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg max-w-lg w-full">
-            <h2 className="text-xl font-semibold mb-4">Summary</h2>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <div>
-                <p>{summary}</p>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-                >
-                  Close
-                </button>
-              </div>
-            )}
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-xl font-semibold">📝 Summary</h3>
+            <p className="mt-2">{summary}</p>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

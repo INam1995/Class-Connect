@@ -1,104 +1,102 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 import axios from 'axios';
-function formatDuration(minutes) {
-    if (minutes === 0) return '0 minutes';
-  
-    const units = [
-      { label: 'year', minutes: 525600 },   // 365 days
-      { label: 'month', minutes: 43200 },   // 30 days
-      { label: 'day', minutes: 1440 },
-      { label: 'hour', minutes: 60 },
-      { label: 'minute', minutes: 1 },
-    ];
-  
-    let remainingMinutes = minutes;
-    const parts = [];
-  
-    for (const unit of units) {
-      const unitValue = Math.floor(remainingMinutes / unit.minutes);
-      if (unitValue > 0) {
-        parts.push(`${unitValue} ${unit.label}${unitValue > 1 ? 's' : ''}`);
-        remainingMinutes %= unit.minutes;
-      }
-    }
-  
-    return parts.join(', ');
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{
+        backgroundColor: '#fff',
+        padding: '10px',
+        border: '1px solid #ccc',
+        borderRadius: '5px'
+      }}>
+        <p><strong>{label}</strong></p>
+        <p style={{ color: '#8884d8' }}>Logins: {payload.find(p => p.dataKey === "logins")?.value}</p>
+        <p style={{ color: '#f58634' }}>Time Spent: {payload.find(p => p.dataKey === "timeSpent")?.value} mins</p>
+      </div>
+    );
   }
-  
-const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="custom-tooltip" style={{ backgroundColor: '#fff', padding: '10px', border: '1px solid #ccc' }}>
-          <p className="label" ><strong>{data.name}</strong></p>
-          <p className="intro" style={{ color: "#8884d8" }} >Total Logins: {data.totalLogins}</p>
-          <p className="desc" style={{ color: "#82ca9d" }}>Total Time Spent: {formatDuration(data.totalTimeSpent)} </p>
-        </div>
-      );
-    }
-  
-    return null;
-  };
-const UserActivityGraph = () => {
-  const [activityData, setActivityData] = useState([]);
-  const navigate = useNavigate();
+  return null;
+};
+
+const UserActivityBarChart = () => {
+  const [data, setData] = useState([]);
+  const [viewMode, setViewMode] = useState('today');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchActivityData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/stat/activity', { withCredentials: true });
-        const transformedData = response.data.map(user => ({
-          userId: user._id,
-          name: user.name|| 'Unknown',
-          totalLogins: user.totalLogins,
-          totalTimeSpent: user.totalTimeSpent,
+        setLoading(true);
+        const endpoint =
+          viewMode === 'today'
+            ? 'http://localhost:5000/api/stat/activity'
+            : 'http://localhost:5000/api/stat/allactivity';
+
+        const res = await axios.get(endpoint, { withCredentials: true });
+
+        console.log(`${viewMode} data:`, res.data);
+
+        // Normalize the response structure
+        const transformed = res.data.map(user => ({
+          name: user.name || user._id || 'Unknown',
+          logins: user.totalLogins || 0,
+          timeSpent: Math.round((user.totalTimeSpent || 0) / 60), // Convert to minutes
         }));
-        setActivityData(transformedData);
-      } catch (error) {
-        console.error('Error fetching activity data:', error);
+
+        setData(transformed);
+      } catch (err) {
+        console.error('Failed to fetch activity data:', err);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchActivityData();
-  }, []);
-
-  const handleBarClick = (data) => {
-    const { userId } = data;
-    navigate(`/user-profile/${userId}`);
-  };
+    fetchData();
+  }, [viewMode]);
 
   return (
-    <div style={{ width: '100%', height: 400 }}>
-      <h3>User Activity Overview</h3>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={activityData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+    <div style={{ width: '100%', height: 450 }}>
+      <div style={{ marginBottom: 10 }}>
+        <select
+          value={viewMode}
+          onChange={(e) => setViewMode(e.target.value)}
+          style={{ padding: '5px 10px' }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          
-          <YAxis />
-          <Tooltip cursor={false} content={<CustomTooltip />} />
-          <Legend />
-          
-          <Bar
-            dataKey="totalLogins"
-            fill="#8884d8"
-            name="Total Logins:"
-            onClick={handleBarClick}
-          />
-          <Bar
-            dataKey="totalTimeSpent"
-            fill="#82ca9d"
-            name="Total Time Spent:"
-            onClick={handleBarClick}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+          <option value="today">Today’s Activity</option>
+          <option value="overall">Overall Activity</option>
+        </select>
+      </div>
+
+      {loading ? (
+        <p>Loading chart...</p>
+      ) : data.length === 0 ? (
+        <p>No user activity data available for {viewMode === 'today' ? 'today' : 'overall'}.</p>
+      ) : (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            barCategoryGap="10%"
+            barGap={5}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+            <Legend />
+            <Bar dataKey="logins" fill="#8884d8" barSize={20} minPointSize={2} />
+            <Bar dataKey="timeSpent" fill="#f58634" barSize={20} minPointSize={2} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };
 
-export default UserActivityGraph;
+export default UserActivityBarChart;

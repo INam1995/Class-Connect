@@ -1,7 +1,5 @@
 import User from "../../models/user.js";
 import Folder from "../../models/folder.js"; // Assuming this is your File model
-
-
 export const search = async (req, res)=>{
   try {
     const { query } = req.query;
@@ -13,7 +11,7 @@ export const search = async (req, res)=>{
         { name: { $regex: query, $options: 'i' } },
         { email: { $regex: query, $options: 'i' } },
       ],
-    }); // Only return relevant fields
+    }); 
 
     res.status(200).json(users);
   } catch (error) {
@@ -43,7 +41,6 @@ export const getUserStats = async (req, res) => {
         startDate = null;
     }
 
-    const dateFilter = startDate ? { createdAt: { $gte: startDate } } : {};
 
     const activeUsersCount = await User.countDocuments(
       startDate ? { lastLogin: { $gte: startDate } } : {}
@@ -62,8 +59,6 @@ export const getUserStats = async (req, res) => {
       { $count: "totalDownloads" }
     ]);
     
-//     const folder = await Folder.findOne(); // Just check one document
-// console.log(folder);
 
     // ✅ ACTUAL AGGREGATION to get most active users
     const topPerformers = await Folder.aggregate([
@@ -91,12 +86,7 @@ export const getUserStats = async (req, res) => {
       },
       { $limit: 5 }, // Get top 5 performers
     ]);
-    
-    // console.log(topPerformers);
-    
-
-    // console.log("topPerformers", topPerformers);
-
+   
     res.status(200).json({
       activeUsersCount,
       totalUploads: totalUploads[0]?.totalUploads || 0,
@@ -126,15 +116,21 @@ export const getStats = async (req, res) => {
         { $count: "totalDownloads" },
       ]),
     ]);
-    console.log("users", totalUsers)
-    res.status(200).json({
+    const stats = {
       totalUsers,
       totalAdmins,
       totalUploads: totalUploads.length > 0 ? totalUploads[0].totalUploads : 0,
       totalDownloads: totalDownloads.length > 0 ? totalDownloads[0].totalDownloads : 0,
-    });
+    };
+    const io = req.app.get("io");
+    // Emit the stats update to all connected clients
+    io.emit('stats-updated', stats);
+
+    res.status(200).json(stats);
   } catch (err) {
     console.error("Error fetching statistics:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+

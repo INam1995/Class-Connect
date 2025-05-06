@@ -1,5 +1,7 @@
 import User from "../../models/user.js";
 import Folder from "../../models/folder.js";
+import mongoose from 'mongoose';
+import { emitUpdatedStats } from "../../utils/stat.js";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -56,6 +58,7 @@ export const deleteUser = async (req, res) => {
 
     // Delete the user
     await User.deleteOne({ _id: userId });
+    await emitUpdatedStats(req.app.get("io"));
 
     res.status(200).json({ message: "User and their folders deleted successfully" });
   } catch (error) {
@@ -91,6 +94,7 @@ export const promoteToAdmin = async (req, res) => {
 
     user.role = "admin";
     await user.save();
+    await emitUpdatedStats(req.app.get("io"));
 
     res.status(200).json({ message: "User promoted to admin successfully" });
   } catch (error) {
@@ -126,6 +130,7 @@ export const demoteAdmin = async (req, res) => {
 
     user.role = "user";
     await user.save();
+    await emitUpdatedStats(req.app.get("io"));
 
     res.status(200).json({ message: "Admin demoted to regular user successfully" });
   } catch (error) {
@@ -138,13 +143,13 @@ export const demoteAdmin = async (req, res) => {
 // Admin blocks a user
 export const blockUser = async (req, res) => {
   try {
-    // console.log("user",req.user._id )
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.isBlocked = true;
     await user.save();
-    
+    await emitUpdatedStats(req.app.get("io"));
+
     res.status(200).json({ message: "User has been blocked." });
   } catch (error) {
     console.error("Error blocking user:", error);
@@ -162,6 +167,7 @@ export const unblockUser = async (req, res) => {
     user.isBlocked = false;
     user.warnings = 0; // Reset warnings
     await user.save();
+    await emitUpdatedStats(req.app.get("io"));
 
     res.status(200).json({ message: "User has been unblocked." });
   } catch (error) {
@@ -194,5 +200,61 @@ export const getUserLocation = async (req, res) => {
     // Log and return the error if something goes wrong
     console.error('Error fetching users location:', error);
     return res.status(500).json({ message: 'Error fetching users locations' });
+  }
+};
+export const getUserUploadsAndDownloads = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Validate if userId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Aggregate to get the total uploads by the user
+    const totalUploads = await Folder.aggregate([
+      { $unwind: { path: "$pdfs", preserveNullAndEmptyArrays: true } },
+      {
+        $match: {
+          "pdfs.uploadedBy": new mongoose.Types.ObjectId(userId),
+        },
+      },
+      { $count: "totalUploads" },
+    ]);
+
+    // Aggregate to get the total downloads by the user
+    const totalDownloads = await Folder.aggregate([
+      { $unwind: { path: "$pdfs", preserveNullAndEmptyArrays: true } },
+      { $unwind: "$pdfs.downloadedBy" },
+      {
+        $match: {
+          "pdfs.downloadedBy.user": new mongoose.Types.ObjectId(userId),
+        },
+      },
+      { $count: "totalDownloads" },
+    ]);
+
+    // Aggregate to get the total folders created by the user
+    const totalCreatedFolders = await Folder.aggregate([
+      { $match: { "createdBy": new mongoose.Types.ObjectId(userId) } },
+      { $count: "totalCreatedFolders" },
+    ]);
+
+    // Aggregate to get the total folders joined by the user
+    const totalJoinedFolders = await Folder.aggregate([
+      { $match: { "joinedUsers": new mongoose.Types.ObjectId(userId) } },
+      { $count: "totalJoinedFolders" },
+    ]);
+
+    // Send the response
+    return res.status(200).json({
+      totalUploads: totalUploads[0] ? totalUploads[0].totalUploads : 0,
+      totalDownloads: totalDownloads[0] ? totalDownloads[0].totalDownloads : 0,
+      totalCreatedFolders: totalCreatedFolders[0] ? totalCreatedFolders[0].totalCreatedFolders : 0,
+      totalJoinedFolders: totalJoinedFolders[0] ? totalJoinedFolders[0].totalJoinedFolders : 0,
+    });
+  } catch (error) {
+    console.error("Error fetching uploads, downloads, and folder counts:", error);
+    res.status(500).json({ error: "Error fetching data" });
   }
 };

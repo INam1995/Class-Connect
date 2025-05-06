@@ -3,7 +3,7 @@ import Home from "./Pages/Home"
 import Register from './Pages/Register.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
 import AdminDashboard from "./Pages/Admin.jsx";
-import Profile from "./Pages/Profile.jsx";
+import Profile from "./Pages/profile.jsx";
 import Folder from "./Pages/Folder.jsx";
 import Login from './Pages/Login.jsx';
 import Discussion from './Pages/Discussion.jsx';
@@ -15,6 +15,7 @@ import DiscussionBox from './Pages/Discussion.jsx';  // Displays all questions a
 import AddAnswerPage from './Components/DiscussionComponents/AddAnswerPage.jsx';  // Adds answers to a specific question
 import LanguageSwitcher from './Components/LanguageSelector.jsx';
 import ShowAllAnswersPage from './Components/DiscussionComponents/ShowAllAnswersPage.jsx'; 
+import { useAuth } from './Components/AuthComponents/AuthContext.jsx';
 
 
 // import Home from '@/pages/Home.jsx';

@@ -46,7 +46,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     let validationErrors = {};
     if (!formData.name) validationErrors.name = "Name is required.";
     if (!formData.username) validationErrors.username = "Username is required.";

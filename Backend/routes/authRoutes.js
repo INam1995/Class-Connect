@@ -1,30 +1,10 @@
 import express from "express";
-import { register, login, logout, sendotp, changePassword } from "../Controllers/authController/authController.js";
-
-
-import { resetPasswordToken, resetPassword } from "../Controllers/authController/ResetPassword.js"; // Use `import` instead of `require`
-
+import { register, login, logout } from "../Controllers/authController/authController.js"; // ✅ Import controllers
+import { AuthMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
-// Route for user registration
+// Define auth routes
 router.post("/register", register);
-
-// Route for user login
 router.post("/login", login);
-
-// Route for user logout
-router.get("/logout", logout);
-
-// Route to send OTP for verification
-router.post("/sendotp", sendotp);
-
-// Route for password change
-router.post("/changepassword", changePassword);
-
-// Route to send reset password token
-router.post("/reset-password-token", resetPasswordToken);
-
-// Route to reset the password
-router.post("/reset-password", resetPassword);
-
+router.post("/logout",AuthMiddleware, logout);
 export default router;

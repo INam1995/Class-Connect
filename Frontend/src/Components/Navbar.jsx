@@ -4,21 +4,18 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
-import { useAuth } from "./AuthComponents/AuthContext.jsx"; // ✅ Ensure the path is correct
-
-
+import { useAuth } from "./AuthComponents/AuthContext"; 
 function NavbarComponent() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate(); // ✅ Now `useNavigate()` is inside a Router component
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate("/", { replace: true }); // ✅ Redirect to home page
+    navigate("/", { replace: true });
   };
 
-  // Handle redirect to Class Notes page
   const handleClassNotesRedirect = () => {
-    navigate("/class-notes/upload"); // Change this route if your ClassNotesPage has a different route
+    navigate("/class-notes"); // Change this route if your ClassNotesPage has a different route
   };
 
   return (
@@ -40,6 +37,14 @@ function NavbarComponent() {
             <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
               Class Notes
             </Nav.Link>
+             <div className="flex items-center gap-4">
+                        <Link to="/register">
+                          <button className="px-4 py-2 text-sm border rounded-md">Sign up</button>
+                        </Link>
+                        <Link to="/login">
+                          <button className="px-4 py-2 text-sm bg-orange-500 text-white rounded-md">Login</button>
+                        </Link>
+                      </div>
           </Nav>
 
           <Nav>
@@ -65,11 +70,14 @@ function NavbarComponent() {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
-                  <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                </Dropdown.Menu>
+  <Dropdown.Header>{user?.username || "User"}</Dropdown.Header>
+  <Dropdown.Item as={Link} to={`/profile/${user?._id}`}>
+     Profile
+  </Dropdown.Item>
+    <Dropdown.Item as={Link} to="/Dashboard">Dashboard</Dropdown.Item> 
+   <Dropdown.Divider />
+   <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+ </Dropdown.Menu>
               </Dropdown>
             ) : (
               <Nav.Link as={Link} to="/register" style={navLinkStyle}>SignUp / SignIn</Nav.Link>

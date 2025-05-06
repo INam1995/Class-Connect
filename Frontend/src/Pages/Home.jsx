@@ -6,21 +6,14 @@ import { Link } from "react-router-dom"; // Importing Link for navigation
 
 export default function LearnifyHomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div style={{ backgroundColor: "rgb(252,250,247)" }} className="min-h-screen">
       <NavbarComponent />
 
-      <div className="min-h-screen bg-white px-6 py-10 md:px-16">
+      <div className="min-h-screen px-6 py-10 md:px-16">
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
           <h1 className="text-2xl font-bold text-orange-500">Learnify</h1>
-          <div className="flex items-center gap-4">
-            <Link to="/register">
-              <button className="px-4 py-2 text-sm border rounded-md">Sign up</button>
-            </Link>
-            <Link to="/login">
-              <button className="px-4 py-2 text-sm bg-orange-500 text-white rounded-md">Login</button>
-            </Link>
-          </div>
+         
         </header>
 
         {/* Hero Section */}
@@ -48,7 +41,7 @@ export default function LearnifyHomePage() {
             <img
               src="/images/flying-girl-pencil.png"
               alt="Flying girl on pencil"
-              className="w-72 md:w-96"
+              className="w-95 md:w-100"
             />
           </div>
         </div>
@@ -56,21 +49,21 @@ export default function LearnifyHomePage() {
         {/* Stats Section */}
         <div className="mt-16 grid gap-6 grid-cols-1 md:grid-cols-3">
           {/* Card 1 */}
-          <div className="p-6 border rounded-xl bg-white shadow-sm">
+          <div className="p-6 border rounded-xl shadow-sm">
             <div className="text-sm font-semibold text-purple-600 mb-2">Education</div>
             <div className="text-3xl font-bold">+40</div>
             <p className="text-sm text-gray-500">subjects</p>
           </div>
 
           {/* Card 2 */}
-          <div className="p-6 border rounded-xl bg-white shadow-sm">
+          <div className="p-6 border rounded-xl shadow-sm">
             <div className="text-sm font-semibold text-purple-600 mb-2">Online</div>
             <div className="text-3xl font-bold">+120</div>
             <p className="text-sm text-gray-500">courses</p>
           </div>
 
           {/* Card 3 */}
-          <div className="p-6 border rounded-xl bg-white shadow-sm">
+          <div className="p-6 border rounded-xl shadow-sm">
             <div className="flex items-center gap-1 text-yellow-500 mb-2">
               <Star size={18} fill="currentColor" />
               <span className="text-sm font-medium">5.0</span>
@@ -79,29 +72,29 @@ export default function LearnifyHomePage() {
             <p className="text-sm text-gray-500">learner reviews</p>
           </div>
         </div>
+
+        {/* Free Courses Promo Section */}
+        <section className="mt-20 bg-yellow-300 rounded-3xl px-8 py-12 flex flex-col md:flex-row items-center justify-between gap-10">
+          {/* Text Content */}
+          <div className="max-w-xl space-y-4">
+            <h2 className="text-3xl md:text-4xl font-extrabold leading-snug text-gray-900">
+              Upgrade your <span className="text-yellow-600">skills</span><br />
+              with <span className="text-white bg-black px-2 py-1 rounded">FREE</span> online courses
+            </h2>
+            <p className="text-gray-800">
+              Ready to gain in-demand skills to kickstart your career? The Learnify Click Start program offers 29 FREE online courses to help you get your first experience in your chosen profession.
+            </p>
+            <button className="bg-black hover:bg-gray-900 text-white font-semibold px-6 py-3 rounded-md transition">
+              Start now
+            </button>
+          </div>
+
+          {/* Illustration */}
+          <div className="w-64 md:w-80">
+            <img src="/images/puzzle-hands.png" alt="Puzzle in hands" className="w-full" />
+          </div>
+        </section>
       </div>
-      {/* Free Courses Promo Section */}
-<section className="mt-20 bg-yellow-300 rounded-3xl px-8 py-12 flex flex-col md:flex-row items-center justify-between gap-10">
-  {/* Text Content */}
-  <div className="max-w-xl space-y-4">
-    <h2 className="text-3xl md:text-4xl font-extrabold leading-snug text-gray-900">
-      Upgrade your <span className="text-yellow-600">skills</span><br />
-      with <span className="text-white bg-black px-2 py-1 rounded">FREE</span> online courses
-    </h2>
-    <p className="text-gray-800">
-      Ready to gain in-demand skills to kickstart your career? The Learnify Click Start program offers 29 FREE online courses to help you get your first experience in your chosen profession.
-    </p>
-    <button className="bg-black hover:bg-gray-900 text-white font-semibold px-6 py-3 rounded-md transition">
-      Start now
-    </button>
-  </div>
-
-  {/* Illustration */}
-  <div className="w-64 md:w-80">
-    <img src="/images/puzzle-hands.png" alt="Puzzle in hands" className="w-full" />
-  </div>
-</section>
-
     </div>
   );
 }

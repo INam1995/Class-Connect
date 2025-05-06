@@ -1,65 +1,117 @@
-import React from 'react';
-import axios from 'axios';
-import { Worker, Viewer } from '@react-pdf-viewer/core';
-import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import React, { useEffect, useRef, useState } from 'react';
+import { fabric } from 'fabric';
+import { PDFDocument } from 'pdf-lib';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import 'pdfjs-dist/legacy/build/pdf.worker.entry';
 
-const PdfEditor = ({ url, onClose, pdf }) => {
-  const trackDownload = async (e, pdf) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
-          pdf.path
-        )}&pdfId=${pdf._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: 'blob',
-        }
-      );
-      
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${pdf.name}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+const PdfEditor = ({ url, onClose }) => {
+  const canvasRef = useRef(null);
+  const [mode, setMode] = useState('pen');
+  const containerRef = useRef(null);
 
-      alert('Download tracked successfully!');
-    } catch (error) {
-      console.error('Error tracking download:', error);
+  useEffect(() => {
+    const loadPdf = async () => {
+      const loadingTask = pdfjsLib.getDocument(url);
+      const pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1); // First page only
+
+      const scale = 2;
+      const viewport = page.getViewport({ scale });
+
+      const tempCanvas = document.createElement('canvas');
+      const context = tempCanvas.getContext('2d');
+      tempCanvas.width = viewport.width;
+      tempCanvas.height = viewport.height;
+
+      await page.render({ canvasContext: context, viewport }).promise;
+      const imgData = tempCanvas.toDataURL();
+
+      const fabricCanvas = new fabric.Canvas('drawingCanvas', {
+        isDrawingMode: true,
+        width: tempCanvas.width,
+        height: tempCanvas.height,
+      });
+
+      canvasRef.current = fabricCanvas;
+
+      fabric.Image.fromURL(imgData, (img) => {
+        fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
+          scaleX: 1,
+          scaleY: 1,
+        });
+      });
+    };
+
+    loadPdf();
+  }, [url]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (mode === 'pen') {
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.color = 'black';
+      canvas.freeDrawingBrush.width = 2;
+    } else if (mode === 'highlight') {
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.color = 'rgba(255,255,0,0.3)';
+      canvas.freeDrawingBrush.width = 20;
+    } else if (mode === 'erase') {
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.color = 'white';
+      canvas.freeDrawingBrush.width = 10;
+    } else if (mode === 'text') {
+      canvas.isDrawingMode = false;
+      const text = new fabric.IText('Type here', {
+        left: 100,
+        top: 100,
+        fontSize: 20,
+        fill: 'black',
+      });
+      canvas.add(text);
     }
+  }, [mode]);
+
+  const savePdf = async () => {
+    const canvas = canvasRef.current;
+    const dataUrl = canvas.toDataURL({ format: 'png' });
+
+    const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const page = pdfDoc.getPages()[0];
+    const { width, height } = page.getSize();
+
+    const pngImage = await pdfDoc.embedPng(dataUrl);
+    page.drawImage(pngImage, {
+      x: 0,
+      y: 0,
+      width,
+      height,
+    });
+
+    const modifiedPdf = await pdfDoc.save();
+    const blob = new Blob([modifiedPdf], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'annotated.pdf';
+    link.click();
   };
 
-  const defaultLayoutPluginInstance = defaultLayoutPlugin({
-    toolbarPlugin: {
-      // override the download button only
-      download: {
-        onClick: (props) => (e) => {
-          if (pdf) {
-            trackDownload(e, pdf);
-          }
-        },
-      },
-    },
-  });
-
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-xl w-[90%] h-[90%] relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 z-10"
-        >
-          Close
-        </button>
-        <div className="h-full pt-10 px-5">
-          <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-            <Viewer fileUrl={url} plugins={[defaultLayoutPluginInstance]} />
-          </Worker>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-white w-[95%] h-[90%] rounded-lg shadow-lg relative p-4 overflow-auto">
+        <div className="absolute top-2 left-2 z-10 flex gap-2">
+          <button onClick={() => setMode('pen')} className="bg-blue-500 text-white px-3 py-1 rounded">Pen</button>
+          <button onClick={() => setMode('highlight')} className="bg-yellow-400 text-black px-3 py-1 rounded">Highlight</button>
+          <button onClick={() => setMode('erase')} className="bg-gray-400 text-white px-3 py-1 rounded">Eraser</button>
+          <button onClick={() => setMode('text')} className="bg-green-500 text-white px-3 py-1 rounded">Text</button>
+          <button onClick={savePdf} className="bg-purple-600 text-white px-3 py-1 rounded">Save</button>
+          <button onClick={onClose} className="bg-red-500 text-white px-3 py-1 rounded">Close</button>
+        </div>
+
+        <div ref={containerRef} className="w-full h-full mt-10 flex justify-center">
+          <canvas id="drawingCanvas" />
         </div>
       </div>
     </div>

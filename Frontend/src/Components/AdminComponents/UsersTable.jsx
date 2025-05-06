@@ -12,7 +12,7 @@ const UsersTable = ({ users, handlePromote, handleDemote, handleDelete, handleVi
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-
+  
   // Handle page change
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
