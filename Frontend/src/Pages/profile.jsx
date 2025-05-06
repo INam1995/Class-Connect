@@ -101,7 +101,7 @@ const UserDashboard = () => {
   const downloadPercentage = totalActivity ? (userStats.totalDownloads / totalActivity) * 100 : 0;
 
   return (
-    <div className="flex">
+    <div className="flex bg-amber-200"  >
       {/* Sidebar with refs passed down */}
       
       <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} sectionRefs={sectionRefs} profileUserId={userId} />
@@ -110,7 +110,7 @@ const UserDashboard = () => {
         <h1 className="text-2xl font-bold mb-6">Welcome, {name}</h1>
 
         {/* Profile Section */}
-        <div ref={profileRef} className="bg-white shadow rounded p-6 mb-6 flex items-center">
+        <div ref={profileRef} className="bg-amber-100 shadow rounded p-6 mb-6 flex items-center">
           <div className="flex">
             <div className="flex-shrink-0 ml-20 mt-15">
               <img
@@ -123,27 +123,27 @@ const UserDashboard = () => {
             <div className="ml-41">
               <h2 className="text-2xl font-semibold mb-4">Personal Information</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Name</p>
                   <p className="text-lg font-semibold">{name}</p>
                 </div>
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Username</p>
                   <p className="text-lg font-semibold">{username}</p>
                 </div>
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-full h-16 max-w-full">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-full h-16 max-w-full">
                   <p className="text-sm text-gray-500 mb-0">Email</p>
                   <p className="text-lg font-semibold">{email}</p>
                 </div>
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Role</p>
                   <p className="text-lg font-semibold">{role}</p>
                 </div>
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Course</p>
                   <p className="text-lg font-semibold">{course}</p>
                 </div>
-                <div className="bg-gray-100 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">College</p>
                   <p className="text-lg font-semibold">{college}</p>
                 </div>
@@ -153,26 +153,26 @@ const UserDashboard = () => {
         </div>
 
         {/* Location Section */}
-        <div ref={locationRef} className="bg-white shadow rounded p-6 mb-6">
+        <div ref={locationRef} className="bg-orange-100 shadow rounded p-6 mb-6">
            {/* Location Card */}
           <h2 className="text-xl font-semibold mb-4">Location</h2>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-100 p-3 rounded shadow-sm w-70 h-16">
+            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
               <p className="text-sm text-gray-500 mb-0">Local Address</p>
               <p className="text-lg font-semibold">{road}</p>
             </div>
 
-            <div className="bg-gray-100 p-3 rounded shadow-sm w-70 h-16">
+            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
               <p className="text-sm text-gray-500 mb-0">City</p>
               <p className="text-lg font-semibold">{city}</p>
             </div>
 
-            <div className="bg-gray-100 p-3 rounded shadow-sm w-70 h-16">
+            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
               <p className="text-sm text-gray-500 mb-0">State</p>
               <p className="text-lg font-semibold">{state}</p>
             </div>
 
-            <div className="bg-gray-100 p-3 rounded shadow-sm w-70 h-16">
+            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
               <p className="text-sm text-gray-500 mb-0">Country</p>
               <p className="text-lg font-semibold">{country}</p>
             </div>

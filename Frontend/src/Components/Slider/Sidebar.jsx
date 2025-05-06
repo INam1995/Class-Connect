@@ -12,23 +12,24 @@ const Sidebar = ({ activeSection, setActiveSection, sectionRefs, profileUserId }
   };
 
   return (
-    <div className="w-1/4 bg-gray-300 p-6 rounded-lg shadow-lg">
+    <div className="w-1/4 bg-amber-100 p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold text-gray mb-8">My Profile</h2>
       <div className="space-y-6 mt-4">
-        <button
-          className={`w-full text-left p-3 rounded-r-full transition duration-300 ease-in-out hover:bg-gray-600  ${
-            activeSection === 'profile' ? 'bg-gray-400 text-white' : 'bg-gray-400 text-white'
-          } mb-4`}
-          onClick={() => handleClick('profile')}
-        >
-          <span className="text-xl">Profile</span>
-        </button>
+      <button
+  className={`w-full p-3 text-left rounded-full transition duration-300 ease-in-out hover:bg-orange-200 ${ 
+    activeSection === 'profile' ? 'bg-orange-400 text-white' : 'bg-orange-400 text-black'
+  } mb-4`}
+  onClick={() => handleClick('profile')}
+>
+  <span className="text-xl">Profile</span>
+</button>
+
 
         {/* Show only if logged-in user is viewing their own profile */}
         {loggedInUserId === profileUserId && (
           <button
-            className={`w-full text-left p-3 rounded-full transition duration-300 ease-in-out hover:bg-gray-600 ${
-              activeSection === 'security' ? 'bg-gray-400 text-white' : 'bg-gray-400 text-white'
+            className={`w-full text-left p-3 rounded-full transition duration-300 ease-in-out hover:bg-orange-200 ${
+              activeSection === 'security' ? 'bg-orange-400 text-white' : 'bg-orange-400 text-white'
             } mb-4`}
             onClick={() => handleClick('security')}
           >
@@ -37,8 +38,8 @@ const Sidebar = ({ activeSection, setActiveSection, sectionRefs, profileUserId }
         )}
 
         <button
-          className={`w-full text-left p-3 rounded-full transition duration-300 ease-in-out hover:bg-gray-600 ${
-            activeSection === 'activity' ? 'bg-gray-400 text-white' : 'bg-gray-400 text-white'
+          className={`w-full text-left p-3 rounded-full transition duration-300 ease-in-out hover:bg-orange-200 ${
+            activeSection === 'activity' ? 'bg-orange-400 text-white' : 'bg-orange-400 text-white'
           }`}
           onClick={() => handleClick('activity')}
         >
