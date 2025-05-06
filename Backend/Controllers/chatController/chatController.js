@@ -113,14 +113,16 @@ export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.user._id;
-    console.log("messageId", messageId)
+    // console.log("userId", userId)
 
     const message = await Message.findById(messageId);
+    // console.log("message", message.sender)
+
     if (!message) {
       return res.status(404).json({ message: "Message not found." });
     }
 
-    if (message.sender.toString() !== userId) {
+    if (message.sender== userId) {
       return res.status(403).json({ message: "Unauthorized to delete this message." });
     }
     await Message.findByIdAndDelete(messageId);
@@ -137,13 +139,11 @@ export const editMessage = async (req, res) => {
     const { messageId } = req.params;
     const { text } = req.body;
     const userId = req.user._id;
-
     const message = await Message.findById(messageId);
     if (!message) {
       return res.status(404).json({ message: "Message not found." });
     }
-
-    if (message.sender.toString() !== userId) {
+    if (message.sender.toString()!== userId.toString()) {
       return res.status(403).json({ message: "Unauthorized to edit this message." });
     }
 

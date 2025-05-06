@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import axios from "axios";
 import { io } from 'socket.io-client';
 import { useParams, useNavigate } from "react-router-dom";
@@ -92,12 +92,23 @@ const FolderDetail = () => {
     onDrop,
     maxFiles: 1,
   });
-
+  
   const handleViewPdf = (pdf) => {
-    setViewPdfUrl(pdf.path);  // Use the actual path from your database
+    // Add a check to ensure the path is valid
+    console.log(pdf.path);
+    if (!pdf.path) {
+      alert("PDF path is not available");
+      return;
+    }
+    setViewPdfUrl(pdf.path);
     setIsPdfViewerOpen(true);
-    // console.log(viewPdfUrl)
   };
+  useEffect(() => {
+    if (viewPdfUrl) {
+      console.log("Updated viewPdfUrl:", viewPdfUrl);
+    }
+  }, [viewPdfUrl]);
+  
   
   const handleFileChange = (e) => {
     setPdfFile(e.target.files[0]);
@@ -178,7 +189,6 @@ const FolderDetail = () => {
       console.error("Error updating progress:", error);
     }
   };
-  
   const trackDownload = async (e, pdf) => {
     e.preventDefault();
     try {
