@@ -42,7 +42,7 @@ Once part of a group, members can:
   - *Rate and discuss public resources.*
 - **General Discussion Room**
   - *Open-topic discussions for all users.*
-  - *Non-logged-in users can **read-only**; logged-in users can actively participate.*
+  - *All users can actively participate.*
 
 ### Additional Features:
 - **Dark Mode**
