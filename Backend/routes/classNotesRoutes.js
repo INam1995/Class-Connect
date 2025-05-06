@@ -1,8 +1,11 @@
 import express from "express";
 import multer from "multer";
-import { getClassNotes, uploadClassNote } from "../Controllers/classNotesController/classNoteController.js";
+import { getClassNotes, uploadClassNote,ratePdf } from "../Controllers/classNotesController/classNoteController.js";
 import { createRating, getAverageRating, getAllRating } from "../Controllers/classNotesController/RatingAndReview.js";
-import AuthMiddleware from "../middleware/authMiddleware.js";
+import {AuthMiddleware} from "../middleware/authMiddleware.js";
+
+
+
 
 const router = express.Router();
 
@@ -19,12 +22,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Routes
-router.post("/rate", AuthMiddleware, createRating); // Add this if missing
+// after
+router.post("/rate", AuthMiddleware, ratePdf); 
+// Add this if missing
 router.get("/reviews", getAllRating); // Optional if needed elsewhere
 
 router.get("/", getClassNotes);
 router.post("/upload", upload.single("file"), uploadClassNote);
 router.post('/upload', AuthMiddleware, upload.single('file'), uploadClassNote);
-
+// router.post("/rate", AuthMiddleware, ratePdf);
 
 export default router;

@@ -22,7 +22,7 @@ import notificationsRoutes from "./routes/noti.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
 import profile from "./routes/userRoute.js";
-
+import ClassNotes from "./routes/classNotesRoutes.js";
 const app = express();
 const server = http.createServer(app);
 const OPENAI_API_KEY = process.env.API_KEY4;
@@ -175,7 +175,7 @@ app.use("/api/notifications", notificationsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
 app.use("/api/profile", profile);
-
+app.use("/api/class-notes",ClassNotes)
 // ✅ Start Server
 
 export const emitUserRegistered = (userName) => {

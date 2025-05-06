@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-// import User from "../../../Backend/models/user.js";
 
 const ClassNotes = () => {
   const [notes, setNotes] = useState([]);
@@ -13,10 +12,10 @@ const ClassNotes = () => {
 
   const fetchNotes = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/class-notes");
-      setNotes(response.data);
-    } catch (error) {
-      console.error("Error fetching class notes:", error);
+      const { data } = await axios.get("http://localhost:5000/api/class-notes");
+      setNotes(data);
+    } catch (err) {
+      console.error("Error fetching class notes:", err);
     }
   };
 
@@ -25,35 +24,28 @@ const ClassNotes = () => {
       alert("Please select a file to upload.");
       return;
     }
-    console.log("File to upload:", file);
-  
-    // Get user ID from localStorage or authentication context
-    const userData = localStorage.getItem("user");
-    const user = userData ? JSON.parse(userData) : null;
-    const userId = user?._id; // Assuming your user object has _id field
-    const folderId = "65e75f9e2b1a4c3f947ea1b7";
-    console.log("User ID:", userId);
 
+    const stored = localStorage.getItem("user");
+    const user = stored ? JSON.parse(stored) : {};
+    const userId = user?._id;
+    const folderId = "65e75f9e2b1a4c3f947ea1b7";
 
     if (!userId) {
       alert("User not logged in. Please log in again.");
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folderId", folderId);
     formData.append("uploadedBy", userId);
-    formData.append("topic", "Math Notes"); // Optional: Replace with dynamic topic if needed
-  
+    formData.append("topic", "Math Notes");
+
     try {
       setUploading(true);
-      
-          // Change this in ClassNotes.jsx
-        await axios.post("http://localhost:5000/api/class-notes/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },});
-
-     
+      await axios.post("http://localhost:5000/api/class-notes/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("File uploaded successfully ✅");
       setFile(null);
       document.getElementById("fileInput").value = "";
@@ -65,108 +57,92 @@ const ClassNotes = () => {
       setUploading(false);
     }
   };
-  
+
   const handleRating = async (pdfId, rating) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in first.");
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You need to log in first.");
-        return;
-      }
-      const userId = localStorage.getItem("userId");
-if (!userId) {
-  alert("User not logged in.");
-  return;
-}
-
-
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:5000/api/class-notes/rate",
-        {
-          pdfId,
-          userId,
-          rating,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { pdfId, rating },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      alert(`Rating submitted! New Average: ${response.data.averageRating}`);
       fetchNotes();
-    } catch (error) {
-      console.error("Error rating PDF:", error.response?.data || error);
+    } catch (err) {
+      console.error("Error rating PDF:", err.response?.data || err);
       alert("Failed to submit rating.");
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">📚 Class Notes</h2>
+    <div className="min-h-screen bg-[#fef6f3] p-6">
+      <h2 className="text-4xl font-bold text-[#222] text-center mb-10">
+        🎓 <span className="text-[#f26d4f]">Class Notes</span> Hub
+      </h2>
 
       {/* File Upload Section */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
         <input
           id="fileInput"
           type="file"
           onChange={(e) => setFile(e.target.files[0])}
-          className="block w-full border border-gray-300 rounded-md p-2 text-gray-700"
+          className="block w-full max-w-sm border border-gray-300 rounded-md p-2 text-gray-700"
         />
         <button
           onClick={handleUpload}
           disabled={uploading}
-          className={`px-5 py-2 text-white font-semibold ${
-            uploading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-          } rounded-md shadow-md transition duration-300`}
+          className={`px-6 py-2 text-white font-bold rounded-md transition duration-300 shadow-md ${
+            uploading ? "bg-gray-400" : "bg-[#f26d4f] hover:bg-[#e25539]"
+          }`}
         >
-          {uploading ? "Uploading..." : "Upload"}
+          {uploading ? "Uploading..." : "Upload Note"}
         </button>
       </div>
 
-      {/* Notes List */}
-      <ul className="space-y-6">
-        {notes.length === 0 ? (
-          <p className="text-gray-500 text-center">
-            No notes available. Upload your first note!
-          </p>
-        ) : (
-          notes.map((note) => (
-            <li
-              key={note._id}
-              className="bg-white p-5 rounded-md shadow-md border border-gray-200"
+      {/* Notes Grid */}
+      {notes.length === 0 ? (
+        <p className="text-gray-500 text-center">No notes available. Upload your first note!</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {notes.map((note) => (
+            <div
+            key={note._id}
+            className="bg-white border border-gray-300 rounded-2xl shadow-md p-4 h-[320px] flex flex-col justify-between transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:border-[#f26d4f]"
             >
-              <h3 className="font-semibold text-xl text-gray-800 mb-1">
-                📂 {note.name}
-              </h3>
-              <p className="text-gray-600">
-                👤 Uploaded by: {note.uploadedBy?.name || "Unknown"}
-              </p>
-              <p className="text-gray-600">
-                🕒 Uploaded on: {new Date(note.createdAt).toLocaleString()}
-              </p>
+          
+              <div>
+                <span className="text-sm px-2 py-1 bg-[#8b5cf6] text-white rounded-full mb-2 inline-block">
+                  PDF Note
+                </span>
+                <h3 className="text-xl font-semibold text-[#1f1f1f] mb-1">{note.name}</h3>
+                <p className="text-gray-600 text-sm">👤 By: {note.uploadedBy?.name || "Unknown"}</p>
+                <p className="text-gray-500 text-sm">🕒 {new Date(note.createdAt).toLocaleString()}</p>
 
-              <a
-                href={`http://localhost:5000${note.path}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline inline-block mt-2"
-              >
-                View PDF
-              </a>
+                <a
+                  href={`http://localhost:5000${note.path}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#f26d4f] hover:underline mt-3 inline-block font-medium"
+                >
+                  📄 View PDF
+                </a>
+              </div>
 
-              <div className="mt-4 flex flex-col gap-1">
-                <p className="text-gray-600">
+              <div className="mt-4">
+                <p className="text-gray-700 text-sm mb-1">
                   ⭐ Avg Rating: {note.averageRating || "No ratings yet"}
                 </p>
-                <p className="text-gray-600">
-                  👥 Rated by: {note.ratingCount || 0} users
-                </p>
-                <div className="flex gap-1 mt-1">
+                <p className="text-gray-700 text-sm mb-2">👥 Rated by {note.ratingCount || 0} users</p>
+                <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       onClick={() => handleRating(note._id, star)}
-                      className="text-yellow-500 text-xl hover:scale-110 transition"
+                      className="text-yellow-400 text-xl hover:scale-110 transition"
                     >
                       ★
                     </button>
@@ -174,16 +150,13 @@ if (!userId) {
                 </div>
               </div>
 
-              {/* Review Section */}
-              {note.reviews && note.reviews.length > 0 && (
-                <div className="mt-5 border-t pt-3">
+              {note.reviews?.length > 0 && (
+                <div className="mt-4 border-t pt-3">
                   <h4 className="font-semibold text-gray-700 mb-2">💬 Reviews:</h4>
                   <ul className="pl-4 list-disc text-sm text-gray-600 space-y-1">
                     {note.reviews.map((r, idx) => (
                       <li key={idx}>
-                        <span className="font-semibold">
-                          {r.user?.name || "Anonymous"}:
-                        </span>{" "}
+                        <span className="font-semibold">{r.user?.name || "Anonymous"}:</span>{" "}
                         {r.review}
                         <span className="text-xs text-gray-400 ml-2">
                           ({new Date(r.createdAt).toLocaleString()})
@@ -193,10 +166,10 @@ if (!userId) {
                   </ul>
                 </div>
               )}
-            </li>
-          ))
-        )}
-      </ul>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
