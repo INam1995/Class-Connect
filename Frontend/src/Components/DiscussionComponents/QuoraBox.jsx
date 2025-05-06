@@ -2,8 +2,8 @@ import { Avatar } from "@mui/material";
 
 import React from "react";
 import { useSelector } from "react-redux";
-import { selectUser } from "../feature/userSlice";
-import "./css/QuoraBox.css";
+import { selectUser } from "../../feature/userSlice";
+import "../css/QuoraBox.css";
 
 function QuoraBox() {
   const user = useSelector(selectUser);

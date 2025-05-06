@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { io } from 'socket.io-client';
 import { useParams, useNavigate } from "react-router-dom";
@@ -96,7 +96,7 @@ const FolderDetail = () => {
   const handleViewPdf = (pdf) => {
     setViewPdfUrl(pdf.path);  // Use the actual path from your database
     setIsPdfViewerOpen(true);
-    console.log(viewPdfUrl)
+    // console.log(viewPdfUrl)
   };
   
   const handleFileChange = (e) => {
@@ -178,6 +178,7 @@ const FolderDetail = () => {
       console.error("Error updating progress:", error);
     }
   };
+  
   const trackDownload = async (e, pdf) => {
     e.preventDefault();
     try {

@@ -1,5 +1,13 @@
 import express from "express";
 import {
+  createPoll,
+  votePoll,
+  getPollsByFolder
+} from "../Controllers/chatController/pollController.js";
+
+
+
+import {
   sendMessage,
   getMessages,
   markMessagesAsSeen,
@@ -7,8 +15,10 @@ import {
   deleteChatRoom,
   getAllChatRooms,
   saveMessages,
-  editMessage 
-} from "../Controllers/chatController/chatController.js";
+  editMessage ,
+  deleteSelectedMessages
+} from "../Controllers/chatController/chatController.js"; // ✅ Import controllers
+// import {AuthMiddleware} from "../middleware/authMiddleware.js";
 import {AuthMiddleware} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -32,6 +42,10 @@ router.delete("/messages/:messageId", AuthMiddleware, deleteMessage);
 router.delete("/rooms/:folderId", AuthMiddleware, deleteChatRoom);
 router.get("/rooms/:folderId", AuthMiddleware,getAllChatRooms);
 router.post("/messages/:folderId", AuthMiddleware,saveMessages);
+router.post("/messages/:folderId/delete-bulk", AuthMiddleware, deleteSelectedMessages);
+router.post("/polls/:folderId", AuthMiddleware, createPoll);
+router.post("/polls/vote/:pollId", AuthMiddleware, votePoll);
+router.get("/polls/:folderId", AuthMiddleware, getPollsByFolder);
 
 
 export default router;

@@ -1,6 +1,6 @@
 import React from "react";
 import WidgetContent from "./WidgetContent";
-import "./css/Widget.css";
+import "../css/Widget.css";
 
 function Widget() {
   return (

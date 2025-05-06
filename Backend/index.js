@@ -7,7 +7,8 @@ import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import connectDB from "./models/db.js";
+import connectDB from "./utils/database.js";
+// import connectDB from "./models/db.js";
 import authRouter from "./routes/authRoutes.js";
 import folderRouter from "./routes/folderRoutes.js";
 import downloadPdf from "./routes/downloadRoutes.js";
@@ -97,7 +98,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    // console.log("User disconnected:", socket.id);
   });
 });
 

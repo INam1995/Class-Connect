@@ -9,10 +9,10 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import CloseIcon from "@mui/icons-material/Close"; // ✅ FIXED IMPORT
 import {  Button, Input } from "@mui/material";
 
-import "./css/QuoraHeader.css";
+import "../css/QuoraHeader.css";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
-import api from "../api.js";
+import api from "../../api.js";
 
 function QuoraHeader() {
   const [isModalOpen, setIsModalOpen] = useState(false);

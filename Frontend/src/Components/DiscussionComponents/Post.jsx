@@ -1,5 +1,5 @@
 
-import "./css/Post.css";
+import "../css/Post.css";
 import React, { useState } from "react";
 import { Avatar } from "@mui/material";
 import { 

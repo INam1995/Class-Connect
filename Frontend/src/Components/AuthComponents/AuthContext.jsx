@@ -31,27 +31,20 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      
-     const token = localStorage.getItem("token"); // ✅ Get token from storage
-     if (!token) {
-      // console.error("No token found in localStorage");
-      return;
-     }
-    //  console.log("token ", token);
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const response = await axios.post(
         "http://localhost:5000/api/auth/logout",
-        {}, 
-        { 
-          withCredentials: true, 
-          headers: { Authorization: `Bearer ${token}` } // Send token in headers
+        {},
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log("token   ". token)
-  
-      console.log("Logout Response:", response);
-      
+
       localStorage.removeItem("token");
-      localStorage.removeItem("user"); 
+      localStorage.removeItem("user");
       setUser(null);
       setIsLoggedIn(false);
     } catch (error) {

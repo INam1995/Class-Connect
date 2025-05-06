@@ -1,7 +1,7 @@
 import { Add } from "@mui/icons-material";
 
 import React from "react";
-import "./css/SidebarOptions.css";
+import "../css/SidebarOptions.css";
 
 function SidebarOptions() {
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -46,7 +46,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     let validationErrors = {};
     if (!formData.name) validationErrors.name = "Name is required.";
     if (!formData.username) validationErrors.username = "Username is required.";
@@ -57,95 +56,106 @@ const Register = () => {
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-    } else {
-      try {
-        const response = await fetch("http://localhost:5000/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        });
+      return;
+    }
 
-        if (response.ok) {
-          alert("Registration successful!");
-          setFormData({
-            name: "",
-            username: "",
-            email: "",
-            password: "",
-            course: "",
-            college: "",
-            latitude: null,
-            longitude: null,
-          });
-          navigate("/login", { replace: true });
-          setErrors({});
-        } else {
-          const errorData = await response.json();
-          alert(`Error: ${errorData.message}`);
-        }
-      } catch (error) {
-        console.error("Error during registration:", error);
-        alert("Error during registration");
+    try {
+      const otpResponse = await fetch("http://localhost:5000/api/auth/sendotp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const otpData = await otpResponse.json();
+      if (!otpResponse.ok) {
+        alert(`Error sending OTP: ${otpData.message}`);
+        return;
       }
+
+      alert("OTP sent to your email. Please verify.");
+      navigate("/register-verification", { state: { formData } });
+
+    } catch (error) {
+      console.error("OTP sending failed:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "50px auto", padding: "20px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)", borderRadius: "10px" }}>
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Register</h2>
-      <form onSubmit={handleSubmit}>
-        {/* Form Fields */}
-        <div style={{ marginBottom: "15px" }}>
-          <label>Name:</label>
-          <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your name" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.name && <p style={{ color: "red", fontSize: "14px" }}>{errors.name}</p>}
-        </div>
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <form className="p-6 bg-white rounded shadow-md w-full max-w-sm" onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>Username:</label>
-          <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Enter a unique username" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.username && <p style={{ color: "red", fontSize: "14px" }}>{errors.username}</p>}
-        </div>
+        <input
+          type="text"
+          name="name"
+          placeholder="Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>Email:</label>
-          <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter your email" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.email && <p style={{ color: "red", fontSize: "14px" }}>{errors.email}</p>}
-        </div>
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>Password:</label>
-          <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Enter your password" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.password && <p style={{ color: "red", fontSize: "14px" }}>{errors.password}</p>}
-        </div>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>Course/Degree:</label>
-          <input type="text" name="course" value={formData.course} onChange={handleChange} placeholder="Enter your course or degree" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.course && <p style={{ color: "red", fontSize: "14px" }}>{errors.course}</p>}
-        </div>
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
 
-        <div style={{ marginBottom: "15px" }}>
-          <label>College Name:</label>
-          <input type="text" name="college" value={formData.college} onChange={handleChange} placeholder="Enter your college name" style={{ width: "100%", padding: "10px", marginTop: "5px", borderRadius: "5px" }} />
-          {errors.college && <p style={{ color: "red", fontSize: "14px" }}>{errors.college}</p>}
-        </div>
+        <input
+          type="text"
+          name="course"
+          placeholder="Course"
+          value={formData.course}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.course && <p className="text-red-500 text-sm">{errors.course}</p>}
 
-        {/* Hidden Fields for Latitude and Longitude */}
-        <input type="hidden" name="latitude" value={formData.latitude || ""} />
-        <input type="hidden" name="longitude" value={formData.longitude || ""} />
+        <input
+          type="text"
+          name="college"
+          placeholder="College"
+          value={formData.college}
+          onChange={handleChange}
+          className="block w-full p-2 mb-2 border rounded"
+        />
+        {errors.college && <p className="text-red-500 text-sm">{errors.college}</p>}
 
-        {/* Submit Button */}
-        <button type="submit" style={{ width: "45%", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", marginRight: "10px" }}>
+        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded w-full mt-2">
           Register
         </button>
 
-        {/* Already Registered Button */}
-        <button type="button" onClick={() => navigate("/login", { replace: true })} style={{ width: "45%", padding: "10px", backgroundColor: "#6c757d", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-          Already Registered? Login
-        </button>
+        <p className="text-sm mt-4 text-center">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Login here
+          </Link>
+        </p>
       </form>
     </div>
   );
