@@ -29,13 +29,7 @@ export const uploadPdfToFolder = async (req, res) => {
       return res.status(404).json({ message: "Folder not found" });
     }
     // console.log("folder",folder)
-    console.log("folder",folder.createdBy)
-    // Check if the folder belongs to the authenticated user
-    // if (folder.createdBy.toString() !== userId.toString()) {
-    //   return res.status(403).json({ message: "Forbidden: You do not have permission to upload to this folder" });
-    // }
-    // console.log("hey");
-    // Access the uploaded file via req.file (multer attaches it here)
+    console.log("folder",folder.createdBy);
     const file = req.file;
     // console.log("file")
     if (!file) {
@@ -89,37 +83,100 @@ export const uploadPdfToFolder = async (req, res) => {
 
 
 // Controller function to update PDF progress (completed or not completed)
+// export const updatePdfProgress = async (req, res) => {
+//   const { folderId, pdfId } = req.params;
+//   const { completed } = req.body;
+
+//   try {
+//     // Find the folder
+//     const folder = await Folder.findById(folderId);
+//     if (!folder) {
+//       return res.status(404).json({ message: "Folder not found" });
+//     }
+
+//     // Find the PDF in the folder's pdfs array
+//     const pdf = folder.pdfs.find((pdf) => pdf._id.toString() === pdfId);
+//     if (!pdf) {
+//       return res.status(404).json({ message: "PDF not found in the folder" });
+//     }
+
+//     // Update the PDF's completed status
+//     pdf.completed = completed;
+//     await folder.save();
+
+//     // Emit real-time notification to all members using Socket.IO
+//     io.emit('notification', {
+//       type: 'PDF_PROGRESS_UPDATED',
+//       message: `The PDF "${pdf.name}" has been marked as ${completed ? "completed" : "not completed"}.`,
+//       folderId: folder._id,
+//     });
+
+//     res.status(200).json({ message: "PDF progress updated successfully", pdf });
+//   } catch (error) {
+//     console.error("Error updating PDF progress:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
+
 export const updatePdfProgress = async (req, res) => {
   const { folderId, pdfId } = req.params;
   const { completed } = req.body;
+  const userId = req.user._id;
 
   try {
     // Find the folder
     const folder = await Folder.findById(folderId);
     if (!folder) {
-      return res.status(404).json({ message: "Folder not found" });
+      return res.status(404).json({ message: 'Folder not found' });
     }
 
-    // Find the PDF in the folder's pdfs array
-    const pdf = folder.pdfs.find((pdf) => pdf._id.toString() === pdfId);
+    // Find the PDF in the folder
+    const pdf = folder.pdfs.id(pdfId);
     if (!pdf) {
-      return res.status(404).json({ message: "PDF not found in the folder" });
+      return res.status(404).json({ message: 'PDF not found in folder' });
     }
 
-    // Update the PDF's completed status
-    pdf.completed = completed;
+    // Find the user-specific progress for this PDF
+    let userProgress = pdf.progressByUser.find(
+      (entry) => entry.user.toString() === userId.toString()
+    );
+
+    if (userProgress) {
+      // Update the existing user's progress
+      userProgress.completed = completed;
+      userProgress.updatedAt = new Date();
+    } else {
+      // If no progress exists for the user, create a new progress entry
+      pdf.progressByUser.push({
+        user: userId,
+        completed,
+        updatedAt: new Date(),
+      });
+    }
+
+    // Save the updated folder
     await folder.save();
 
-    // Emit real-time notification to all members using Socket.IO
-    io.emit('notification', {
+    // Emit a real-time notification only to the user who made the change
+    io.to(userId.toString()).emit('notification', {
       type: 'PDF_PROGRESS_UPDATED',
-      message: `The PDF "${pdf.name}" has been marked as ${completed ? "completed" : "not completed"}.`,
-      folderId: folder._id,
+      message: `You marked the PDF "${pdf.name}" as ${completed ? 'completed' : 'not completed'}.`,
+      folderId: folderId,
+      pdfId: pdfId,
+      userId,
     });
 
-    res.status(200).json({ message: "PDF progress updated successfully", pdf });
+    res.status(200).json({ 
+      message: 'PDF progress updated successfully',
+      progress: {
+        completed,
+        updatedAt: new Date()
+      }
+    });
   } catch (error) {
-    console.error("Error updating PDF progress:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error('Error updating PDF progress:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

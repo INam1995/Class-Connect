@@ -12,7 +12,7 @@ import Role from "../Components/AdminComponents/roles.jsx";
 import { Form } from "react-bootstrap";
 import UserActivityGraph from "../Components/AdminComponents/useractivity.jsx";
 import Navbar  from "../Components/Navbar";
-import Location from "../Components/Location";
+import Location from "../Components/AdminComponents/Location.jsx";
 import MultiLevelDropdown from "../Components/AdminComponents/MultiLevelDropdown.jsx";
 import {
   Chart as ChartJS,
