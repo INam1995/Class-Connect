@@ -22,6 +22,8 @@ Once part of a group, members can:
 - **Chat & Collaborate**
   - *Engage in real-time group discussions.*
   - *React to messages.*
+  - *Delete ,Edit single message*
+  - *Delete selected Messages* 
   - *Conduct quick **polls** to gather opinions.*
 - **Schedule Video Meetings**
   - *Plan group study sessions using the integrated meeting scheduler.*
