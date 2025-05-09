@@ -125,10 +125,17 @@ export const leaveFolder = async (req, res) => {
     res.status(500).json({ message: "Error leaving folder", error });
   }
 };
+
+
 export const getFolderById = async (req, res) => {
   try {
     const folderId = req.params.folderId;
-    const folder = await Folder.findById(folderId);
+    const folder = await Folder.findById(folderId)
+      .populate('createdBy', 'name email') // Populate creator details
+      .populate('members', 'name email')   // Populate member details
+      .exec();
+
+
     if (!folder) {
       return res.status(404).json({ message: "Folder not found" });
     }

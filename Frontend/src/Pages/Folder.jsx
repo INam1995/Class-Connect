@@ -155,27 +155,6 @@ const FolderDetail = () => {
     }
   };
 
-  // const handleToggleCompletion = async (pdfId, markAsComplete) => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-      
-  //     await axios.patch(
-  //       `/api/folders/${folderId}/${pdfId}/progress`,
-  //       { completed: markAsComplete },
-  //       { headers: { Authorization: `Bearer ${token}` } }
-  //     );
-
-  //     setFolder(prev => ({
-  //       ...prev,
-  //       pdfs: prev.pdfs.map(pdf => 
-  //         pdf._id === pdfId ? { ...pdf, userCompleted: markAsComplete } : pdf
-  //       )
-  //     }));
-  //   } catch (error) {
-  //     console.error("Error updating progress:", error);
-  //   }
-  // };
-
 
   const handleToggleCompletion = async (pdfId, markAsComplete) => {
   try {
