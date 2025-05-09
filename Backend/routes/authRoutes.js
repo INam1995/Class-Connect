@@ -1,9 +1,6 @@
 import express from "express";
-import { register, login, logout, sendotp, changePassword } from "../Controllers/authController.js";
-
-
-import { resetPasswordToken, resetPassword } from "../Controllers/ResetPassword.js"; // Use `import` instead of `require`
-
+import { register, login, logout,sendotp } from "../Controllers/authController/authController.js"; // ✅ Import controllers
+import { AuthMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Route for user registration
@@ -11,20 +8,8 @@ router.post("/register", register);
 
 // Route for user login
 router.post("/login", login);
-
-// Route for user logout
-router.get("/logout", logout);
-
+router.post("/logout",AuthMiddleware, logout);
 // Route to send OTP for verification
 router.post("/sendotp", sendotp);
-
-// Route for password change
-router.post("/changepassword", changePassword);
-
-// Route to send reset password token
-router.post("/reset-password-token", resetPasswordToken);
-
-// Route to reset the password
-router.post("/reset-password", resetPassword);
 
 export default router;

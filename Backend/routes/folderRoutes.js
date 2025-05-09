@@ -7,8 +7,10 @@ import {
   myfolders,
   deleteFolder,
   leaveFolder,
-  getFolderById
-} from "../Controllers/folderController.js"; // ✅ Import controllers
+  getFolderById,
+  getFolderWithUserProgress,
+  updateUserProgress
+} from "../Controllers/folder&PdfController/folderController.js"; // ✅ Import controllers
 
 const router = express.Router();
 
@@ -39,5 +41,10 @@ router.get("/:folderId/members", AuthMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error fetching folder members" });
   }
 });
+
+// Progress tracking routes
+router.get("/:folderId/user-progress", AuthMiddleware, getFolderWithUserProgress);
+router.patch("/:folderId/:pdfId/progress", AuthMiddleware, updateUserProgress);
+
 
 export default router;

@@ -4,8 +4,7 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
-import { useAuth } from "./AuthContext";
-
+import { useAuth } from "./AuthComponents/AuthContext"; 
 function NavbarComponent() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -33,7 +32,6 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/" style={navLinkStyle}>Home</Nav.Link>
             <Nav.Link as={Link} to="/admin" style={navLinkStyle}>Admin</Nav.Link>
             <Nav.Link as={Link} to="/features" style={navLinkStyle}>Features</Nav.Link>
-            <Nav.Link as={Link} to="/pricing" style={navLinkStyle}>Pricing</Nav.Link>
             <Nav.Link as={Link} to="/discussion" style={navLinkStyle}>Discussion</Nav.Link>
             <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
               Class Notes

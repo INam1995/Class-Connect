@@ -5,6 +5,7 @@ const ClassNotes = () => {
   const [notes, setNotes] = useState([]);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [reviewState, setReviewState] = useState({}); // { [pdfId]: { rating, review } }
 
   useEffect(() => {
     fetchNotes();
@@ -19,26 +20,21 @@ const ClassNotes = () => {
     }
   };
 
+  const getToken = () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.token || localStorage.getItem("token") || "";
+  };
+
   const handleUpload = async () => {
-    if (!file) {
-      alert("Please select a file to upload.");
-      return;
-    }
+    if (!file) return alert("Please select a file to upload.");
 
-    const stored = localStorage.getItem("user");
-    const user = stored ? JSON.parse(stored) : {};
-    const userId = user?._id;
-    const folderId = "65e75f9e2b1a4c3f947ea1b7";
-
-    if (!userId) {
-      alert("User not logged in. Please log in again.");
-      return;
-    }
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!user._id) return alert("User not logged in.");
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("folderId", folderId);
-    formData.append("uploadedBy", userId);
+    formData.append("folderId", "65e75f9e2b1a4c3f947ea1b7"); // TODO: dynamic later
+    formData.append("uploadedBy", user._id);
     formData.append("topic", "Math Notes");
 
     try {
@@ -46,26 +42,28 @@ const ClassNotes = () => {
       await axios.post("http://localhost:5000/api/class-notes/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("File uploaded successfully ✅");
+      alert("File uploaded ✅");
       setFile(null);
       document.getElementById("fileInput").value = "";
       fetchNotes();
-    } catch (error) {
-      console.error("❌ Error uploading class note:", error.response?.data || error.message);
-      alert("Failed to upload file. Please try again.");
+    } catch (err) {
+      console.error("Upload error:", err.response?.data || err);
+      alert("Upload failed");
     } finally {
       setUploading(false);
     }
   };
 
   const handleRating = async (pdfId, rating) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please log in first.");
-      return;
-    }
+    const token = getToken();
+    if (!token) return alert("Please log in to rate.");
 
     try {
+      setReviewState((prev) => ({
+        ...prev,
+        [pdfId]: { ...prev[pdfId], rating },
+      }));
+
       await axios.post(
         "http://localhost:5000/api/class-notes/rate",
         { pdfId, rating },
@@ -73,8 +71,35 @@ const ClassNotes = () => {
       );
       fetchNotes();
     } catch (err) {
-      console.error("Error rating PDF:", err.response?.data || err);
+      console.error("Rating failed:", err);
       alert("Failed to submit rating.");
+    }
+  };
+
+  const handleSubmitReview = async (pdfId) => {
+    const token = getToken();
+    const { rating, review } = reviewState[pdfId] || {};
+    if (!rating || !review) return alert("Please rate and write a review.");
+
+    const note = notes.find((n) => n._id === pdfId);
+    const folderId = note?.folderId;
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/reviews/submit-review",
+        { pdfId, rating, review, folderId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Review submitted ✅");
+      setReviewState((prev) => {
+        const updated = { ...prev };
+        delete updated[pdfId];
+        return updated;
+      });
+      fetchNotes();
+    } catch (err) {
+      console.error("Review submit error:", err);
+      alert("Review submission failed.");
     }
   };
 
@@ -84,7 +109,7 @@ const ClassNotes = () => {
         🎓 <span className="text-[#f26d4f]">Class Notes</span> Hub
       </h2>
 
-      {/* File Upload Section */}
+      {/* Upload Section */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
         <input
           id="fileInput"
@@ -105,44 +130,48 @@ const ClassNotes = () => {
 
       {/* Notes Grid */}
       {notes.length === 0 ? (
-        <p className="text-gray-500 text-center">No notes available. Upload your first note!</p>
+        <p className="text-gray-500 text-center">No notes available yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {notes.map((note) => (
             <div
-            key={note._id}
-            className="bg-white border border-gray-300 rounded-2xl shadow-md p-4 h-[320px] flex flex-col justify-between transform transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:border-[#f26d4f]"
+              key={note._id}
+              className="bg-white border border-gray-300 rounded-2xl shadow-md p-4 flex flex-col justify-between h-[380px] hover:scale-105 transition"
             >
-          
               <div>
                 <span className="text-sm px-2 py-1 bg-[#8b5cf6] text-white rounded-full mb-2 inline-block">
                   PDF Note
                 </span>
-                <h3 className="text-xl font-semibold text-[#1f1f1f] mb-1">{note.name}</h3>
-                <p className="text-gray-600 text-sm">👤 By: {note.uploadedBy?.name || "Unknown"}</p>
+                <h3 className="text-xl font-semibold">{note.name}</h3>
+                <p className="text-gray-600 text-sm">👤 {note.uploadedBy?.name || "Unknown"}</p>
                 <p className="text-gray-500 text-sm">🕒 {new Date(note.createdAt).toLocaleString()}</p>
-
                 <a
                   href={`http://localhost:5000${note.path}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#f26d4f] hover:underline mt-3 inline-block font-medium"
+                  className="text-[#f26d4f] hover:underline mt-2 inline-block font-medium"
                 >
                   📄 View PDF
                 </a>
               </div>
 
               <div className="mt-4">
-                <p className="text-gray-700 text-sm mb-1">
-                  ⭐ Avg Rating: {note.averageRating || "No ratings yet"}
+                <p className="text-sm text-gray-700 mb-1">
+                  ⭐ Avg Rating: {note.averageRating || "N/A"}
                 </p>
-                <p className="text-gray-700 text-sm mb-2">👥 Rated by {note.ratingCount || 0} users</p>
+                <p className="text-sm text-gray-600 mb-1">
+                  👥 Rated by {note.ratingCount || 0} users
+                </p>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       onClick={() => handleRating(note._id, star)}
-                      className="text-yellow-400 text-xl hover:scale-110 transition"
+                      className={`text-xl ${
+                        (reviewState[note._id]?.rating || 0) >= star
+                          ? "text-yellow-500"
+                          : "text-gray-300"
+                      }`}
                     >
                       ★
                     </button>
@@ -151,14 +180,13 @@ const ClassNotes = () => {
               </div>
 
               {note.reviews?.length > 0 && (
-                <div className="mt-4 border-t pt-3">
-                  <h4 className="font-semibold text-gray-700 mb-2">💬 Reviews:</h4>
-                  <ul className="pl-4 list-disc text-sm text-gray-600 space-y-1">
+                <div className="mt-3 border-t pt-2">
+                  <h4 className="text-sm font-semibold text-gray-700">💬 Reviews:</h4>
+                  <ul className="pl-4 list-disc text-sm text-gray-600 space-y-1 mt-1">
                     {note.reviews.map((r, idx) => (
                       <li key={idx}>
-                        <span className="font-semibold">{r.user?.name || "Anonymous"}:</span>{" "}
-                        {r.review}
-                        <span className="text-xs text-gray-400 ml-2">
+                        <strong>{r.user?.name || "Anonymous"}:</strong> {r.review}
+                        <span className="text-xs text-gray-400 ml-1">
                           ({new Date(r.createdAt).toLocaleString()})
                         </span>
                       </li>
@@ -166,6 +194,49 @@ const ClassNotes = () => {
                   </ul>
                 </div>
               )}
+
+              {/* Review input */}
+              <div className="mt-3 border-t pt-2">
+                <h4 className="text-sm font-semibold text-gray-700 mb-1">Write a Review:</h4>
+                <div className="flex items-start gap-2 mb-2">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() =>
+                        setReviewState((prev) => ({
+                          ...prev,
+                          [note._id]: { ...prev[note._id], rating: s },
+                        }))
+                      }
+                      className={`text-xl ${
+                        (reviewState[note._id]?.rating || 0) >= s
+                          ? "text-yellow-500"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <textarea
+                    rows={2}
+                    placeholder="Your review..."
+                    className="flex-1 border rounded-md p-1 text-sm"
+                    value={reviewState[note._id]?.review || ""}
+                    onChange={(e) =>
+                      setReviewState((prev) => ({
+                        ...prev,
+                        [note._id]: { ...prev[note._id], review: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+                <button
+                  onClick={() => handleSubmitReview(note._id)}
+                  className="bg-green-600 text-white text-sm px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Submit Review
+                </button>
+              </div>
             </div>
           ))}
         </div>

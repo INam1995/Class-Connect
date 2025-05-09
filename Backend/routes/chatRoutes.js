@@ -15,10 +15,11 @@ import {
   deleteChatRoom,
   getAllChatRooms,
   saveMessages,
-  editMessage 
-} from "../Controllers/chatcontroller.js";
+  editMessage ,
+  deleteSelectedMessages
+} from "../Controllers/chatController/chatController.js"; // ✅ Import controllers
 // import {AuthMiddleware} from "../middleware/authMiddleware.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import {AuthMiddleware} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -26,24 +27,25 @@ const router = express.Router();
 // router.post("/rooms", authMiddleware, createChatRoom);
 
 // ✅ Send message
-router.post("/messages/:folderId", authMiddleware, sendMessage);
-router.put("/messages/:messageId", authMiddleware, editMessage);
+router.post("/messages/:folderId", AuthMiddleware, sendMessage);
+router.put("/messages/:messageId", AuthMiddleware, editMessage);
 // ✅ Fetch messages from a chat room
-router.get("/messages/:folderId", authMiddleware, getMessages);
+router.get("/messages/:folderId", AuthMiddleware, getMessages);
 
 // ✅ Mark messages as seen
-router.put("/messages/seen/:folderId", authMiddleware, markMessagesAsSeen);
+router.put("/messages/seen/:folderId", AuthMiddleware, markMessagesAsSeen);
 
 // ✅ Delete a message (only sender can delete)
-router.delete("/messages/:messageId", authMiddleware, deleteMessage);
+router.delete("/messages/:messageId", AuthMiddleware, deleteMessage);
 
 // ✅ Delete a chat room (only admin can delete)
-router.delete("/rooms/:folderId", authMiddleware, deleteChatRoom);
-router.get("/rooms/:folderId", authMiddleware,getAllChatRooms);
-router.post("/messages/:folderId", authMiddleware,saveMessages);
-router.post("/polls/:folderId", authMiddleware, createPoll);
-router.post("/polls/vote/:pollId", authMiddleware, votePoll);
-router.get("/polls/:folderId", authMiddleware, getPollsByFolder);
+router.delete("/rooms/:folderId", AuthMiddleware, deleteChatRoom);
+router.get("/rooms/:folderId", AuthMiddleware,getAllChatRooms);
+router.post("/messages/:folderId", AuthMiddleware,saveMessages);
+router.post("/messages/:folderId/delete-bulk", AuthMiddleware, deleteSelectedMessages);
+router.post("/polls/:folderId", AuthMiddleware, createPoll);
+router.post("/polls/vote/:pollId", AuthMiddleware, votePoll);
+router.get("/polls/:folderId", AuthMiddleware, getPollsByFolder);
 
 
 export default router;

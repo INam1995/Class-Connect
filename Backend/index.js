@@ -7,6 +7,7 @@ import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// import connectDB from "./utils/database.js";
 import connectDB from "./models/db.js";
 import authRouter from "./routes/authRoutes.js";
 import folderRouter from "./routes/folderRoutes.js";
@@ -23,6 +24,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
 import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
 
+import profile from "./routes/userRoute.js";
+import ClassNotes from "./routes/classNotesRoutes.js";
 const app = express();
 const server = http.createServer(app);
 const OPENAI_API_KEY = process.env.API_KEY4;
@@ -35,7 +38,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
+app.set("io", io);
 // Initialize all socket events
 // initWhiteboardSocket(io);
 
@@ -174,8 +177,9 @@ app.use('/api/whiteboard', whiteboardRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
+app.use("/api/profile", profile);
+app.use("/api/class-notes",ClassNotes)
 app.use("/api/class-notes", classNotesRouter);
-
 // ✅ Start Server
 
 export const emitUserRegistered = (userName) => {

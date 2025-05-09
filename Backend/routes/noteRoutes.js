@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { uploadNote } = require('../Controllers/noteController');
+const { uploadNote } = require('../Controllers/classNotesController/noteController.js');
 
 const router = express.Router();
 
