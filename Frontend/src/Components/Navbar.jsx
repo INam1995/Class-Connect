@@ -5,7 +5,7 @@ import Navbar from "react-bootstrap/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import {useAuth } from "./AuthComponents/AuthContext"; 
-
+import Nlg from "./LanguageSelector";
 function NavbarComponent() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function NavbarComponent() {
             <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
               Class Notes
             </Nav.Link>
-             
+             <Nav.Item><Nlg/></Nav.Item>
           </Nav>
 
           <Nav>

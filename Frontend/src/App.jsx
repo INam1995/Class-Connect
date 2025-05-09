@@ -34,7 +34,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <>
-    <LanguageSwitcher />
+  
       <Routes>
         <Route path="/" element={<Home />} /> 
         <Route path="/register" element={<Register />} /> 
