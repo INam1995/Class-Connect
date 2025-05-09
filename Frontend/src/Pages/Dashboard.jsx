@@ -168,7 +168,7 @@ const Dashboard = () => {
   
   return (
     <>
-      <Navbar />
+      <Navbar className="fixed top-0 left-0 w-full z-50"/>
       <div className="flex flex-col min-h-screen p-6 bg-gray-50">
         {/* Header Section */}
         <div className="flex justify-between items-center w-full mb-6">

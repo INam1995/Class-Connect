@@ -1,56 +1,42 @@
-import React, { useState, useEffect,useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { io } from 'socket.io-client';
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
-import { FaFilePdf } from "react-icons/fa";
-import PdfEditor from '../Components/Folder&PdfComponents/PdfEditor';
-
+import { FaFilePdf, FaEllipsisV } from "react-icons/fa";
+import Navbar from "../Components/Navbar.jsx";
 
 const FolderDetail = () => {
   const { folderId } = useParams();
-  const navigate = useNavigate();
   const [folder, setFolder] = useState({ 
     name: "", 
     subject: "", 
     pdfs: [],
-    userProgressPercentage: 0,
-    completedPdfs: 0,
-    totalPdfs: 0
+    description: ""
   });
   const [loading, setLoading] = useState(true);
-  
   const [pdfFile, setPdfFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [summary, setSummary] = useState('');
-  const [currentPdf, setCurrentPdf] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [selectedPdfName, setSelectedPdfName] = useState(null);
-  const [pdfProgress, setPdfProgress] = useState({});
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
-  const userId = localStorage.getItem("userId");
 
   const socket = io("http://localhost:5000", {
     transports: ["websocket"],
   });
 
-  // Listen for real-time notifications
+  // Socket.IO connection and notifications
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected to Socket.IO server');
     });
 
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
-    });
-
     socket.on('notification', (data) => {
-      console.log('Received notification:', data);
-      setNotifications(prevNotifications => [...prevNotifications, data]);
+      setNotifications(prev => [...prev, data]);
     });
 
     return () => {
@@ -58,6 +44,7 @@ const FolderDetail = () => {
     };
   }, []);
 
+  // Fetch folder data
   useEffect(() => {
     const fetchFolderData = async () => {
       try {
@@ -66,7 +53,6 @@ const FolderDetail = () => {
           `/api/folders/${folderId}/user-progress`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        
         setFolder(response.data.folder);
       } catch (error) {
         console.error("Error fetching folder:", error);
@@ -78,28 +64,23 @@ const FolderDetail = () => {
     fetchFolderData();
   }, [folderId]);
 
+  // PDF dropzone
   const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      if (file.type === 'application/pdf') {
-        setPdfFile(file);
-      } else {
-        alert('Please upload only PDF files');
-      }
+    if (acceptedFiles.length > 0 && acceptedFiles[0].type === 'application/pdf') {
+      setPdfFile(acceptedFiles[0]);
+    } else {
+      alert('Please upload only PDF files');
     }
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'application/pdf': ['.pdf']
-    },
+    accept: { 'application/pdf': ['.pdf'] },
     onDrop,
     maxFiles: 1,
   });
-  
+
+  // PDF handling functions
   const handleViewPdf = (pdf) => {
-    // Add a check to ensure the path is valid
-    console.log(pdf.path);
     if (!pdf.path) {
       alert("PDF path is not available");
       return;
@@ -107,22 +88,32 @@ const FolderDetail = () => {
     setViewPdfUrl(pdf.path);
     setIsPdfViewerOpen(true);
   };
-  useEffect(() => {
-    if (viewPdfUrl) {
-      console.log("Updated viewPdfUrl:", viewPdfUrl);
+
+  const handleDownloadPdf = async (pdf) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${pdf.name}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
     }
-  }, [viewPdfUrl]);
-  
-  
-  const handleFileChange = (e) => {
-    setPdfFile(e.target.files[0]);
   };
 
   const handleUploadPdf = async () => {
-    if (!pdfFile) {
-      alert("Please select a PDF file.");
-      return;
-    }
+    if (!pdfFile) return;
 
     const formData = new FormData();
     formData.append("pdf", pdfFile);
@@ -131,647 +122,316 @@ const FolderDetail = () => {
     try {
       setUploading(true);
       const token = localStorage.getItem("token");
-      const url = `http://localhost:5000/api/pdfs/${folderId}/upload`;
-      const response = await axios.post(url, formData, {
+      const response = await axios.post(`/api/pdfs/${folderId}/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
-      alert("PDF uploaded successfully!");
-      setFolder((prevFolder) => ({
-        ...prevFolder,
-        pdfs: [...prevFolder.pdfs, response.data.pdf],
-      }));
 
-      setPdfProgress((prevProgress) => ({
-        ...prevProgress,
-        [response.data.pdf._id]: false,
+      setFolder(prev => ({
+        ...prev,
+        pdfs: [...prev.pdfs, response.data.pdf],
       }));
-
-      setUploading(false);
       setPdfFile(null);
     } catch (error) {
       console.error("Error uploading PDF:", error);
+    } finally {
       setUploading(false);
     }
   };
 
   const handleSummarize = async (pdfUrl) => {
-    setLoading(true);
-    setCurrentPdf(pdfUrl);
-    setSelectedPdfName(pdfUrl);
     try {
-      const response = await axios.post('http://localhost:5000/api/summarize-url', { pdfUrl });
+      setLoading(true);
+      const response = await axios.post('/api/summarize-url', { pdfUrl });
       setSummary(response.data.summary);
       setShowModal(true);
     } catch (error) {
       console.error(error);
-      alert('An error occurred while summarizing the PDF.');
+      alert('Error summarizing PDF');
     } finally {
       setLoading(false);
     }
   };
 
-  const trackDownload = async (e, pdf) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
-          pdf.path
-        )}&pdfId=${pdf._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob", // Handle file as a binary stream
-        }
-      );
-
-      // Create a download link
-      const blob = new Blob([response.data], { type: "application/pdf" });
-      const link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = `${pdf.name}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      alert("Download tracked successfully!");
-    } catch (error) {
-      console.error("Error tracking download:", error);
-    }
-  };
-
-  const calculateUserProgress = () => {
-    if (!folder || !folder.pdfs) return 0;
-    const totalPdfs = folder.pdfs.length;
-    if (totalPdfs === 0) return 0;
-
-    const completedPdfs = folder.pdfs.filter(pdf => pdf.userCompleted).length;
-    return ((completedPdfs / totalPdfs) * 100).toFixed(2);
-  };
-
-
   const handleToggleCompletion = async (pdfId, markAsComplete) => {
     try {
       const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-
       await axios.patch(
         `/api/folders/${folderId}/${pdfId}/progress`,
-        { completed: markAsComplete }, // true for green button, false for red
+        { completed: markAsComplete },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Emit socket event after updating progress
-      socket.emit('progress-updated', { 
-        folderId,
-        userId: userId // Make sure you have access to user ID
-      });
-  
-      // Update local state
-      setFolder(prev => {
-        const updatedPdfs = prev.pdfs.map(pdf => {
-          if (pdf._id === pdfId) {
-            return {
-              ...pdf,
-              userCompleted: markAsComplete // Set to the button's intended state
-            };
-          }
-          return pdf;
-        });
-  
-        return {
-          ...prev,
-          pdfs: updatedPdfs
-        };
-      });
+      setFolder(prev => ({
+        ...prev,
+        pdfs: prev.pdfs.map(pdf => 
+          pdf._id === pdfId ? { ...pdf, userCompleted: markAsComplete } : pdf
+        )
+      }));
     } catch (error) {
       console.error("Error updating progress:", error);
     }
   };
-  
-  if (loading) return <div>Loading...</div>;
 
+  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
- 
-  // return (
-  //   <div className="p-5">
-  //     <div className="flex justify-between items-center">
-  //     <div>
-  //         <h1 className="text-2xl font-bold">{folder.name || "Folder"}</h1>
-  //         <p>Subject: {folder.subject || "Unknown"}</p>
-  //         <p>Overall Progress: {calculateUserProgress()}%</p>
-
-  //         {/* ✅ Start Chat Button */}
-  //         <button
-  //           onClick={() => navigate(`/chatroom/${folderId}`)}
-  //           className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
-  //         >
-  //           Start Chat
-  //         </button>
-  //     </div>
-
-  //       <div className="relative">
-  //         <button
-  //           onClick={() => setShowNotifications(!showNotifications)}
-  //           className="relative p-2 hover:bg-gray-200 rounded-full ml-4"
-  //         >
-  //           <IoIosNotifications className="text-2xl" />
-  //           {notifications.length > 0 && (
-  //             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
-  //               {notifications.length}
-  //             </span>
-  //           )}
-  //         </button>
-  //         {showNotifications && (
-  //           <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg">
-  //             <div className="p-4">
-  //               <h3 className="font-bold mb-2">Notifications</h3>
-  //               {notifications.length === 0 ? (
-  //                 <p className="text-gray-500">No new notifications.</p>
-  //               ) : (
-  //                 <ul>
-  //                   {notifications.map((notification, index) => (
-  //                     <li key={index} className="mb-2">
-  //                       <p className="text-sm">{notification.message}</p>
-  //                       <p className="text-xs text-gray-500">
-  //                         {new Date(notification.timestamp).toLocaleString()}
-  //                       </p>
-  //                     </li>
-  //                   ))}
-  //                 </ul>
-  //               )}
-  //             </div>
-  //           </div>
-  //         )}
-  //       </div>
-  //     </div>
-
-  //     <div className="mt-5">
-  //       <div
-  //         {...getRootProps()}
-  //         className="border-dashed border-2 p-5 mb-3 cursor-pointer text-center relative"
-  //       >
-  //         <input {...getInputProps()} />
-  //         <p>Drag & Drop PDF files here or click to select</p>
-          
-  //         {pdfFile && (
-  //           <div className="absolute top-0 left-0 right-0 bottom-0 bg-white bg-opacity-75 flex items-center justify-center">
-  //             <FaFilePdf size={50} color="red" /> {/* PDF icon */}
-  //             <p className="ml-2">{pdfFile.name}</p> {/* File name */}
-  //           </div>
-  //         )}
-  //       </div>
-
-  //       <button
-  //         onClick={handleUploadPdf}
-  //         className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-  //         disabled={uploading}
-  //       >
-  //         {uploading && <p className="text-sm text-gray-500">Uploading PDF...</p>}
-  //       </button>
-  //     </div>
-
-  //     <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
-  //       <div
-  //         className="bg-blue-500 h-4 rounded-full transition-all"
-  //         style={{ width: `${calculateUserProgress()}%` }}
-  //       ></div>
-  //     </div>
-  //     <p className="text-sm text-gray-700">Overall Progress: {calculateUserProgress()}%</p>
-
-  //     <div className="mt-5">
-  //       <button
-  //         onClick={() => navigate(`/chatroom/${folderId}`)}
-  //         className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 mb-4"
-  //       >
-  //         Start Chat
-  //       </button>
-
-  //       <h3 className="text-xl">📄 Uploaded PDFs</h3>
-  //       {folder.pdfs.length > 0 ? (
-  //         <ul>
-  //           {folder.pdfs.map((pdf) => (
-  //             <li key={pdf._id} className="mb-4 p-4 border rounded-lg shadow-sm">
-  //               <p className="font-semibold">{pdf.name}</p>
-  //               <div className="flex space-x-4 mt-2">
-  //                 <div className="flex space-x-2">
-  //                   {/* Green button - mark as complete */}
-  //                   <button
-  //                     onClick={() => handleToggleCompletion(pdf._id, true)}
-  //                     className={`w-6 h-6 rounded-full transition-all ${
-  //                       pdf.userCompleted ? "bg-green-500" : "bg-gray-300"
-  //                     }`}
-  //                     title="Mark as complete"
-  //                   ></button>
-                    
-  //                   {/* Red button - mark as incomplete */}
-  //                   <button
-  //                     onClick={() => handleToggleCompletion(pdf._id, false)}
-  //                     className={`w-6 h-6 rounded-full transition-all ${
-  //                       !pdf.userCompleted ? "bg-red-500" : "bg-gray-300"
-  //                     }`}
-  //                     title="Mark as incomplete"
-  //                   ></button>
-  //                 </div>
-
-  //                 {isPdfViewerOpen && viewPdfUrl && (
-  //                   <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
-  //                 )}
-
-  //                 <button
-  //                   onClick={() => handleViewPdf(pdf)}
-  //                   className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-  //                 >
-  //                   View PDF
-  //                 </button>
-
-
-  //                 <a
-  //                   href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(
-  //                     pdf.path
-  //                   )}&pdfId=${pdf._id}`}
-  //                   onClick={(e) => trackDownload(e, pdf)}
-  //                   className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-  //                 >
-  //                   Download PDF
-  //                 </a>
-
-  //                 <button
-  //                   onClick={() => handleSummarize(pdf.path)}
-  //                   className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600"
-  //                   disabled={loading && currentPdf === pdf.path}
-  //                 >
-  //                   {loading && currentPdf === pdf.path ? 'Summarizing...' : 'Summarize PDF'}
-  //                 </button>
-
-  //               </div>
-  //             </li>
-  //           ))}
-  //         </ul>
-  //       ) : (
-  //         <p className="text-gray-500">No PDFs found for this folder.</p>
-  //       )}
-  //     </div>
-
-  //     {showModal && (
-  //       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-  //         <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-  //           <h3 className="text-xl font-semibold">📝 Summary</h3>
-  //           <p className="mt-2">{summary}</p>
-  //           <div className="mt-4 flex justify-end">
-  //             <button
-  //               onClick={() => setShowModal(false)}
-  //               className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-  //             >
-  //               Close
-  //             </button>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
-
-//   return (
-//   <div className="p-8 bg-gray-50 min-h-screen font-sans">
-//     {/* Folder Info Header */}
-//     <div className="text-center mb-8">
-//       <h1 className="text-3xl font-bold text-gray-800 mb-1">{folder.name || "Folder"}</h1>
-//       <p className="text-gray-600 text-lg">Subject: {folder.subject || "Unknown"}</p>
-//     </div>
-
-//     {/* Main Layout */}
-//     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-//       {/* Left Column - Progress */}
-//       <div className="bg-white p-5 rounded-xl shadow-md space-y-4">
-//         <h2 className="text-lg font-semibold text-gray-700">📊 Progress</h2>
-//         <div className="w-full bg-gray-200 rounded-full h-4">
-//           <div
-//             className="bg-blue-500 h-4 rounded-full transition-all"
-//             style={{ width: `${calculateUserProgress()}%` }}
-//           ></div>
-//         </div>
-//         <p className="text-sm text-gray-700 text-right">{calculateUserProgress()}%</p>
-//       </div>
-
-//       {/* Middle Column - Upload PDF */}
-//       <div className="bg-white p-5 rounded-xl shadow-md space-y-4">
-//         <h2 className="text-lg font-semibold text-gray-700">📥 Upload PDF</h2>
-//         <div
-//           {...getRootProps()}
-//           className="border-2 border-dashed border-gray-400 p-5 text-center rounded-lg cursor-pointer relative hover:bg-gray-50"
-//         >
-//           <input {...getInputProps()} />
-//           <p className="text-gray-600">Drag & Drop PDF files here or click to select</p>
-
-//           {pdfFile && (
-//             <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-//               <FaFilePdf size={40} className="text-red-500" />
-//               <p className="ml-2 font-medium text-gray-700">{pdfFile.name}</p>
-//             </div>
-//           )}
-//         </div>
-
-//         <button
-//           onClick={handleUploadPdf}
-//           className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-//           disabled={uploading}
-//         >
-//           {uploading ? "Uploading..." : "Upload PDF"}
-//         </button>
-//       </div>
-
-//       {/* Right Column - Notifications & Chat */}
-//       <div className="space-y-4">
-//         {/* Notifications */}
-//         <div className="bg-white p-5 rounded-xl shadow-md relative">
-//           <h2 className="text-lg font-semibold text-gray-700 mb-2">🔔 Notifications</h2>
-//           <button
-//             onClick={() => setShowNotifications(!showNotifications)}
-//             className="absolute top-4 right-4 p-2 hover:bg-gray-200 rounded-full"
-//           >
-//             <IoIosNotifications className="text-2xl text-gray-700" />
-//             {notifications.length > 0 && (
-//               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
-//                 {notifications.length}
-//               </span>
-//             )}
-//           </button>
-
-//           {showNotifications && (
-//             <div className="mt-4">
-//               {notifications.length === 0 ? (
-//                 <p className="text-sm text-gray-500">No new notifications.</p>
-//               ) : (
-//                 <ul className="space-y-2 max-h-40 overflow-auto">
-//                   {notifications.map((notification, index) => (
-//                     <li key={index} className="text-sm">
-//                       <p>{notification.message}</p>
-//                       <p className="text-xs text-gray-400">
-//                         {new Date(notification.timestamp).toLocaleString()}
-//                       </p>
-//                     </li>
-//                   ))}
-//                 </ul>
-//               )}
-//             </div>
-//           )}
-//         </div>
-
-//         {/* Start Chat */}
-//         <div className="bg-white p-5 rounded-xl shadow-md text-center">
-//           <button
-//             onClick={() => navigate(`/chatroom/${folderId}`)}
-//             className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition"
-//           >
-//             💬 Start Chat
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-
-//     {/* PDF List */}
-//     <div className="mt-10">
-//       <h3 className="text-xl font-semibold mb-4">📄 Uploaded PDFs</h3>
-//       {folder.pdfs.length > 0 ? (
-//         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-//           {folder.pdfs.map((pdf) => (
-//             <div key={pdf._id} className="bg-white p-4 rounded-lg shadow-sm">
-//               <p className="font-medium mb-2">{pdf.name}</p>
-//               <div className="flex flex-wrap gap-2">
-//                 <button
-//                   onClick={() => handleToggleCompletion(pdf._id, true)}
-//                   className={`w-6 h-6 rounded-full ${pdf.userCompleted ? "bg-green-500" : "bg-gray-300"}`}
-//                   title="Mark as complete"
-//                 ></button>
-
-//                 <button
-//                   onClick={() => handleToggleCompletion(pdf._id, false)}
-//                   className={`w-6 h-6 rounded-full ${!pdf.userCompleted ? "bg-red-500" : "bg-gray-300"}`}
-//                   title="Mark as incomplete"
-//                 ></button>
-
-//                 <button
-//                   onClick={() => handleViewPdf(pdf)}
-//                   className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-//                 >
-//                   View
-//                 </button>
-
-//                 <a
-//                   href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`}
-//                   onClick={(e) => trackDownload(e, pdf)}
-//                   className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-//                 >
-//                   Download
-//                 </a>
-
-//                 <button
-//                   onClick={() => handleSummarize(pdf.path)}
-//                   className="bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
-//                   disabled={loading && currentPdf === pdf.path}
-//                 >
-//                   {loading && currentPdf === pdf.path ? "Summarizing..." : "Summarize"}
-//                 </button>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       ) : (
-//         <p className="text-gray-500">No PDFs found for this folder.</p>
-//       )}
-//     </div>
-
-//     {/* Summary Modal */}
-//     {showModal && (
-//       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-//         <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-//           <h3 className="text-xl font-semibold">📝 Summary</h3>
-//           <p className="mt-2 text-gray-700">{summary}</p>
-//           <div className="mt-4 flex justify-end">
-//             <button
-//               onClick={() => setShowModal(false)}
-//               className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-//             >
-//               Close
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     )}
-//   </div>
-// );
+  const members = [
+    { name: "Alerted Goodwin", role: "Product Designer" },
+    { name: "Sommy Jones", role: "Reducing Director" },
+    { name: "Nick Mortinson", role: "Front-End Developer" },
+    { name: "Donielin Frost", role: "Game Engineer" },
+    { name: "John Doe", role: "UX Designer" },
+  ];
 
   return (
-  <div className="p-8 bg-gray-50 min-h-screen font-sans">
-    {/* Folder Info Header */}
-    <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-1">{folder.name || "Folder"}</h1>
-      <p className="text-gray-600 text-lg">Subject: {folder.subject || "Unknown"}</p>
-    </div>
+    <>
+      <Navbar className="fixed top-0 left-0 w-full z-50"/>
+      {/* <div className="p-6 bg-gray-50 min-h-screen font-sans pt-20"> */}
 
-    {/* Top Section: Progress, Upload, Chat */}
-    <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-xl shadow-md">
-      {/* Notification Icon */}
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-2 hover:bg-gray-200 rounded-full"
-        >
-          <IoIosNotifications className="text-2xl text-gray-700" />
-          {notifications.length > 0 && (
-            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
-              {notifications.length}
-            </span>
-          )}
-        </button>
-        {showNotifications && (
-          <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-            <div className="p-4">
-              <h3 className="font-bold mb-2">Notifications</h3>
-              {notifications.length === 0 ? (
-                <p className="text-gray-500">No new notifications.</p>
-              ) : (
-                <ul>
-                  {notifications.map((notification, index) => (
-                    <li key={index} className="mb-2">
-                      <p className="text-sm">{notification.message}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(notification.timestamp).toLocaleString()}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Section - Upload & Recent */}
+          <div className="lg:w-1/4 space-y-6">
+            {/* Upload Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Upload Documents</h2>
+              <div
+                {...getRootProps()}
+                className="border-2 border-dashed border-gray-300 p-8 text-center rounded-lg cursor-pointer hover:bg-gray-50 transition"
+              >
+                <input {...getInputProps()} />
+                <FaFilePdf className="mx-auto text-4xl text-red-500 mb-3" />
+                <p className="text-gray-600 mb-2">Drag & Drop PDF files here</p>
+                <p className="text-sm text-gray-500">or click to browse files</p>
+              </div>
+              
+              {pdfFile && (
+                <div className="mt-4 p-3 bg-gray-100 rounded-lg ">
+                {/* <div className="mt-4 p-3 bg-gray-100 rounded-lg flex justify-between items-center"> */}
+                  <div className="flex items-center">
+                    <FaFilePdf className="text-black-500 mr-2" />
+                    <span className="font-medium truncate max-w-xs">{pdfFile.name}</span>
+                  </div>
+                  
+                  
+                </div>
+                
               )}
+              <button 
+                    onClick={handleUploadPdf}
+                    className="bg-orange-600 text-white px-4 py-1 rounded hover:bg-orange-700"
+                    disabled={uploading}
+                  >
+                    {uploading ? "Uploading..." : "Upload"}
+                  </button>
+            </div>
+
+            {/* Recent Uploads */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Recent Uploads</h2>
+              {folder.pdfs?.slice(0, 3).map(pdf => (
+                <div key={pdf._id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center">
+                    <FaFilePdf className="text-red-500 mr-3" />
+                    <div>
+                      <p className="font-medium truncate max-w-xs">{pdf.name}</p>
+                      <p className="text-sm text-gray-500">{pdf.size || "N/A"}</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button 
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => handleViewPdf(pdf)}
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* Middle Section - All Documents */}
+          <div className="lg:w-2/4">
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+
+              {/* Cluster and Subject Header */}
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800">{folder.name || "Folder"}</h1>
+                  <p className="text-gray-600 mt-1">Subject: {folder.subject || "Unknown"}</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button 
+                    className="relative p-2 hover:bg-gray-200 rounded-full"
+                    onClick={() => setShowNotifications(!showNotifications)}
+                  >
+                    <IoIosNotifications className="text-2xl text-gray-700" />
+                    {notifications.length > 0 && (
+                      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {notifications.length}
+                      </span>
+                    )}
+                  </button>
+                  
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    💬 Start Chat
+                  </button>
+                  {/* Notification Dropdown */}
+  {showNotifications && (
+    <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+      <div className="p-2 max-h-60 overflow-y-auto">
+        {notifications.length > 0 ? (
+          notifications.map((notification, index) => (
+            <div key={index} className="p-2 hover:bg-gray-100 rounded">
+              <p className="text-sm font-medium">{notification.title}</p>
+              <p className="text-xs text-gray-500">{notification.message}</p>
+            </div>
+          ))
+        ) : (
+          <p className="p-2 text-sm text-gray-500">No notifications</p>
         )}
       </div>
-
-      {/* Progress Section */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700">📊 Progress</h2>
-        <div className="w-full bg-gray-200 rounded-full h-4">
-          <div
-            className="bg-blue-500 h-4 rounded-full transition-all"
-            style={{ width: `${calculateUserProgress()}%` }}
-          ></div>
-        </div>
-        <p className="text-sm text-gray-700 text-right">{calculateUserProgress()}%</p>
-      </div>
-
-      {/* Upload Section */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-gray-700">📥 Upload PDF</h2>
-        <div
-          {...getRootProps()}
-          className="border-2 border-dashed border-gray-400 p-5 text-center rounded-lg cursor-pointer relative hover:bg-gray-50"
-        >
-          <input {...getInputProps()} />
-          <p className="text-gray-600">Drag & Drop PDF files here or click to select</p>
-
-          {pdfFile && (
-            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-              <FaFilePdf size={40} className="text-red-500" />
-              <p className="ml-2 font-medium text-gray-700">{pdfFile.name}</p>
-            </div>
-          )}
-        </div>
-
-        <button
-          onClick={handleUploadPdf}
-          className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Upload PDF"}
-        </button>
-      </div>
-
-      {/* Chat Section */}
-      <div className="flex flex-col justify-center items-center">
-        <button
-          onClick={() => navigate(`/chatroom/${folderId}`)}
-          className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition"
-        >
-          💬 Start Chat
-        </button>
-      </div>
     </div>
+  )}
+                </div>
+                
+              </div>
+              
 
-    {/* PDF List */}
-    <div className="mt-10">
-      <h3 className="text-xl font-semibold mb-4">📄 Uploaded PDFs</h3>
-      {folder.pdfs.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {folder.pdfs.map((pdf) => (
-            <div key={pdf._id} className="bg-white p-4 rounded-lg shadow-sm">
-              <p className="font-medium mb-2">{pdf.name}</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleToggleCompletion(pdf._id, true)}
-                  className={`w-6 h-6 rounded-full ${pdf.userCompleted ? "bg-green-500" : "bg-gray-300"}`}
-                  title="Mark as complete"
-                ></button>
+              {/* All Documents Section */}
 
-                <button
-                  onClick={() => handleToggleCompletion(pdf._id, false)}
-                  className={`w-6 h-6 rounded-full ${!pdf.userCompleted ? "bg-red-500" : "bg-gray-300"}`}
-                  title="Mark as incomplete"
-                ></button>
 
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">All Documents</h2>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">{folder.pdfs?.length || 0} items</span>
+                  <button className="p-1 hover:bg-gray-100 rounded">
+                    <FaEllipsisV className="text-gray-500" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {folder.pdfs?.map(pdf => (
+                  <div key={pdf._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div className="flex justify-between">
+                      <div className="flex items-center">
+                        <FaFilePdf className="text-red-500 mr-2" />
+                        <p className="font-medium truncate max-w-xs">{pdf.name}</p>
+                      </div>
+                      <div className="flex space-x-1">
+                        <button 
+                          onClick={() => handleViewPdf(pdf)}
+                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                          title="View"
+                        >
+                          👁️
+                        </button>
+                        <button 
+                          onClick={() => handleDownloadPdf(pdf)}
+                          className="p-1 text-green-600 hover:bg-green-50 rounded"
+                          title="Download"
+                        >
+                          ⬇️
+                        </button>
+                        <button 
+                          onClick={() => handleSummarize(pdf.path)}
+                          className="p-1 text-purple-600 hover:bg-purple-50 rounded"
+                          title="Summarize"
+                        >
+                          ✍️
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex justify-between items-center">
+                      <p className="text-sm text-gray-500">{pdf.size || "N/A"}</p>
+                      <button
+                        onClick={() => handleToggleCompletion(pdf._id, !pdf.userCompleted)}
+                        className={`w-4 h-4 rounded-full border ${pdf.userCompleted ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500'}`}
+                        title={pdf.userCompleted ? "Mark as incomplete" : "Mark as complete"}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section - Members & Description */}
+          <div className="lg:w-1/4 space-y-6">
+            {/* Members Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Joined Members</h2>
+              <div className="space-y-4">
+                {members.map((member, index) => (
+                  <div key={index} className="flex items-center">
+                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{member.name}</p>
+                      <p className="text-sm text-gray-500">{member.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Description</h2>
+              <p className="text-gray-700">
+                {folder.description || "No description available."}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Summary Modal */}
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+              <h3 className="text-xl font-semibold mb-4">📝 Summary</h3>
+              <div className="max-h-96 overflow-y-auto">
+                <p className="text-gray-700 whitespace-pre-line">{summary}</p>
+              </div>
+              <div className="mt-6 flex justify-end">
                 <button
-                  onClick={() => handleViewPdf(pdf)}
-                  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
+                  onClick={() => setShowModal(false)}
+                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
                 >
-                  View
-                </button>
-
-                <a
-                  href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`}
-                  onClick={(e) => trackDownload(e, pdf)}
-                  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
-                >
-                  Download
-                </a>
-
-                <button
-                  onClick={() => handleSummarize(pdf.path)}
-                  className="bg-purple-500 text-white px-3 py-1 rounded-md hover:bg-purple-600"
-                  disabled={loading && currentPdf === pdf.path}
-                >
-                  {loading && currentPdf === pdf.path ? "Summarizing..." : "Summarize"}
+                  Close
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-500">No PDFs found for this folder.</p>
-      )}
-    </div>
-
-    {/* Summary Modal */}
-    {showModal && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-          <h3 className="text-xl font-semibold">📝 Summary</h3>
-          <p className="mt-2 text-gray-700">{summary}</p>
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={() => setShowModal(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-            >
-              Close
-            </button>
           </div>
-        </div>
-      </div>
-    )}
-  </div>
-);
+        )}
 
-
+        {/* PDF Viewer Modal */}
+        {isPdfViewerOpen && viewPdfUrl && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col">
+            <div className="bg-white p-4 flex justify-between items-center">
+              <h3 className="text-lg font-semibold">PDF Viewer</h3>
+              <button 
+                onClick={() => setIsPdfViewerOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1">
+              <iframe 
+                src={viewPdfUrl} 
+                className="w-full h-full" 
+                title="PDF Viewer"
+              />
+            </div>
+          </div>
+        )}
+    </>
+  );
 };
 
 export default FolderDetail;

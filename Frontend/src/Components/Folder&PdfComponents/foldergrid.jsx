@@ -200,7 +200,7 @@ const FolderGrid = ({
             return (
               <div
                 key={folder._id}
-                  className={` w-[350px] border-[2px] border-black rounded-3xl shadow-md p-5 relative ${bgColor} text-black hover:shadow-xl transition-shadow cursor-pointer`}
+                  className={` w-[350px] border-[2px] border-black rounded-3xl shadow-md p-4 relative ${bgColor} text-black hover:shadow-xl transition-shadow cursor-pointer`}
                 onClick={() => onFolderClick(folder._id)}
               >
                 {/* Subject Pill */}
@@ -233,12 +233,12 @@ const FolderGrid = ({
                 </div>
 
                 {/* Folder Name */}
-                <h3 className="text-xl font-bold mt-12 mb-4">{folder.name}</h3>
+                <h3 className="text-xl font-bold mb-1 mt-4">{folder.name}</h3>
 
                 {/* Progress Bar */}
                 {showProgress && userId && (
-                  <div className="mb-4">
-                    <div className="flex justify-between text-sm font-medium mb-1">
+                  <div className=" mb-1">
+                    <div className="flex justify-between text-sm font-medium mt-4 mb-1">
                       <span>Your Progress</span>
                       <span>{percentage}%</span>
                     </div>
@@ -253,10 +253,11 @@ const FolderGrid = ({
                     </p>
                   </div>
                 )}
-
+                <div className="flex justify-between mb-2">
                 {/* Member Avatars */}
                 {folder.members && folder.members.length > 0 && (
-                  <div className="flex items-center space-x-[-8px] mb-4">
+                  <div className="flex items-center space-x-[-8px]">
+                  {/* <div className="flex items-center space-x-[-8px]"> */}
                     {folder.members.slice(0, 3).map((member, i) => (
                       <img
                         key={i}
@@ -274,7 +275,6 @@ const FolderGrid = ({
                 )}
 
                 {/* Continue Button */}
-                <div className="flex justify-end">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
