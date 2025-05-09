@@ -36,14 +36,7 @@ function NavbarComponent() {
             <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
               Class Notes
             </Nav.Link>
-             <div className="flex items-center gap-4">
-                        <Link to="/register">
-                          <button className="px-4 py-2 text-sm border rounded-md">Sign up</button>
-                        </Link>
-                        <Link to="/login">
-                          <button className="px-4 py-2 text-sm bg-orange-500 text-white rounded-md">Login</button>
-                        </Link>
-                      </div>
+             
           </Nav>
 
           <Nav>
@@ -69,11 +62,14 @@ function NavbarComponent() {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-                  <Dropdown.Item disabled>{user?.username || "User"}</Dropdown.Item>
-                  <Dropdown.Item disabled>{user?.email || "No email"}</Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
-                </Dropdown.Menu>
+  <Dropdown.Header>{user?.username || "User"}</Dropdown.Header>
+  <Dropdown.Item as={Link} to={`/profile/${user?._id}`}>
+     Profile
+  </Dropdown.Item>
+    <Dropdown.Item as={Link} to="/Dashboard">Dashboard</Dropdown.Item> 
+   <Dropdown.Divider />
+   <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+ </Dropdown.Menu>
               </Dropdown>
             ) : (
               <Nav.Link as={Link} to="/register" style={navLinkStyle}>SignUp / SignIn</Nav.Link>

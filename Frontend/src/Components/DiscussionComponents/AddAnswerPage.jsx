@@ -9,18 +9,29 @@ export default function AddAnswerPage() {
   const navigate = useNavigate();
 
   const handleAddAnswer = async () => {
-    if (!answerText.trim()) return;
+  if (!answerText.trim()) return;
 
-    try {
-      await api.post("/api/answers", {
+  try {
+    const response = await fetch("http://localhost:5000/api/answers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         text: answerText,
         questionId,
-      });
-      navigate("/discussion");
-    } catch (err) {
-      console.error("Error adding answer:", err);
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to submit answer");
     }
-  };
+
+    navigate("/discussion");
+  } catch (err) {
+    console.error("Error adding answer:", err);
+  }
+};
 
   return (
     <Box sx={{ maxWidth: 600, mx: "auto", mt: 4, p: 2 }}>
