@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { FolderPlus, FolderOpen } from 'lucide-react';
 import profileImg from '../assets/project_profile.png';
-import Sidebar from '../Components/DiscussionComponents/Sidebar.jsx'; // Import Sidebar component
+//mport Sidebar component
 import SecuritySettings from '../Components/SecuritySettings';
 
 

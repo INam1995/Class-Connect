@@ -6,12 +6,12 @@ import AdminDashboard from "./Pages/Admin.jsx";
 import Profile from "./Pages/profile.jsx";
 import Folder from "./Pages/Folder.jsx";
 import Login from './Pages/Login.jsx';
-import Discussion from './Pages/Discussion.jsx';
-import AllChats from './Components/ChatComponents/AllChats.jsx';
-import ChatRoom from './Components/ChatComponents/ChatRoom.jsx';
+import DiscussionBox from './Components/DiscussionComponents/Discussion.jsx';
+
+import ChatRoom from './Components/ChatComponents/chatRoom.jsx';
 import RegisterVerification from "./Components/AuthComponents/RegisterVerification.jsx";
 import ClassNotes from "./Pages/ClassNotes"; // updated import
-import DiscussionBox from './Pages/Discussion.jsx';  // Displays all questions and answers
+//ys all questions and answers
 import AddAnswerPage from './Components/DiscussionComponents/AddAnswerPage.jsx';  // Adds answers to a specific question
 import LanguageSwitcher from './Components/LanguageSelector.jsx';
 import ShowAllAnswersPage from './Components/DiscussionComponents/ShowAllAnswersPage.jsx'; 
@@ -44,8 +44,8 @@ function App() {
         <Route path="/register-verification" element={<RegisterVerification />} />
         <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
-        <Route path="/discussion" element={<Discussion />} />
-        <Route path="/chats" element={<AllChats />} /> {/* Add this route */}
+        <Route path="/discussion" element={<DiscussionBox />} />
+       
         <Route path="/chatroom/:folderId" element={<ChatRoom />} />
         <Route path="/folder/:folderId" element={<Folder />} />
         <Route path="/class-notes" element={<ClassNotes />} /> {/* updated component name */}
