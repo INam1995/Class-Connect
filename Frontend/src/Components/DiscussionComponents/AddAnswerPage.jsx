@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../../api";
+import api from "../api";
 import { Button, TextField, Typography, Box } from "@mui/material";
 
 export default function AddAnswerPage() {
