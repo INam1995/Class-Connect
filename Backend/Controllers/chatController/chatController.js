@@ -112,50 +112,46 @@ export const markMessagesAsSeen = async (req, res) => {
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const userId = req.user._id;
-    // console.log("userId", userId)
-
     const message = await Message.findById(messageId);
-    // console.log("message", message.sender)
+    if (!message) return res.status(404).json({ message: "Message not found" });
 
-    if (!message) {
-      return res.status(404).json({ message: "Message not found." });
+    // Only sender can delete
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to delete this message" });
     }
 
-    if (message.sender== userId) {
-      return res.status(403).json({ message: "Unauthorized to delete this message." });
-    }
     await Message.findByIdAndDelete(messageId);
-    res.status(200).json({ message: "Message deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting message:", error);
-    res.status(500).json({ message: "Error deleting message", error });
+    res.json({ message: "Message deleted successfully" });
+  } catch (err) {
+    console.error("Delete message error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 // controllers/chatcontroller.js
 
 export const editMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
     const { text } = req.body;
-    const userId = req.user._id;
+
     const message = await Message.findById(messageId);
-    if (!message) {
-      return res.status(404).json({ message: "Message not found." });
-    }
-    if (message.sender.toString()!== userId.toString()) {
-      return res.status(403).json({ message: "Unauthorized to edit this message." });
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    // Check if the logged-in user is the sender
+    if (message.sender.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to edit this message" });
     }
 
     message.text = text;
     await message.save();
-
-    res.status(200).json({ message: "Message edited successfully.", data: message });
-  } catch (error) {
-    console.error("Error editing message:", error);
-    res.status(500).json({ message: "Error editing message", error });
+    res.json(message);
+  } catch (err) {
+    console.error("Edit message error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 // ✅ Delete a Chat Room (Only admin can delete)
 export const deleteChatRoom = async (req, res) => {
   try {

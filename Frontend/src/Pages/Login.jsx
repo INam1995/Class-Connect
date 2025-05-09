@@ -78,36 +78,67 @@ const Login = () => {
   };
 
   return (
-    <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <div className="bg-white p-4 rounded shadow-lg w-100" style={{ maxWidth: "400px" }}>
-        <h2 className="text-center text-primary">Log in</h2>
-        {error && <p className="text-danger text-center">{error}</p>}
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#F4F7FB' }}>
+      <div style={{
+        backgroundColor: 'white', 
+        padding: '40px', 
+        borderRadius: '10px', 
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', 
+        width: '100%',
+        maxWidth: '400px'
+      }}>
+        <h2 style={{ textAlign: 'center', color: '#1E3A8A' }}>Log in</h2>
+        {error && <p style={{ color: '#D32F2F', textAlign: 'center' }}>{error}</p>}
         <form onSubmit={handleLogin}>
-          <div className="mb-3">
+          <div style={{ marginBottom: '20px' }}>
             <input
               type="text"
               placeholder="Email or Username"
-              className={`form-control ${emailError ? "is-invalid" : ""}`}
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: emailError ? '1px solid #D32F2F' : '1px solid #E0E0E0',
+                outline: 'none'
+              }}
               value={emailOrUsername}
               onChange={(e) => setEmailOrUsername(e.target.value)}
               required
             />
-            {emailError && <div className="invalid-feedback">{emailError}</div>}
+            {emailError && <div style={{ color: '#D32F2F', fontSize: '12px', marginTop: '5px' }}>{emailError}</div>}
           </div>
-          <div className="mb-3">
+          <div style={{ marginBottom: '20px' }}>
             <input
               type="password"
               placeholder="Password"
-              className={`form-control ${passwordError ? "is-invalid" : ""}`}
+              style={{
+                width: '100%',
+                padding: '12px',
+                fontSize: '16px',
+                borderRadius: '8px',
+                border: passwordError ? '1px solid #D32F2F' : '1px solid #E0E0E0',
+                outline: 'none'
+              }}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+            {passwordError && <div style={{ color: '#D32F2F', fontSize: '12px', marginTop: '5px' }}>{passwordError}</div>}
           </div>
           <button 
             type="submit" 
-            className="btn btn-primary w-100"
+            style={{
+              width: '100%',
+              padding: '12px',
+              fontSize: '16px',
+              backgroundColor: '#1E3A8A',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              opacity: !emailOrUsername.trim() || !password.trim() || password.length < 6 ? 0.6 : 1
+            }}
             disabled={!emailOrUsername.trim() || !password.trim() || password.length < 6}
           >
             Log in

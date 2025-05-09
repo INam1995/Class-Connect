@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import sittingchild from '../assets/sittting.png';
+import block from '../assets/block.png';
+import { FaUser, FaUserCircle, FaEnvelope, FaLock, FaBookOpen, FaUniversity } from "react-icons/fa";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,10 +15,10 @@ const Register = () => {
     latitude: null,
     longitude: null,
   });
+
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Fetch user's location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -83,81 +86,124 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form className="p-6 bg-white rounded shadow-md w-full max-w-sm" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
+    <div className="relative flex min-h-screen bg-[#faf6f6] items-center justify-center px-4 overflow-hidden">
+      {/* Right Form Section */}
+      <div className="w-full md:w-1/3 p-8 bg-[#f8f8f8]">
+        <h1 className="text-2xl font-extrabold font-Cal Sans mb-1">Let's<br />Start Learning</h1>
+        <p className="text-gray-600 mb-6">Please login or sign up to continue</p>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
+        <form onSubmit={handleSubmit}>
+        <div className="mb-2 relative">
+    <FaUser className="absolute  top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      name="name"
+      placeholder="Name"
+      value={formData.name}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+  </div>
+
+  <div className="mb-2 relative">
+    <FaUserCircle className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      name="username"
+      placeholder="Username"
+      value={formData.username}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+  </div>
+
+  <div className="mb-2 relative">
+    <FaEnvelope className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="email"
+      name="email"
+      placeholder="Email"
+      value={formData.email}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+  </div>
+
+  <div className="mb-2 relative">
+    <FaLock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="password"
+      name="password"
+      placeholder="Password"
+      value={formData.password}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+  </div>
+
+  <div className="mb-2 relative">
+    <FaBookOpen className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      name="course"
+      placeholder="Course"
+      value={formData.course}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.course && <p className="text-red-500 text-sm">{errors.course}</p>}
+  </div>
+
+  <div className="mb-4 relative">
+    <FaUniversity className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+    <input
+      type="text"
+      name="college"
+      placeholder="College"
+      value={formData.college}
+      onChange={handleChange}
+      className="w-full pl-12 px-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+    {errors.college && <p className="text-red-500 text-sm">{errors.college}</p>}
+  </div>
+
+  <button
+    type="submit"
+    className="w-full h-14 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded transition duration-200"
+  >
+    Sign Up
+  </button>
+
+  <div className="my-4 flex items-center">
+    <div className="flex-grow h-px bg-gray-300" />
+    <span className="px-2 text-sm text-gray-500">or</span>
+    <div className="flex-grow h-px bg-gray-300" />
+  </div>
+
+          <p className="text-sm text-center mt-4 text-gray-600">
+            Already Have An Account?{" "}
+            <Link to="/login" className="text-blue-600 hover:underline">
+              Login
+            </Link>
+          </p>
+        </form>
+      </div>
+
+      {/* Bottom Left Illustration */}
+      <img
+        src={sittingchild}
+        alt="Child Sitting"
+        className="hidden sm:block absolute bottom-1/8 left-1/9 w-52 md:w-64 lg:w-100 opacity-90"
         />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
+        <img
+        src={block}
+        alt="Child Sitting"
+        className="hidden sm:block absolute  bottom-1/12 right-70 w-52 md:w-50 lg:w-75 opacity-90"
         />
-        {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-
-        <input
-          type="text"
-          name="course"
-          placeholder="Course"
-          value={formData.course}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.course && <p className="text-red-500 text-sm">{errors.course}</p>}
-
-        <input
-          type="text"
-          name="college"
-          placeholder="College"
-          value={formData.college}
-          onChange={handleChange}
-          className="block w-full p-2 mb-2 border rounded"
-        />
-        {errors.college && <p className="text-red-500 text-sm">{errors.college}</p>}
-
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded w-full mt-2">
-          Register
-        </button>
-
-        <p className="text-sm mt-4 text-center">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login here
-          </Link>
-        </p>
-      </form>
     </div>
   );
 };

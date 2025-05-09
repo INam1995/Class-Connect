@@ -1,6 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../../api";
+
+import axios from "axios";
+
 import {
   Typography,
   Card,
@@ -20,19 +23,16 @@ export default function ShowAllAnswersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp"; // Default avatar image
+  const defaultAvatar = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp";
 
   useEffect(() => {
     const fetchAnswers = async () => {
-      console.log("Fetching answers for questionId:", questionId);
       try {
-        const res = await api.get(`/api/answers/${questionId}`);
-        console.log(res.data);
+        const res = await axios.get(`http://localhost:5000/api/answers/${questionId}`);
         setAnswers(res.data);
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          // Handle the "No answers found" case
-          setAnswers([]); // Or just rely on an empty array for conditional rendering
+          setAnswers([]);
         } else {
           console.error("Error fetching answers", err);
           setError("An error occurred while fetching answers.");
@@ -41,14 +41,13 @@ export default function ShowAllAnswersPage() {
         setLoading(false);
       }
     };
-  
+
     fetchAnswers();
   }, [questionId]);
-  
 
   const handleLike = async (id) => {
     try {
-      await api.post(`/api/answers/${id}/like`);
+      await axios.post(`http://localhost:5000/api/answers/${id}/like`);
       setAnswers((prev) =>
         prev.map((a) => (a._id === id ? { ...a, likes: a.likes + 1 } : a))
       );
@@ -59,7 +58,7 @@ export default function ShowAllAnswersPage() {
 
   const handleDislike = async (id) => {
     try {
-      await api.post(`/api/answers/${id}/dislike`);
+      await axios.post(`http://localhost:5000/api/answers/${id}/dislike`);
       setAnswers((prev) =>
         prev.map((a) => (a._id === id ? { ...a, dislikes: a.dislikes + 1 } : a))
       );
@@ -133,3 +132,4 @@ export default function ShowAllAnswersPage() {
     </div>
   );
 }
+// a/

@@ -1,19 +1,19 @@
 import {  Routes, Route } from 'react-router-dom';
-import Home from "./Pages/Home"
+import Home from "./Pages/Home.jsx"
 import Register from './Pages/Register.jsx';
 import Dashboard from './Pages/Dashboard.jsx';
 import AdminDashboard from "./Pages/Admin.jsx";
 import Profile from "./Pages/profile.jsx";
 import Folder from "./Pages/Folder.jsx";
 import Login from './Pages/Login.jsx';
-import Discussion from './Pages/Discussion.jsx';
-import AllChats from './Components/ChatComponents/AllChats.jsx';
-import ChatRoom from './Components/ChatComponents/ChatRoom.jsx';
+
+import DiscussionBox from './Components/DiscussionComponents/Discussion.jsx';
+
+import ChatRoom from './Components/ChatComponents/chatRoom.jsx';
 import RegisterVerification from "./Components/AuthComponents/RegisterVerification.jsx";
 import ClassNotes from "./Pages/ClassNotes"; // updated import
-import DiscussionBox from './Pages/Discussion.jsx';  // Displays all questions and answers
+//ys all questions and answers
 import AddAnswerPage from './Components/DiscussionComponents/AddAnswerPage.jsx';  // Adds answers to a specific question
-import LanguageSwitcher from './Components/LanguageSelector.jsx';
 import ShowAllAnswersPage from './Components/DiscussionComponents/ShowAllAnswersPage.jsx'; 
 import { useAuth } from './Components/AuthComponents/AuthContext.jsx';
 
@@ -34,7 +34,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <>
-    <LanguageSwitcher />
+  
       <Routes>
         <Route path="/" element={<Home />} /> 
         <Route path="/register" element={<Register />} /> 
@@ -44,8 +44,10 @@ function App() {
         <Route path="/register-verification" element={<RegisterVerification />} />
         <Route path="/profile/:userId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
-        <Route path="/discussion" element={<Discussion />} />
-        <Route path="/chats" element={<AllChats />} /> {/* Add this route */}
+
+        <Route path="/discussion" element={<DiscussionBox />} />
+        {/* <Route path="/chats" element={<AllChats />} /> Add this route */}
+
         <Route path="/chatroom/:folderId" element={<ChatRoom />} />
         <Route path="/folder/:folderId" element={<Folder />} />
         <Route path="/class-notes" element={<ClassNotes />} /> {/* updated component name */}

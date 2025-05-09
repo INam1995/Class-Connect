@@ -21,6 +21,9 @@ import whiteboardRoutes from './routes/whiteboardRoutes.js';
 import notificationsRoutes from "./routes/noti.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
+import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
+import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
+
 import profile from "./routes/userRoute.js";
 import ClassNotes from "./routes/classNotesRoutes.js";
 const app = express();
@@ -62,7 +65,7 @@ app.get("/", (req, res) => {
 
 // ✅ Socket.io Events
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  // console.log("User connected:", socket.id);
 
   socket.on("join_room", ({ roomId, userId }) => {
     socket.join(roomId);
@@ -176,6 +179,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/stat", stats);
 app.use("/api/profile", profile);
 app.use("/api/class-notes",ClassNotes)
+app.use("/api/class-notes", classNotesRouter);
 // ✅ Start Server
 
 export const emitUserRegistered = (userName) => {

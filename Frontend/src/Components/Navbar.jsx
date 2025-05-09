@@ -32,19 +32,11 @@ function NavbarComponent() {
             <Nav.Link as={Link} to="/" style={navLinkStyle}>Home</Nav.Link>
             <Nav.Link as={Link} to="/admin" style={navLinkStyle}>Admin</Nav.Link>
             <Nav.Link as={Link} to="/features" style={navLinkStyle}>Features</Nav.Link>
-            <Nav.Link as={Link} to="/pricing" style={navLinkStyle}>Pricing</Nav.Link>
             <Nav.Link as={Link} to="/discussion" style={navLinkStyle}>Discussion</Nav.Link>
             <Nav.Link onClick={handleClassNotesRedirect} style={{ ...navLinkStyle, cursor: "pointer" }}>
               Class Notes
             </Nav.Link>
-             <div className="flex items-center gap-4">
-                        <Link to="/register">
-                          <button className="px-4 py-2 text-sm border rounded-md">Sign up</button>
-                        </Link>
-                        <Link to="/login">
-                          <button className="px-4 py-2 text-sm bg-orange-500 text-white rounded-md">Login</button>
-                        </Link>
-                      </div>
+             
           </Nav>
 
           <Nav>

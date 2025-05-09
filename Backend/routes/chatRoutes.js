@@ -3,7 +3,7 @@ import {
   createPoll,
   votePoll,
   getPollsByFolder
-} from "../Controllers/chatController/pollController.js";
+} from "../Controllers/pollController.js";
 
 
 

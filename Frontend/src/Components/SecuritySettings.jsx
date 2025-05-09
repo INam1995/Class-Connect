@@ -73,7 +73,7 @@ const SecuritySettings = ({ userId }) => {
         />
         <button
           onClick={handleEmailUpdate}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-purple-700 text-white rounded  hover:bg-purple-500"
         >
           Update Email
         </button>
@@ -101,7 +101,7 @@ const SecuritySettings = ({ userId }) => {
 
         <button
           onClick={handlePasswordUpdate}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-500"
         >
           Update Password
         </button>

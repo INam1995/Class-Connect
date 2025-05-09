@@ -59,7 +59,6 @@ const Dashboard = () => {
   }, [isModalOpen, isWhiteboardOpen, refreshKey]);
   
 
-  // Handle folder creation
   const handleCreateFolder = async (folderName, subjectName, uniqueKeyhere) => {
     try {
       const response = await fetch("http://localhost:5000/api/folders/create", {
@@ -74,7 +73,7 @@ const Dashboard = () => {
 
       const data = await response.json();
       if (response.ok && data.folder) {
-        setCreatedFolders((prev) => [...prev, data.folder]);  
+        setCreatedFolders((prev) => [...prev, data.folder]);
         alert("Folder created successfully!");
         setIsModalOpen(false);
       } else {
@@ -85,7 +84,6 @@ const Dashboard = () => {
     }
   };
 
-  // Handle folder joining
   const handleJoinFolder = async (folderKey) => {
     try {
       const response = await fetch("http://localhost:5000/api/folders/join", {
@@ -99,8 +97,8 @@ const Dashboard = () => {
       });
 
       const data = await response.json();
-      if (response.ok===200 && data.folder) {
-        setJoinedFolders((prev) => [...prev, data.folder]);  
+      if (response.ok === 200 && data.folder) {
+        setJoinedFolders((prev) => [...prev, data.folder]);
         alert("Joined folder successfully!");
       } else {
         alert(data.message || "Error joining folder.");
@@ -110,27 +108,17 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ Handle folder deletion (Only for folders the user created)
   const handleDeleteFolder = async (folderId) => {
     if (!window.confirm("Are you sure you want to delete this folder?")) return;
-    const token = localStorage.getItem("token"); 
-   // const token = localStorage.getItem("token");  // ✅ Get token from storage
-    console.log("Token being sent:", token);  // ✅ Debug log
-  
-    if (!token) {
-      alert("You are not logged in! Please log in again.");
-      return;
-    }
-  
+
     try {
       const response = await fetch(`http://localhost:5000/api/folders/deleteFolder/${folderId}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
         },
       });
-  
-     console.log(response.status)
+
       if (response.ok) {
         setCreatedFolders((prev) => prev.filter((folder) => folder._id !== folderId));
         setJoinedFolders((prev) => prev.filter((folder) => folder._id !== folderId));
@@ -143,9 +131,7 @@ const Dashboard = () => {
       alert("Error deleting folder. Please try again.");
     }
   };
-  
 
-  // ✅ Handle leaving a joined folder
   const handleLeaveFolder = async (folderId) => {
     if (!window.confirm("Are you sure you want to leave this folder?")) return;
 
@@ -158,7 +144,7 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
-        setJoinedFolders((prev) => prev.filter((folder) => folder._id !== folderId));  
+        setJoinedFolders((prev) => prev.filter((folder) => folder._id !== folderId));
         alert("You have left the folder!");
       } else {
         alert("Error leaving folder.");
@@ -172,10 +158,9 @@ const Dashboard = () => {
     setIsWhiteboardOpen(true);
   };
 
-  const navigate = useNavigate(); // ✅ Correct way to use navigate
+  const navigate = useNavigate();
 
   const handleFolderClick = (folderId) => {
-    console.log("Navigating to folder:", folderId);
     navigate(`/folder/${folderId}`);
   };
 
@@ -233,7 +218,7 @@ const Dashboard = () => {
   
         {/* Folder Display Section */}
         {loading ? (
-          <p className="text-lg text-gray-600">⏳ Loading folders...</p>
+          <p className="text-xl text-gray-600">⏳ Loading folders...</p>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : (

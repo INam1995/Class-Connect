@@ -6,6 +6,9 @@ import profileImg from '../assets/project_profile.png';
 import Sidebar from '../Components/Slider/Sidebar.jsx'; // Import Sidebar component
 import SecuritySettings from '../Components/SecuritySettings';
 
+
+
+import NavbarComponent from '../Components/Navbar.jsx';
 const UserDashboard = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -100,17 +103,22 @@ const UserDashboard = () => {
   const uploadPercentage = totalActivity ? (userStats.totalUploads / totalActivity) * 100 : 0;
   const downloadPercentage = totalActivity ? (userStats.totalDownloads / totalActivity) * 100 : 0;
 
-  return (
-    <div className="flex bg-amber-200"  >
+  return <>
+
+    <NavbarComponent className="fixed top-0 left-0 w-full z-50"/>
+
+    <div className="flex "  >
+      
       {/* Sidebar with refs passed down */}
       
       <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} sectionRefs={sectionRefs} profileUserId={userId} />
+      
 
       <div className="m-full mx-auto px-6 py-10 flex-1">
         <h1 className="text-2xl font-bold mb-6">Welcome, {name}</h1>
 
         {/* Profile Section */}
-        <div ref={profileRef} className="bg-amber-100 shadow rounded p-6 mb-6 flex items-center">
+        <div ref={profileRef} className=" shadow rounded p-6 mb-6 flex items-center ">
           <div className="flex">
             <div className="flex-shrink-0 ml-20 mt-15">
               <img
@@ -123,27 +131,27 @@ const UserDashboard = () => {
             <div className="ml-41">
               <h2 className="text-2xl font-semibold mb-4">Personal Information</h2>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-purple-100  p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Name</p>
                   <p className="text-lg font-semibold">{name}</p>
                 </div>
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-purple-100 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Username</p>
                   <p className="text-lg font-semibold">{username}</p>
                 </div>
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-full h-16 max-w-full">
+                <div className="bg-purple-100 p-3 rounded shadow-sm w-full h-16 max-w-full">
                   <p className="text-sm text-gray-500 mb-0">Email</p>
                   <p className="text-lg font-semibold">{email}</p>
                 </div>
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-purple-100 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Role</p>
                   <p className="text-lg font-semibold">{role}</p>
                 </div>
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-purple-100 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">Course</p>
                   <p className="text-lg font-semibold">{course}</p>
                 </div>
-                <div className="bg-amber-200 p-3 rounded shadow-sm w-60 h-16">
+                <div className="bg-purple-100 p-3 rounded shadow-sm w-60 h-16">
                   <p className="text-sm text-gray-500 mb-0">College</p>
                   <p className="text-lg font-semibold">{college}</p>
                 </div>
@@ -153,26 +161,26 @@ const UserDashboard = () => {
         </div>
 
         {/* Location Section */}
-        <div ref={locationRef} className="bg-orange-100 shadow rounded p-6 mb-6">
+        <div ref={locationRef} className=" shadow rounded p-6 mb-6">
            {/* Location Card */}
           <h2 className="text-xl font-semibold mb-4">Location</h2>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
+            <div className="p-3 rounded shadow-sm w-70 h-16 bg-purple-100">
               <p className="text-sm text-gray-500 mb-0">Local Address</p>
               <p className="text-lg font-semibold">{road}</p>
             </div>
 
-            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
+            <div className=" p-3 rounded shadow-sm w-70 h-16 bg-purple-100">
               <p className="text-sm text-gray-500 mb-0">City</p>
               <p className="text-lg font-semibold">{city}</p>
             </div>
 
-            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
+            <div className=" p-3 rounded shadow-sm w-70 h-16 bg-purple-100 ">
               <p className="text-sm text-gray-500 mb-0">State</p>
               <p className="text-lg font-semibold">{state}</p>
             </div>
 
-            <div className="bg-amber-200 p-3 rounded shadow-sm w-70 h-16">
+            <div className=" p-3 rounded shadow-sm w-70 h-16 bg-purple-100">
               <p className="text-sm text-gray-500 mb-0">Country</p>
               <p className="text-lg font-semibold">{country}</p>
             </div>
@@ -192,7 +200,7 @@ const UserDashboard = () => {
             <div className="flex items-center mb-4">
               <span className="w-24 text-sm text-gray-600">Uploads</span>
               <div className="flex-1 h-4 bg-gray-200 rounded overflow-hidden">
-                <div className="bg-green-500 h-full" style={{ width: `${uploadPercentage}%` }}></div>
+                <div className="bg-purple-500 h-full" style={{ width: `${uploadPercentage}%` }}></div>
               </div>
               <span className="ml-2 text-sm font-medium">{userStats.totalUploads}</span>
             </div>
@@ -227,7 +235,9 @@ const UserDashboard = () => {
         </div>
       </div>
     </div>
-  );
+    
+ 
+  </>
 };
 
 export default UserDashboard;

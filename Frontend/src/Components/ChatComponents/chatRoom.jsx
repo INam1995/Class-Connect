@@ -1,6 +1,8 @@
+// imports (same as before)
 import React, { useState, useEffect, useRef } from "react";
-import { FaPaperPlane, FaEye, FaSmile,FaPoll, FaEdit, FaTrash,FaCheckSquare, FaSquare , FaEllipsisV} from "react-icons/fa";
-//import { FaPaperPlane, FaEye, FaSmile, FaEdit, FaTrash, } from "react-icons/fa";
+import {
+  FaPaperPlane, FaEye, FaSmile, FaEdit, FaTrash, FaEllipsisV
+} from "react-icons/fa";
 import axios from "axios";
 import io from "socket.io-client";
 import { useParams } from "react-router-dom";
@@ -10,90 +12,92 @@ const socket = io("http://localhost:5000");
 
 const ChatRoom = () => {
   const { folderId } = useParams();
-  const [messages, setMessages] = useState([]);
+  const [items, setItems] = useState([]); // holds both messages and polls
   const [newMessage, setNewMessage] = useState("");
-  const [seenByMap, setSeenByMap] = useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
-  const [polls, setPolls] = useState([]);
   const [showPollForm, setShowPollForm] = useState(false);
   const [newPoll, setNewPoll] = useState({ question: "", options: ["", ""] });
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedMessages, setSelectedMessages] = useState(new Set());
-  const [isSelecting, setIsSelecting] = useState(false);
+  const [folderUsers, setFolderUsers] = useState([]);
+
   const emojiPickerRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  const fetchPolls = async () => {
+  const fetchAll = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/chat/polls/${folderId}`, {
+      const [msgRes, pollRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/chat/messages/${folderId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`http://localhost:5000/api/chat/polls/${folderId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const messages = msgRes.data.map((m) => ({ ...m, type: "message" }));
+      const polls = pollRes.data.map((p) => ({ ...p, type: "poll" }));
+      const combined = [...messages, ...polls].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+      setItems(combined);
+    } catch (err) {
+      console.error("Error fetching chat data:", err);
+    }
+  };
+
+  const fetchFolderUsers = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await axios.get(`http://localhost:5000/api/folders/${folderId}/members`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setPolls(res.data);
+      setFolderUsers(res.data);
     } catch (err) {
-      console.error("Error fetching polls:", err);
+      console.error("Error fetching folder users:", err);
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/chat/messages/${folderId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setMessages(res.data);
-      } catch (err) {
-        console.error("Error fetching messages:", err);
-      }
-    };
-
-    fetchMessages();
-    fetchPolls();
+    fetchAll();
+    fetchFolderUsers();
 
     socket.emit("join_room", { roomId: folderId, userId: "User123" });
 
     socket.on("message", (message) => {
       if (message.folderId === folderId) {
-        setMessages((prev) => [...prev, message]);
+        setItems((prev) =>
+          [...prev, { ...message, type: "message" }].sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          )
+        );
       }
     });
 
     socket.on("message_edited", (updatedMessage) => {
-      setMessages((prev) =>
-        prev.map((msg) => (msg._id === updatedMessage._id ? updatedMessage : msg))
+      setItems((prev) =>
+        prev.map((item) =>
+          item.type === "message" && item._id === updatedMessage._id
+            ? { ...item, text: updatedMessage.text }
+            : item
+        )
       );
     });
-
-    socket.on("messages_seen", ({ folderId: seenFolderId, messages: updatedMessages }) => {
-      if (seenFolderId === folderId) {
-        setMessages(updatedMessages);
-      }
-    });
-
-    axios
-      .put(`http://localhost:5000/api/chat/messages/seen/${folderId}`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .catch((err) => console.error("Error marking messages as seen", err));
 
     return () => {
       socket.off("message");
       socket.off("message_edited");
-      socket.off("messages_seen");
     };
   }, [folderId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)
-      ) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
         setShowEmojiPicker(false);
       }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -106,7 +110,6 @@ const ChatRoom = () => {
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
-
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -123,87 +126,25 @@ const ChatRoom = () => {
         message,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      const savedMessage = {
-        ...res.data,
-        sender: res.data.sender || { _id: "You", name: "You" }
-      };
-
-      setMessages((prev) => [...prev, savedMessage]);
+      const newMsg = { ...res.data, type: "message" };
+      setItems((prev) => [...prev, newMsg].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
       socket.emit("send_message", { chatRoom: folderId, sender: "You", text: newMessage });
       setNewMessage("");
     } catch (err) {
       console.error("Error sending message:", err);
-      alert("Failed to send message. Please try again.");
-    }
-  };
-
-  const toggleSeenBy = (messageId) => {
-    setSeenByMap((prev) => ({ ...prev, [messageId]: !prev[messageId] }));
-  };
-
-  const handleEmojiClick = (emojiObject) => {
-    setNewMessage((prev) => prev + emojiObject.emoji);
-  };
-
-  const startEditing = (message) => {
-    setEditingMessage({ ...message });
-  };
-
-  const saveEdit = async () => {
-    if (!editingMessage) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      const res = await axios.put(
-        `http://localhost:5000/api/chat/messages/${editingMessage._id}`,
-        { text: editingMessage.text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === editingMessage._id ? { ...msg, text: res.data.text } : msg
-        )
-      );
-
-      socket.emit("edit_message", { folderId, message: res.data });
-      setEditingMessage(null);
-    } catch (err) {
-      console.error("Error editing message:", err);
-    }
-  };
-
-  const deleteMessage = async (messageId) => {
-    if (!window.confirm("Are you sure you want to delete this message?")) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/chat/messages/${messageId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
-    } catch (err) {
-      console.error("Error deleting message:", err);
     }
   };
 
   const createPoll = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return;
-
     try {
-      await axios.post(`http://localhost:5000/api/chat/polls/${folderId}`, newPoll, {
+      const res = await axios.post(`http://localhost:5000/api/chat/polls/${folderId}`, newPoll, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const newPollData = { ...res.data, type: "poll" };
+      setItems((prev) => [...prev, newPollData].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
       setNewPoll({ question: "", options: ["", ""] });
       setShowPollForm(false);
-      fetchPolls();
     } catch (err) {
       console.error("Error creating poll:", err);
     }
@@ -212,125 +153,45 @@ const ChatRoom = () => {
   const votePoll = async (pollId, optionIndex) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.post(`http://localhost:5000/api/chat/polls/vote/${pollId}`, {
-        optionIndex,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchPolls();
+      await axios.post(
+        `http://localhost:5000/api/chat/polls/vote/${pollId}`,
+        { optionIndex },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchAll();
     } catch (err) {
       console.error("Error voting:", err);
     }
   };
 
   const deletePoll = async (pollId) => {
-    if (!window.confirm("Are you sure you want to delete this poll?")) return;
-
     const token = localStorage.getItem("token");
     try {
       await axios.delete(`http://localhost:5000/api/chat/polls/${pollId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchPolls();
+      fetchAll();
     } catch (err) {
       console.error("Error deleting poll:", err);
     }
   };
-  const toggleMessageSelection = (messageId) => {
-    setSelectedMessages((prevSelected) => {
-      const newSelected = new Set(prevSelected);
-      if (newSelected.has(messageId)) {
-        newSelected.delete(messageId);
-      } else {
-        newSelected.add(messageId);
-      }
-      return newSelected;
-    });
-  };
-  const deleteSelectedMessages = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    if (!window.confirm("Are you sure you want to delete the selected messages?")) {
-      console.log("❌ Deletion canceled by user.");
-      return;
-  }
 
-    console.log("🚀 Deleting messages:", selectedMessages);
-    console.log("📂 Folder ID:", folderId); // Debugging folderId
-    console.log("🗑 Messages to delete:", [...selectedMessages]); // Debugging messages
-  
-    if (!folderId || selectedMessages.size === 0) {
-      console.error("❌ Missing folderId or no messages selected.");
-      return;
-    }
-  console.log("hello");
-    try {
-      console.log("world");
-     
-      const payload = { messageIds: [...selectedMessages], folderId };
-      console.log("📩 Sending payload to backend:", payload);
-
-      const response = await axios.post(
-          `http://localhost:5000/api/chat/messages/${folderId}/delete-bulk`,
-          payload,
-          {
-              headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-              },
-          }
-      );
-
-      console.log("✅ Deleted messages response:", response.data);
-
-      // Update UI
-      
-      
-      
-      // Remove deleted messages from UI
-      setMessages((prev) => prev.filter((msg) => !selectedMessages.has(msg._id)));
-      setSelectedMessages(new Set());
-      setIsSelecting(false);
-      console.log("✅ Deleted messages response:", response.data);
-    } catch (err) {
-      console.error("❌ Error deleting messages:", err.response ? err.response.data : err.message);
-    }
-  };
   return (
     <div className="flex h-screen bg-[#F3F2FF] font-sans">
-      <div className="w-2/12 h-full bg-white p-6 shadow-md rounded-tr-3xl rounded-br-3xl">
+      {/* Sidebar */}
+      <div className="w-2/12 bg-[#FEFBF0] p-6 shadow-md rounded-tr-3xl rounded-br-3xl">
         <h2 className="text-xl font-bold text-[#FF6B00] mb-6">Group Chat</h2>
-      
-<ul className="space-y-2 text-sm">
-  {['NIKI', 'Samantha', 'Kai', 'Cheena', 'Gori', 'SRK', 'Abhi'].map(name => (
-    <li key={name} className="bg-[#EEE5FF] text-[#2C2C2C] px-3 py-2 rounded-full font-medium hover:bg-[#D6CCFF] cursor-pointer">
-      {name}
-    </li>
-  ))}
-  <li>
-  <div className="flex justify-end mb-4">
-  {isSelecting ? (
-    <button
-      onClick={deleteSelectedMessages}
-      className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm"
-    >
-      Delete Selected ({selectedMessages.size})
-    </button>
-  ) : (
-    <button
-      onClick={() => setIsSelecting(true)}
-      className="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm"
-    >
-      Select Messages
-    </button>
-  )}
-</div>
-
-  </li>
-</ul>
+        <ul className="space-y-2 text-sm">
+          {folderUsers.length > 0 ? folderUsers.map((user) => (
+            <li key={user._id} className="bg-[#EEE5FF] px-3 py-2 rounded-full font-medium hover:bg-[#D6CCFF]">
+              {user.name}
+            </li>
+          )) : <li className="text-gray-500">No users joined yet.</li>}
+        </ul>
       </div>
 
-      <div className="flex-1 flex flex-col px-6 py-4 relative">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col px-6 py-4 relative bg-[#F8F3E7]">
         <div className="absolute right-6 top-6 z-50" ref={dropdownRef}>
           <button onClick={() => setShowDropdown(!showDropdown)} className="p-2 rounded hover:bg-gray-200">
             <FaEllipsisV />
@@ -342,18 +203,15 @@ const ChatRoom = () => {
           )}
         </div>
 
+        {/* Poll Form */}
         {showPollForm && (
           <div className="bg-white p-4 rounded-xl shadow mb-4">
-            <input
-              className="w-full p-2 border mb-2 rounded"
-              placeholder="Poll question"
+            <input className="w-full p-2 border mb-2 rounded" placeholder="Poll question"
               value={newPoll.question}
               onChange={(e) => setNewPoll({ ...newPoll, question: e.target.value })}
             />
             {newPoll.options.map((opt, idx) => (
-              <input
-                key={idx}
-                className="w-full p-2 border mb-2 rounded"
+              <input key={idx} className="w-full p-2 border mb-2 rounded"
                 placeholder={`Option ${idx + 1}`}
                 value={opt}
                 onChange={(e) => {
@@ -371,132 +229,110 @@ const ChatRoom = () => {
           </div>
         )}
 
+        {/* Combined Messages & Polls */}
         <div className="flex-1 overflow-y-auto space-y-4">
-  {messages.map((msg) => (
-    <div key={msg._id} className="p-4 rounded-2xl bg-white shadow text-[#2C2C2C]">
-      <div className="flex items-start">
-        {isSelecting && (
-          <button
-            onClick={() => toggleMessageSelection(msg._id)}
-            className="mr-2 mt-1"
-          >
-            {selectedMessages.has(msg._id) ? (
-              <FaCheckSquare size={20} />
+          {items.map((item) => (
+            item.type === "message" ? (
+              <div key={item._id} className="flex items-center justify-between px-2 py-2 rounded-xl bg-white shadow">
+                <div className="font-bold text-[#063D30] mr-4">{item.sender?.name || "Unknown"}</div>
+                <div className="flex-1 mx-4">
+                  {editingMessage?._id === item._id ? (
+                    <input
+                      type="text"
+                      value={editingMessage.text}
+                      onChange={(e) => setEditingMessage({ ...editingMessage, text: e.target.value })}
+                      className="w-full p-1 border border-[#DDD] rounded-lg"
+                    />
+                  ) : (
+                    <div>{item.text}</div>
+                  )}
+                </div>
+                <div className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                <div className="flex items-center space-x-2 ml-4">
+                  {editingMessage?._id === item._id ? (
+                    <button onClick={async () => {
+                      const token = localStorage.getItem("token");
+                      if (!token) return;
+                      const res = await axios.put(
+                        `http://localhost:5000/api/chat/messages/${item._id}`,
+                        { text: editingMessage.text },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      setItems((prev) =>
+                        prev.map((m) => (m._id === item._id ? { ...m, text: res.data.text } : m))
+                      );
+                      setEditingMessage(null);
+                      socket.emit("edit_message", { folderId, message: res.data });
+                    }} className="text-green-500 text-xs">Save</button>
+                  ) : (
+                    <button onClick={() => setEditingMessage({ ...item })} className="text-yellow-500 text-xs flex items-center">
+                      <FaEdit className="mr-1" />
+                    </button>
+                  )}
+                  <button onClick={() => {
+                    if (window.confirm("Delete message?")) {
+                      const token = localStorage.getItem("token");
+                      axios.delete(`http://localhost:5000/api/chat/messages/${item._id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      setItems((prev) => prev.filter((i) => i._id !== item._id));
+                    }
+                  }} className="text-red-500 text-xs flex items-center">
+                    <FaTrash className="mr-1" />
+                  </button>
+                </div>
+              </div>
             ) : (
-              <FaSquare size={20} />
-            )}
-          </button>
-        )}
-        <div className="flex-1">
-          <strong className="text-[#6C63FF]">{msg.sender?.name || "Unknown User"}:</strong>
-          {editingMessage?._id === msg._id ? (
-            <input
-              type="text"
-              value={editingMessage.text}
-              onChange={(e) =>
-                setEditingMessage({ ...editingMessage, text: e.target.value })
-              }
-              className="w-full mt-2 p-2 border border-[#DDD] rounded-lg"
-            />
-          ) : (
-            <div className="mt-1 text-base">{msg.text}</div>
-          )}
-          <div className="text-xs text-gray-500 mt-2">
-            {new Date(msg.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
+              <div key={item._id} className="p-4 bg-white rounded shadow">
+                <div className="font-bold mb-2">{item.question}</div>
+                {item.options.map((opt, idx) => {
+                  const totalVotes = item.options.reduce((sum, o) => sum + o.votes.length, 0);
+                  const percentage = totalVotes ? (opt.votes.length / totalVotes) * 100 : 0;
+                  return (
+                    <div key={idx} className="mb-2">
+                      <div className="flex justify-between text-sm">
+                        <span>{opt.text}</span>
+                        <span>{opt.votes.length} votes</span>
+                      </div>
+                      <div className="w-full h-4 bg-[#EEE5FF] rounded-full" onClick={() => votePoll(item._id, idx)}>
+                        <div className="h-full bg-[#6C63FF]" style={{ width: `${percentage}%` }}></div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <button onClick={() => deletePoll(item._id)} className="text-red-500 mt-2 text-sm">Delete Poll</button>
+              </div>
+            )
+          ))}
+        </div>
+
+        {/* Message Input */}
+        <div className="p-4 bg-white border-t mt-4 flex items-center relative rounded-2xl shadow-md">
           <button
-            onClick={() => toggleSeenBy(msg._id)}
-            className="mt-2 text-sm text-[#6C63FF] flex items-center"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="mr-3 p-2 bg-[#EEE5FF] hover:bg-[#D6CCFF] rounded-full"
           >
-            <FaEye className="mr-1" />
-            {msg.seenBy?.length > 0
-              ? `Seen by ${msg.seenBy.length}`
-              : "Not Seen"}
+            <FaSmile size={22} className="text-[#6C63FF]" />
           </button>
-          {seenByMap[msg._id] && (
-            <div className="mt-2 text-xs bg-[#FAF9FF] p-2 rounded-lg border border-gray-100">
-              {msg.seenBy?.length > 0 ? (
-                msg.seenBy.map((user) => (
-                  <div key={user._id}>{user.name}</div>
-                ))
-              ) : (
-                <p>No one has seen this yet</p>
-              )}
+          {showEmojiPicker && (
+            <div ref={emojiPickerRef} className="absolute bottom-16 left-4 z-10 bg-white shadow-xl p-3 rounded-lg border border-gray-200">
+              <EmojiPicker onEmojiClick={(e) => setNewMessage((prev) => prev + e.emoji)} />
             </div>
           )}
-          <div className="flex space-x-3 mt-2">
-            {editingMessage?._id === msg._id ? (
-              <button onClick={saveEdit} className="text-green-500 text-xs">Save</button>
-            ) : (
-              <button onClick={() => startEditing(msg)} className="text-yellow-500 text-xs flex items-center">
-                <FaEdit className="mr-1" /> Edit
-              </button>
-            )}
-            <button onClick={() => deleteMessage(msg._id)} className="text-red-500 text-xs flex items-center">
-              <FaTrash className="mr-1" /> Delete
-            </button>
-          </div>
+          <input
+            type="text"
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
+            className="flex-1 p-3 border rounded-xl mr-3 focus:outline-none bg-[#FFD800]"
+          />
+          <button onClick={sendMessage} className="p-2 bg-[#FF6B00] rounded-full text-white hover:bg-[#e55b00]">
+            <FaPaperPlane size={20} />
+          </button>
         </div>
       </div>
     </div>
-  ))}
-
-  {/* Polls */}
-  {polls.map((poll) => (
-    <div key={poll._id} className="p-4 bg-white rounded shadow">
-      <div className="font-bold mb-2">{poll.question}</div>
-      {poll.options.map((opt, idx) => (
-        <button
-          key={idx}
-          onClick={() => votePoll(poll._id, idx)}
-          className="block w-full text-left bg-[#EEE5FF] hover:bg-[#D6CCFF] px-3 py-2 my-1 rounded"
-        >
-          {opt.text} — {opt.votes.length} votes
-        </button>
-      ))}
-      <button onClick={() => deletePoll(poll._id)} className="text-red-500 mt-2 text-sm">Delete Poll</button>
-    </div>
-  ))}
-
-  {/* Message input */}
-  <div className="p-4 bg-white border-t mt-4 flex items-center relative rounded-2xl shadow-md">
-    <button
-      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-      className="mr-3 p-2 bg-[#EEE5FF] hover:bg-[#D6CCFF] rounded-full"
-    >
-      <FaSmile size={22} className="text-[#6C63FF]" />
-    </button>
-    {showEmojiPicker && (
-      <div ref={emojiPickerRef} className="absolute bottom-16 left-4 z-10 bg-white shadow-xl p-3 rounded-lg border border-gray-200">
-        <EmojiPicker onEmojiClick={handleEmojiClick} />
-      </div>
-    )}
-    <input
-      type="text"
-      placeholder="Type a message..."
-      value={newMessage}
-      onChange={(e) => setNewMessage(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          sendMessage();
-        }
-      }}
-      className="flex-1 p-3 border border-gray-300 rounded-xl mr-3 focus:outline-none"
-    />
-    <button
-      onClick={sendMessage}
-      className="p-2 bg-[#FF6B00] rounded-full text-white hover:bg-[#e55b00]"
-    >
-      <FaPaperPlane size={20} />
-    </button>
-  </div>
-</div>
-  </div>
-  </div>
   );
 };
 

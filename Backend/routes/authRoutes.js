@@ -3,8 +3,10 @@ import { register, login, logout,sendotp } from "../Controllers/authController/a
 import { AuthMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
-// Define auth routes
+// Route for user registration
 router.post("/register", register);
+
+// Route for user login
 router.post("/login", login);
 router.post("/logout",AuthMiddleware, logout);
 router.post("/sendotp",sendotp);
