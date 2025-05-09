@@ -271,7 +271,7 @@ const ChatRoom = () => {
       console.log("📩 Sending payload to backend:", payload);
 
       const response = await axios.post(
-          `http://localhost:5000/api/chat/messages/${folderId}/delete-bulk`,
+          "http://localhost:5000/api/chat/messages/${folderId}/delete-bulk",
           payload,
           {
               headers: {
