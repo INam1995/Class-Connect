@@ -339,50 +339,6 @@ const FolderDetail = () => {
                 </div>
               </div>
 
-              {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {folder.pdfs?.map(pdf => (
-                  <div key={pdf._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between">
-                      <div className="flex items-center">
-                        <FaFilePdf className="text-red-500 mr-2" />
-                        <p className="font-medium truncate max-w-xs">{pdf.name}</p>
-                      </div>
-                      <div className="flex space-x-1">
-                        <button 
-                          onClick={() => handleViewPdf(pdf)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                          title="View"
-                        >
-                          👁️
-                        </button>
-                        <button 
-                          onClick={() => handleDownloadPdf(pdf)}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded"
-                          title="Download"
-                        >
-                          ⬇️
-                        </button>
-                        <button 
-                          onClick={() => handleSummarize(pdf.path)}
-                          className="p-1 text-purple-600 hover:bg-purple-50 rounded"
-                          title="Summarize"
-                        >
-                          ✍️
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex justify-between items-center">
-                      <p className="text-sm text-gray-500">{pdf.size || "N/A"}</p>
-                      <button
-                        onClick={() => handleToggleCompletion(pdf._id, !pdf.userCompleted)}
-                        className={`w-4 h-4 rounded-full border ${pdf.userCompleted ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500'}`}
-                        title={pdf.userCompleted ? "Mark as incomplete" : "Mark as complete"}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div> */}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {folder.pdfs?.map(pdf => (
                   <div key={pdf._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
