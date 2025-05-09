@@ -19,14 +19,11 @@ const FolderDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [selectedPdfName, setSelectedPdfName] = useState(null);
   const [pdfProgress, setPdfProgress] = useState({});
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
 
-  const socket = io("http://localhost:5000", {
-    transports: ["websocket"],
-  });
+  const socket = io("http://localhost:5000", { transports: ["websocket"] });
 
   useEffect(() => {
     socket.on('connect', () => console.log('Connected to Socket.IO server'));
@@ -99,7 +96,6 @@ const FolderDetail = () => {
   const handleSummarize = async (pdfUrl) => {
     setLoading(true);
     setCurrentPdf(pdfUrl);
-    setSelectedPdfName(pdfUrl);
     try {
       const { data } = await axios.post('http://localhost:5000/api/summarize-url', { pdfUrl });
       setSummary(data.summary);
@@ -151,6 +147,11 @@ const FolderDetail = () => {
     return total === 0 ? 0 : ((completed / total) * 100).toFixed(2);
   };
 
+  const handleViewPdf = (pdf) => {
+    setViewPdfUrl(pdf.path);
+    setIsPdfViewerOpen(true);
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto text-gray-800">
       <div className="flex justify-between items-center mb-6">
@@ -159,6 +160,7 @@ const FolderDetail = () => {
           <p className="text-sm text-gray-600">Subject: {folder.subject}</p>
           <p className="text-sm">Overall Progress: {calculateOverallProgress()}%</p>
         </div>
+
         <div className="relative">
           <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 bg-purple-100 rounded-full hover:bg-purple-200">
             <IoIosNotifications className="text-2xl text-purple-700" />
@@ -168,6 +170,7 @@ const FolderDetail = () => {
               </span>
             )}
           </button>
+
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-10">
               <div className="p-4">
@@ -192,77 +195,25 @@ const FolderDetail = () => {
         {pdfFile && <div className="mt-2 flex items-center justify-center space-x-2"><FaFilePdf className="text-red-500 text-xl" /><p>{pdfFile.name}</p></div>}
       </div>
 
-<<<<<<< HEAD
       <button onClick={handleUploadPdf} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
         {uploading ? "Uploading..." : "Upload PDF"}
       </button>
-      <br />
-   
+
       <button
-  onClick={() => navigate(`/chatroom/${folderId}`)}
-  className="mt-2 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
-=======
-      <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
-        <div
-          className="bg-blue-500 h-4 rounded-full transition-all"
-          style={{ width: `${calculateOverallProgress()}%` }}
-        ></div>
-      </div>
-      <p className="text-sm text-gray-700">Overall Progress: {calculateOverallProgress()}%</p>
+        onClick={() => navigate(`/chatroom/${folderId}`)}
+        className="mt-4 bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-all"
+      >
+        Go to Chatroom
+      </button>
 
-      <div className="mt-5">
-        <button
-          onClick={() => navigate(`/chatroom/${folderId}`)}
-          className="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 mb-4"
-        >
-          Start Chat
-        </button>
-
-        <h3 className="text-xl">📄 Uploaded PDFs</h3>
-        {folder.pdfs.length > 0 ? (
-          <ul>
-            {folder.pdfs.map((pdf) => (
-              <li key={pdf._id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                <p className="font-semibold">{pdf.name}</p>
-                <div className="flex space-x-4 mt-2">
-                  <div className="flex space-x-2">
-                    <button
-                      className={`w-6 h-6 rounded-full transition-all ${
-                        pdfProgress[pdf._id] ? "bg-green-500" : "bg-gray-300"
-                      }`}
-                      onClick={() => toggleCompletion(pdf._id, true)}
-                    ></button>
-                    <button
-                      className={`w-6 h-6 rounded-full transition-all ${
-                        !pdfProgress[pdf._id] ? "bg-red-500" : "bg-gray-300"
-                      }`}
-                      onClick={() => toggleCompletion(pdf._id, false)}
-                    ></button>
-                  </div>
-                  {isPdfViewerOpen && viewPdfUrl && (
-  <PdfEditor url={viewPdfUrl} onClose={() => setIsPdfViewerOpen(false)} />
-)}
-
-<button
-  onClick={() => handleViewPdf(pdf)}
-  className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600"
->>>>>>> c551efa1a64ee1f8412be0677114a946bf5f3e81
->
-  Start Chat
-</button>
-
-      
-
-      <div className="w-full bg-gray-300 h-3 rounded mt-4">
-        
-        <div className="bg-purple-600 h-3 rounded transition-all duration-300" style={{ width: `${calculateOverallProgress()}%` }}></div>
+      <div className="w-full bg-gray-200 rounded-full h-4 my-4">
+        <div className="bg-blue-500 h-4 rounded-full transition-all" style={{ width: `${calculateOverallProgress()}%` }}></div>
       </div>
 
-
-      <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-2">📄 Uploaded PDFs</h3>
+      <h3 className="text-xl font-semibold mb-4">📄 Uploaded PDFs</h3>
+      {folder.pdfs.length > 0 ? (
         <ul className="space-y-4">
-          {folder.pdfs.map(pdf => (
+          {folder.pdfs.map((pdf) => (
             <li key={pdf._id} className="p-4 border rounded-lg shadow-sm bg-white">
               <div className="flex justify-between items-center">
                 <span className="font-medium text-lg text-purple-700">{pdf.name}</span>
@@ -270,9 +221,8 @@ const FolderDetail = () => {
                   <button onClick={() => toggleCompletion(pdf._id, true)} className={`w-6 h-6 rounded-full ${pdfProgress[pdf._id] ? 'bg-green-500' : 'bg-gray-300'}`}></button>
                   <button onClick={() => toggleCompletion(pdf._id, false)} className={`w-6 h-6 rounded-full ${!pdfProgress[pdf._id] ? 'bg-red-500' : 'bg-gray-300'}`}></button>
                 </div>
-<<<<<<< HEAD
               </div>
-              
+
               <div className="flex flex-wrap gap-3 mt-2">
                 <button onClick={() => handleViewPdf(pdf)} className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">View PDF</button>
                 <a href={`http://localhost:5000/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`} onClick={(e) => trackDownload(e, pdf)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Download</a>
@@ -283,46 +233,9 @@ const FolderDetail = () => {
             </li>
           ))}
         </ul>
-=======
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No PDFs found for this folder.</p>
-        )}
-        {folder.pdfs.map((pdf) => (
-          <div key={pdf._id} className="flex justify-between items-center mb-3">
-            <div className="flex items-center">
-              <FaFilePdf size={20} className="text-red-600 mr-2" />
-              <span>{pdf.name}</span>
-            </div>
-
-            <div>
-              <button
-                onClick={() => handleSummarize(pdf.url)}
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-              >
-                Summarize
-              </button>
-
-              <button
-                onClick={(e) => trackDownload(e, pdf)}
-                className="ml-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-              >
-                Download
-              </button>
-
-              <button
-                onClick={() => toggleCompletion(pdf._id, !pdfProgress[pdf._id])}
-                className="ml-2 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-              >
-                {pdfProgress[pdf._id] ? "Mark Incomplete" : "Mark Complete"}
-              </button>
-            </div>
-          </div>
-        ))}
->>>>>>> c551efa1a64ee1f8412be0677114a946bf5f3e81
-      </div>
+      ) : (
+        <p className="text-gray-500">No PDFs found for this folder.</p>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

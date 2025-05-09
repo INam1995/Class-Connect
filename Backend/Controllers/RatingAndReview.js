@@ -5,7 +5,8 @@ import mongoose from "mongoose";
 // ✅ Create a rating for a PDF
 export const createRating = async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.user.id); // ✅ Fix: convert to ObjectId
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+    // ✅ Fix: convert to ObjectId
     const { rating, review, pdfId, folderId } = req.body;
 
     const alreadyReviewed = await RatingAndReview.findOne({

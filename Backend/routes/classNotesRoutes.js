@@ -6,25 +6,23 @@ import AuthMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Multer configuration (same as before)
+// Multer configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Store files in 'uploads' folder
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // Add timestamp to the filename
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
 const upload = multer({ storage });
 
 // Routes
-router.post("/rate", AuthMiddleware, createRating); // Add this if missing
-router.get("/reviews", getAllRating); // Optional if needed elsewhere
-
+router.post("/rate", AuthMiddleware, createRating);
+router.get("/reviews", getAllRating); // Optional
 router.get("/", getClassNotes);
 router.post("/upload", upload.single("file"), uploadClassNote);
-router.post('/upload', AuthMiddleware, upload.single('file'), uploadClassNote);
-
+router.post("/upload", AuthMiddleware, upload.single("file"), uploadClassNote);
 
 export default router;

@@ -1,199 +1,227 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
 
-const ClassNotes = () => {
-  const [notes, setNotes] = useState([]);
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+// const ClassNotes = () => {
+//   const [notes, setNotes] = useState([]);
+//   const [file, setFile] = useState(null);
+//   const [uploading, setUploading] = useState(false);
+//   const [reviewState, setReviewState] = useState({}); // { [pdfId]: { rating, review } }
 
-  useEffect(() => {
-    fetchNotes();
-  }, []);
+//   useEffect(() => {
+//     fetchNotes();
+//   }, []);
 
-  const fetchNotes = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/class-notes");
-      setNotes(response.data);
-    } catch (error) {
-      console.error("Error fetching class notes:", error);
-    }
-  };
+//   const fetchNotes = async () => {
+//     try {
+//       const { data } = await axios.get("http://localhost:5000/api/class-notes");
+//       setNotes(data);
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
 
-  const handleUpload = async () => {
-    if (!file) {
-      alert("Please select a file to upload.");
-      return;
-    }
-  
-    // Get user ID from localStorage or authentication context
-    const userId = localStorage.getItem("userId"); // Make sure you set this at login
-    const folderId = "65e75f9e2b1a4c3f947ea1b7"; // Replace with dynamic folder ID if needed
-  
-    if (!userId) {
-      alert("User not logged in. Please log in again.");
-      return;
-    }
-  
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folderId", folderId);
-    formData.append("uploadedBy", userId);
-    formData.append("topic", "Math Notes"); // Optional: Replace with dynamic topic if needed
-  
-    try {
-      setUploading(true);
-      
-          // Change this in ClassNotes.jsx
-await axios.post("http://localhost:5000/api/class-notes/upload", formData, {
-  headers: { "Content-Type": "multipart/form-data" },
-});
+//   const handleUpload = async () => {
+//     if (!file) return alert("Please select a file.");
+//     const stored = localStorage.getItem("user");
+//     const user = stored ? JSON.parse(stored) : {};
+//     if (!user._id) return alert("Log in first.");
 
-     
-      alert("File uploaded successfully ✅");
-      setFile(null);
-      document.getElementById("fileInput").value = "";
-      fetchNotes();
-    } catch (error) {
-      console.error("❌ Error uploading class note:", error.response?.data || error.message);
-      alert("Failed to upload file. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
-  
-  const handleRating = async (pdfId, rating) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("You need to log in first.");
-        return;
-      }
-      const userId = localStorage.getItem("userId");
-if (!userId) {
-  alert("User not logged in.");
-  return;
-}
+//     const formData = new FormData();
+//     formData.append("file", file);
+//     formData.append("folderId", "65e75f9e2b1a4c3f947ea1b7");
+//     formData.append("uploadedBy", user._id);
+//     formData.append("topic", "Math Notes");
 
+//     try {
+//       setUploading(true);
+//       await axios.post(
+//         "http://localhost:5000/api/class-notes/upload",
+//         formData,
+//         { headers: { "Content-Type": "multipart/form-data" } }
+//       );
+//       alert("Uploaded");
+//       setFile(null);
+//       fetchNotes();
+//     } catch (e) {
+//       console.error(e);
+//       alert("Upload failed");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
 
-      const response = await axios.post(
-        "http://localhost:5000/api/class-notes/rate",
-        {
-          pdfId,
-          userId,
-          rating,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+//   // Utility: get auth token from localStorage
+//   const getAuthToken = () => {
+//     let token = localStorage.getItem("token");
+//     if (!token) {
+//       const stored = localStorage.getItem("user");
+//       const user = stored ? JSON.parse(stored) : {};
+//       token = user.token;
+//     }
+//     return token;
+//   };
 
-      alert(`Rating submitted! New Average: ${response.data.averageRating}`);
-      fetchNotes();
-    } catch (error) {
-      console.error("Error rating PDF:", error.response?.data || error);
-      alert("Failed to submit rating.");
-    }
-  };
+//   const handleRating = async (pdfId, rating) => {
+//     const stored = localStorage.getItem("user");
+//     const user = stored ? JSON.parse(stored) : {};
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">📚 Class Notes</h2>
+//     try {
+//       // Update the rating state immediately
+//       setReviewState((prevState) => ({
+//         ...prevState,
+//         [pdfId]: { ...prevState[pdfId], rating }, // update the rating for this note
+//       }));
 
-      {/* File Upload Section */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-        <input
-          id="fileInput"
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="block w-full border border-gray-300 rounded-md p-2 text-gray-700"
-        />
-        <button
-          onClick={handleUpload}
-          disabled={uploading}
-          className={`px-5 py-2 text-white font-semibold ${
-            uploading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-          } rounded-md shadow-md transition duration-300`}
-        >
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
-      </div>
+//       // Send the rating to the backend
+//       await axios.post("http://localhost:5000/api/class-notes/rate", {
+//         pdfId,
+//         userId: user._id,
+//         rating,
+//       });
 
-      {/* Notes List */}
-      <ul className="space-y-6">
-        {notes.length === 0 ? (
-          <p className="text-gray-500 text-center">
-            No notes available. Upload your first note!
-          </p>
-        ) : (
-          notes.map((note) => (
-            <li
-              key={note._id}
-              className="bg-white p-5 rounded-md shadow-md border border-gray-200"
-            >
-              <h3 className="font-semibold text-xl text-gray-800 mb-1">
-                📂 {note.name}
-              </h3>
-              <p className="text-gray-600">
-                👤 Uploaded by: {note.uploadedBy?.name || "Unknown"}
-              </p>
-              <p className="text-gray-600">
-                🕒 Uploaded on: {new Date(note.createdAt).toLocaleString()}
-              </p>
+//       fetchNotes(); // refresh list
+//     } catch (err) {
+//       console.error("Rating failed:", err);
+//       alert("Rating failed. Try again.");
+//     }
+//   };
 
-              <a
-                href={`http://localhost:5000${note.path}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline inline-block mt-2"
-              >
-                View PDF
-              </a>
+//   const handleSubmitReview = async (pdfId) => {
+//     const token = getAuthToken();
+//     if (!token) return alert("Log in first.");
+//     const { rating, review } = reviewState[pdfId] || {};
+//     if (!rating || !review) return alert("Select stars and type review.");
+//     const note = notes.find((n) => n._id === pdfId) || {};
+//     const folderId = note.folderId;
+//     try {
+//       await axios.post(
+//         "http://localhost:5000/api/class-notes/rate",
+//         { pdfId, rating, review, folderId },
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+//       alert("Review submitted");
+//       setReviewState((rs) => {
+//         const newState = { ...rs };
+//         delete newState[pdfId];
+//         return newState;
+//       });
+//       fetchNotes();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Submit failed");
+//     }
+//   };
 
-              <div className="mt-4 flex flex-col gap-1">
-                <p className="text-gray-600">
-                  ⭐ Avg Rating: {note.averageRating || "No ratings yet"}
-                </p>
-                <p className="text-gray-600">
-                  👥 Rated by: {note.ratingCount || 0} users
-                </p>
-                <div className="flex gap-1 mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      onClick={() => handleRating(note._id, star)}
-                      className="text-yellow-500 text-xl hover:scale-110 transition"
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-              </div>
+//   return (
+//     <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-lg">
+//       <h2 className="text-3xl font-bold mb-6">Class Notes(written by goat people)</h2>
 
-              {/* Review Section */}
-              {note.reviews && note.reviews.length > 0 && (
-                <div className="mt-5 border-t pt-3">
-                  <h4 className="font-semibold text-gray-700 mb-2">💬 Reviews:</h4>
-                  <ul className="pl-4 list-disc text-sm text-gray-600 space-y-1">
-                    {note.reviews.map((r, idx) => (
-                      <li key={idx}>
-                        <span className="font-semibold">
-                          {r.user?.name || "Anonymous"}:
-                        </span>{" "}
-                        {r.review}
-                        <span className="text-xs text-gray-400 ml-2">
-                          ({new Date(r.createdAt).toLocaleString()})
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </li>
-          ))
-        )}
-      </ul>
-    </div>
-  );
-};
+//       <div className="flex items-center gap-4 mb-6">
+//         <input
+//           type="file"
+//           onChange={(e) => setFile(e.target.files[0])}
+//           className="border rounded p-2"
+//         />
+//         <button
+//           onClick={handleUpload}
+//           disabled={uploading}
+//           className="px-4 py-2 bg-blue-500 text-white rounded"
+//         >
+//           {uploading ? "Uploading..." : "Upload"}
+//         </button>
+//       </div>
 
-export default ClassNotes;
+//       <ul className="space-y-6">
+//         {notes.map((note) => (
+//           <li key={note._id} className="bg-white p-5 rounded shadow">
+//             <h3 className="text-xl font-semibold mb-1">{note.name}</h3>
+//             <p>By: {note.uploadedBy?.name || "Unknown"}</p>
+//             <p>{new Date(note.createdAt).toLocaleString()}</p>
+//             <a
+//               href={note.path}
+//               target="_blank"
+//               rel="noopener noreferrer"
+//               className="text-blue-500 underline"
+//             >
+//               View PDF
+//             </a>
+
+//             <div className="mt-4">
+//               <p>Avg Rating: {note.averageRating || "N/A"}</p>
+//               <div className="flex gap-1 mt-1">
+//                 {[1, 2, 3, 4, 5].map((s) => (
+//                   <button
+//                     key={s}
+//                     onClick={() => handleRating(note._id, s)} // Trigger rating on click
+//                     className={
+//                       (reviewState[note._id]?.rating || 0) >= s
+//                         ? "text-yellow-500"
+//                         : "text-gray-300"
+//                     }
+//                   >
+//                     ★
+//                   </button>
+//                 ))}
+//               </div>
+//             </div>
+
+//             {note.reviews?.length > 0 && (
+//               <div className="mt-4 border-t pt-2">
+//                 <h4 className="font-semibold">Reviews:</h4>
+//                 {note.reviews.map((r, i) => (
+//                   <div key={i} className="mt-1">
+//                     <strong>{r.user?.name || "Anon"}:</strong> {r.review}
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+
+//             <div className="mt-4 border-t pt-2">
+//               <h4 className="font-semibold mb-2">Leave a review</h4>
+//               <div className="flex items-start gap-2">
+//                 {[1, 2, 3, 4, 5].map((s) => (
+//                   <button
+//                     key={s}
+//                     onClick={() =>
+//                       setReviewState((rs) => ({
+//                         ...rs,
+//                         [note._id]: { ...rs[note._id], rating: s },
+//                       }))
+//                     }
+//                     className={
+//                       (reviewState[note._id]?.rating || 0) >= s
+//                         ? "text-yellow-500"
+//                         : "text-gray-300"
+//                     }
+//                   >
+//                     ★
+//                   </button>
+//                 ))}
+//                 <textarea
+//                   rows={2}
+//                   value={reviewState[note._id]?.review || ""}
+//                   onChange={(e) =>
+//                     setReviewState((rs) => ({
+//                       ...rs,
+//                       [note._id]: { ...rs[note._id], review: e.target.value },
+//                     }))
+//                   }
+//                   className="flex-1 border rounded p-1"
+//                   placeholder="Your review..."
+//                 />
+//               </div>
+//               <button
+//                 onClick={() => handleSubmitReview(note._id)}
+//                 className="mt-2 px-3 py-1 bg-green-500 text-white rounded"
+//               >
+//                 Submit Review
+//               </button>
+//             </div>
+//           </li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// };
+
+// export default ClassNotes;

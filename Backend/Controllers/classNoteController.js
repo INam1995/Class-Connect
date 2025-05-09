@@ -109,10 +109,10 @@ export const uploadClassNote = async (req, res) => {
 // ✅ Add rating to a PDF
 export const ratePdf = async (req, res) => {
   try {
-    const { pdfId, userId, rating } = req.body;
-    console.log("Incoming request:", { pdfId, userId, rating });
+    const { pdfId, rating } = req.body;
+    const userId = req.user._id; // ✅ user from token
 
-    if (!pdfId || !userId || !rating) {
+    if (!pdfId || !rating) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -128,22 +128,17 @@ export const ratePdf = async (req, res) => {
       return res.status(404).json({ message: "PDF not found" });
     }
 
-    // ✅ Check if the user already rated this PDF
-    const existingRating = pdf.ratings.find((r) => r.userId.toString() === userId);
+    const existingRating = pdf.ratings.find((r) => r.userId.toString() === userId.toString());
 
     if (existingRating) {
-      console.log("✅ Updating existing rating");
       existingRating.rating = rating;
     } else {
-      console.log("✅ Adding new rating");
       pdf.ratings.push({ userId: objectIdUserId, rating });
     }
 
-    // ✅ Calculate new average rating
     pdf.averageRating =
       pdf.ratings.reduce((acc, curr) => acc + curr.rating, 0) / pdf.ratings.length;
 
-    // ✅ Ensure the updated rating is saved
     await pdf.save();
 
     res.status(200).json({ message: "Rating added successfully", averageRating: pdf.averageRating });
@@ -152,3 +147,4 @@ export const ratePdf = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
