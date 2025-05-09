@@ -193,11 +193,15 @@ const Dashboard = () => {
           {/* Right Side: Buttons + Filter Tabs */}
           <div className="flex items-center gap-4 flex-wrap justify-end">
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
               onClick={() => setIsModalOpen(true)}
+              style={{ borderRadius: "0.3rem" }}
             >
               ➕ Create / Join Folder
             </button>
+            
+
+
   
             {/* Filter Tabs */}
             {["created", "joined", "whiteboard"].map((tab) => (
@@ -215,6 +219,7 @@ const Dashboard = () => {
                     ? "bg-black text-white border-black"
                     : "bg-white text-black border-black"
                 }`}
+                style={{ borderRadius: "0.5rem" }}
               >
                 {tab === "created"
                   ? "Created"

@@ -60,6 +60,7 @@ const Register = () => {
     }
 
     try {
+      console.log("hey");
       const otpResponse = await fetch("http://localhost:5000/api/auth/sendotp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
