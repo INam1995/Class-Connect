@@ -155,25 +155,72 @@ const FolderDetail = () => {
     }
   };
 
-  const handleToggleCompletion = async (pdfId, markAsComplete) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `/api/folders/${folderId}/${pdfId}/progress`,
-        { completed: markAsComplete },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  // const handleToggleCompletion = async (pdfId, markAsComplete) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+      
+  //     await axios.patch(
+  //       `/api/folders/${folderId}/${pdfId}/progress`,
+  //       { completed: markAsComplete },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
 
-      setFolder(prev => ({
+  //     setFolder(prev => ({
+  //       ...prev,
+  //       pdfs: prev.pdfs.map(pdf => 
+  //         pdf._id === pdfId ? { ...pdf, userCompleted: markAsComplete } : pdf
+  //       )
+  //     }));
+  //   } catch (error) {
+  //     console.error("Error updating progress:", error);
+  //   }
+  // };
+
+
+  const handleToggleCompletion = async (pdfId, markAsComplete) => {
+  try {
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+
+    // Update backend
+    await axios.patch(
+      `/api/folders/${folderId}/${pdfId}/progress`,
+      { completed: markAsComplete },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // Update local state
+    setFolder(prev => {
+      const updatedPdfs = prev.pdfs.map(pdf => {
+        if (pdf._id === pdfId) {
+          return { ...pdf, userCompleted: markAsComplete };
+        }
+        return pdf;
+      });
+
+      // Calculate new progress
+      const totalPdfs = updatedPdfs.length;
+      const completedPdfs = updatedPdfs.filter(pdf => pdf.userCompleted).length;
+      const userProgressPercentage = totalPdfs > 0 
+        ? Math.round((completedPdfs / totalPdfs) * 100) 
+        : 0;
+
+      return {
         ...prev,
-        pdfs: prev.pdfs.map(pdf => 
-          pdf._id === pdfId ? { ...pdf, userCompleted: markAsComplete } : pdf
-        )
-      }));
-    } catch (error) {
-      console.error("Error updating progress:", error);
-    }
-  };
+        pdfs: updatedPdfs,
+        completedPdfs,
+        totalPdfs,
+        userProgressPercentage
+      };
+    });
+
+  } catch (error) {
+    console.error("Error updating progress:", error);
+  }
+};
+  
+
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
@@ -279,22 +326,22 @@ const FolderDetail = () => {
                     💬 Start Chat
                   </button>
                   {/* Notification Dropdown */}
-  {showNotifications && (
-    <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 border border-gray-200">
-      <div className="p-2 max-h-60 overflow-y-auto">
-        {notifications.length > 0 ? (
-          notifications.map((notification, index) => (
-            <div key={index} className="p-2 hover:bg-gray-100 rounded">
-              <p className="text-sm font-medium">{notification.title}</p>
-              <p className="text-xs text-gray-500">{notification.message}</p>
-            </div>
-          ))
-        ) : (
-          <p className="p-2 text-sm text-gray-500">No notifications</p>
-        )}
-      </div>
-    </div>
-  )}
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 border border-gray-200">
+                    <div className="p-2 max-h-60 overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        notifications.map((notification, index) => (
+                          <div key={index} className="p-2 hover:bg-gray-100 rounded">
+                            <p className="text-sm font-medium">{notification.title}</p>
+                            <p className="text-xs text-gray-500">{notification.message}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="p-2 text-sm text-gray-500">No notifications</p>
+                      )}
+                    </div>
+                  </div>
+                )}
                 </div>
                 
               </div>
@@ -313,7 +360,7 @@ const FolderDetail = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {folder.pdfs?.map(pdf => (
                   <div key={pdf._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                     <div className="flex justify-between">
@@ -355,12 +402,117 @@ const FolderDetail = () => {
                     </div>
                   </div>
                 ))}
+              </div> */}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {folder.pdfs?.map(pdf => (
+                  <div key={pdf._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    {/* PDF Name and Size */}
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center">
+                        <FaFilePdf className="text-red-500 mr-3 text-xl" />
+                        <div>
+                          <p className="font-medium">{pdf.name}</p>
+                          <p className="text-sm text-gray-500 mt-1">{pdf.size || "2.4 MB"}</p>
+                        </div>
+                      </div>
+        
+                      {/* Dropdown Menu */}
+                      <div className="relative">
+                        <button 
+                          className="p-1 text-gray-500 hover:bg-gray-100 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveDropdown(activeDropdown === pdf._id ? null : pdf._id);
+                          }}
+                        >
+                          <FaEllipsisV />
+                        </button>
+          
+                    {activeDropdown === pdf._id && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                        <button
+                          onClick={() => handleViewPdf(pdf)}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          View PDF
+                        </button>
+                        <button
+                          onClick={() => handleDownloadPdf(pdf)}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                        Download
+                      </button>
+                      <button
+                        onClick={() => handleSummarize(pdf.path)}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Summarize
+                      </button>
+                    </div>
+                )}
               </div>
+          </div>
+
+      {/* Completion Toggle */}
+      <div className="mt-4 flex items-center justify-between pt-2 border-t border-gray-100">
+        <span className="text-sm text-gray-500">
+          {pdf.userCompleted ? "Completed" : "Not completed"}
+        </span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input 
+            type="checkbox" 
+            className="sr-only peer" 
+            checked={pdf.userCompleted || false}
+            onChange={() => handleToggleCompletion(pdf._id, !pdf.userCompleted)}
+          />
+          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+        </label>
+      </div>
+    </div>
+  ))}
+</div>
+
             </div>
           </div>
 
           {/* Right Section - Members & Description */}
           <div className="lg:w-1/4 space-y-6">
+            {/* Description Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">Description</h2>
+              <p className="text-gray-700">
+                {folder.description || "No description available."}
+              </p>
+            </div>
+
+            {/* Progress Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <h2 className="text-xl font-semibold mb-4">My Progress</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Completion</span>
+                    <span className="text-sm font-medium">
+                      {folder.completedPdfs || 0}/{folder.totalPdfs || 0} (
+                      {folder.userProgressPercentage || 0}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className="bg-orange-500 h-2.5 rounded-full" 
+                      style={{ width: `${folder.userProgressPercentage || 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <p className="text-sm text-gray-600">
+                    {folder.completedPdfs || 0} of {folder.totalPdfs || 0} documents completed
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Members Section */}
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Joined Members</h2>
@@ -377,14 +529,6 @@ const FolderDetail = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Description Section */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Description</h2>
-              <p className="text-gray-700">
-                {folder.description || "No description available."}
-              </p>
             </div>
           </div>
         </div>
