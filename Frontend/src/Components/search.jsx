@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { InputGroup, Form, Button } from "react-bootstrap";
-import axios from "axios";
 
 const SearchBar = ({ onSearch, resetSearch }) => {
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
