@@ -5,6 +5,7 @@ const folderSchema = new mongoose.Schema(
     name: { type: String, required: true },
     subject: { type: String, required: true },
     uniqueKey: { type: String, unique: true, required: true },
+    // description: { type: String, default: "" ,required: true},
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Ensure createdBy is set
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Reference to the User model
     pdfs: [

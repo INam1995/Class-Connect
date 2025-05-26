@@ -8,12 +8,14 @@ import { FaFilePdf, FaEllipsisV } from "react-icons/fa";
 import Navbar from "../Components/Navbar.jsx";
 
 const FolderDetail = () => {
+  // const userId = localStorage.getItem("userId");
   const { folderId } = useParams();
   const [folder, setFolder] = useState({ 
     name: "", 
     subject: "", 
     pdfs: [],
-    description: ""
+    description: "",
+    // createdBy: userId || "",
   });
   const [loading, setLoading] = useState(true);
   const [pdfFile, setPdfFile] = useState(null);

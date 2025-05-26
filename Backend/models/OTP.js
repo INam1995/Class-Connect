@@ -1,11 +1,7 @@
 import mongoose from 'mongoose';
 import otpTemplate from '../mail/templates/emailVerificationTemplate.js';
 
-
-
 import mailSender from '../utils/mailSender.js';
-
-
 
 
 const OTPSchema = new mongoose.Schema({
@@ -32,7 +28,6 @@ async function sendVerificationEmail(email, otp) {
 			email,
 			'Verification Email',
 			otpTemplate(otp)
-
 		);
 		console.log('Email sent successfully: ', mailResponse.response);
 	} catch (error) {
