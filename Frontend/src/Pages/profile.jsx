@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { FolderPlus, FolderOpen } from 'lucide-react';
 import profileImg from '../assets/project_profile.png';
 import Sidebar from '../Components/Slider/Sidebar.jsx'; // Import Sidebar component
-import SecuritySettings from '../Components/SecuritySettings';
+import SecuritySettings from '../Components/SecuritySettings.jsx';
 
 
 
