@@ -476,5 +476,4 @@ const deletePoll = async (pollId, items, setItems) => {
   );
 };
 
-
 export default ChatRoom;
