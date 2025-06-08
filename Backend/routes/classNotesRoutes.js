@@ -1,28 +1,15 @@
 import express from "express";
-import multer from "multer";
-import { getClassNotes, uploadClassNote } from "../Controllers/classNoteController.js";
-import { createRating, getAverageRating, getAllRating } from "../Controllers/RatingAndReview.js";
+import { ratePdf, getClassNotes, uploadClassNote, submitReview } from "../Controllers/classNotesController/classNoteController.js";
 import AuthMiddleware from "../middleware/authMiddleware.js";
+import uploadPdf from "../middleware/multerMiddleware.js";
 
 const router = express.Router();
 
-// Multer configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
-const upload = multer({ storage });
-
-// Routes
-router.post("/rate", AuthMiddleware, createRating);
-router.get("/reviews", getAllRating); // Optional
 router.get("/", getClassNotes);
-router.post("/upload", upload.single("file"), uploadClassNote);
-router.post("/upload", AuthMiddleware, upload.single("file"), uploadClassNote);
+router.post("/upload/:folderId", AuthMiddleware, uploadPdf, uploadClassNote);
+router.post("/rate", AuthMiddleware, ratePdf);
+
+// ✅ New review submission route
+router.post("/reviews/submit-review", AuthMiddleware, submitReview);
 
 export default router;

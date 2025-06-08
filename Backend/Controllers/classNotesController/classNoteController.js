@@ -1,39 +1,35 @@
 import mongoose from "mongoose";
 import Pdf from "../../models/pdf.js";
 import User from "../../models/user.js";
-import RatingAndReview from "../../models/RatingAndReview.js";
+
 
 export const getClassNotes = async (req, res) => {
   try {
-    const notes = await Pdf.find({})
-      .populate({
-        path: "uploadedBy",
-        select: "name email",
-        strictPopulate: false,
-      })
-      .exec();
+   const notes = await Pdf.find({})
+  .populate({ path: "uploadedBy", select: "name email" })
+  .populate({ path: "reviews.user", select: "name email", strictPopulate: false }) // 🔧 FIXED
+  .exec();
 
-    const enhancedNotes = await Promise.all(
-      notes.map(async (note) => {
-        const reviews = await RatingAndReview.find({ pdfId: note._id })
-          .populate({ path: "user", select: "name" })
-          .exec();
 
-        const avgRating =
-          reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1);
 
-        return {
-          ...note.toObject(), // turn Mongoose doc into plain object
-          averageRating: reviews.length ? avgRating.toFixed(1) : null,
-          ratingCount: reviews.length,
-          reviews: reviews.map((r) => ({
-            user: r.user,
-            review: r.review,
-            createdAt: r.createdAt,
-          })),
-        };
-      })
-    );
+
+    const enhancedNotes = notes.map((note) => {
+      const ratingCount = note.ratings?.length || 0;
+      const avgRating = ratingCount
+        ? note.ratings.reduce((acc, r) => acc + r.rating, 0) / ratingCount
+        : null;
+
+      return {
+        ...note.toObject(),
+        averageRating: avgRating?.toFixed(1),
+        ratingCount,
+        reviews: note.reviews?.map((r) => ({
+          user: r.user,
+          review: r.review,
+          createdAt: r.createdAt,
+        })),
+      };
+    });
 
     res.status(200).json(enhancedNotes);
   } catch (error) {
@@ -41,6 +37,7 @@ export const getClassNotes = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 // ✅ Upload new class note
 
@@ -78,7 +75,8 @@ export const uploadClassNote = async (req, res) => {
 
     const newNote = new Pdf({
       name: req.file.originalname,
-      path: `/uploads/${req.file.filename}`,
+      path: `/uploads/pdfs/${req.params.folderId}/${req.file.filename}`,
+
       folderId: objectIdFolderId,
       uploadedBy: objectIdUserId,
       topic,
@@ -144,6 +142,49 @@ export const ratePdf = async (req, res) => {
     res.status(200).json({ message: "Rating added successfully", averageRating: pdf.averageRating });
   } catch (error) {
     console.error("❌ Error rating PDF:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+export const submitReview = async (req, res) => {
+  try {
+    const { pdfId, rating, review } = req.body;
+    const userId = req.user._id;
+
+    if (!pdfId || !rating || !review) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const note = await Pdf.findById(pdfId);
+if (!note) return res.status(404).json({ message: "PDF not found" });
+
+// Ensure arrays exist
+if (!Array.isArray(note.reviews)) note.reviews = [];
+if (!Array.isArray(note.ratings)) note.ratings = [];
+
+// Handle rating
+const existingRating = note.ratings.find(r => r.userId.toString() === userId.toString());
+if (existingRating) {
+  existingRating.rating = rating;
+} else {
+  note.ratings.push({ userId, rating });
+}
+
+// Handle review
+note.reviews.push({
+  user: userId,
+  review,
+  createdAt: new Date(),
+});
+
+note.averageRating =
+  note.ratings.reduce((acc, r) => acc + r.rating, 0) / note.ratings.length;
+
+await note.save();
+
+
+    res.status(200).json({ message: "Review submitted successfully" });
+  } catch (error) {
+    console.error("❌ Error submitting review:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

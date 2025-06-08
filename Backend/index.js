@@ -24,6 +24,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
 import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
 
+
 import profile from "./routes/userRoute.js";
 import ClassNotes from "./routes/classNotesRoutes.js";
 const app = express();
@@ -180,6 +181,9 @@ app.use("/api/stat", stats);
 app.use("/api/profile", profile);
 app.use("/api/class-notes",ClassNotes)
 app.use("/api/class-notes", classNotesRouter);
+
+
+
 // ✅ Start Server
 
 export const emitUserRegistered = (userName) => {
