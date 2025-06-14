@@ -1,4 +1,4 @@
-import User from "../../models/user.js"; // Ensure .js extension is added
+import User from "../../models/User.js"; // Ensure .js extension is added
 import mailSender from "../../utils/mailSender.js"; // Ensure .js extension is added
 import bcrypt from 'bcryptjs';
 

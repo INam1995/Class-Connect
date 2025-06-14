@@ -1,6 +1,6 @@
 // utils/emitUpdatedStats.js
-import User from "../models/user.js";
-import Folder from "../models/folder.js";
+import User from "../models/User.js";
+import Folder from "../models/Folder.js";
 
 export const emitUpdatedStats = async (io) => {
   try {

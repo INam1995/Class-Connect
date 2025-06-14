@@ -1,6 +1,6 @@
 
 import express from "express";
-import Question from "../models/Question.js";
+import Question from "../models/DiscussionModels/Question.js";
 
 const router = express.Router();
 

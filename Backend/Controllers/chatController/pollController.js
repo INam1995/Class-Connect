@@ -1,4 +1,4 @@
-import Poll from "../../models/poll.js";
+import Poll from "../../models/ChatModels/Poll.js";
 
 export const createPoll = async (req, res) => {
   const { question, options } = req.body;

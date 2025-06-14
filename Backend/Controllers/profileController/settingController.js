@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import User from '../../models/user.js';
+import User from '../../models/User.js';
 
 // Update Email
 export const updateEmail  = async (req, res) => {

@@ -1,4 +1,4 @@
-import Folder from '../../models/folder.js';
+import Folder from '../../models/Folder.js';
 import cloudinary from '../../utils/cloudinary.js'; 
 import { io } from '../../index.js'; // Import the Socket.IO instance
 

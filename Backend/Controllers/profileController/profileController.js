@@ -1,6 +1,6 @@
 
-import User from '../../models/user.js';
-import Folder from '../../models/folder.js';
+import User from '../../models/User.js';
+import Folder from '../../models/Folder.js';
 import mongoose from 'mongoose';
 
 export const getUserProfile = async (req, res) => {

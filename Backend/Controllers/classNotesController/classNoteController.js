@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import Pdf from "../../models/pdf.js";
-import User from "../../models/user.js";
+import Pdf from "../../models/Pdf.js";
+import User from "../../models/User.js";
 
 
 export const getClassNotes = async (req, res) => {
