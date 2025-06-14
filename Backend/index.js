@@ -22,6 +22,7 @@ import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
 // import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
 import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
+import summarizeRoutes from "./routes/summarizeRoute.js";
 
 
 
@@ -105,72 +106,9 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Bottleneck for Rate Limiting
-// const limiter = new Bottleneck({
-//   maxConcurrent: 1, // Process one request at a time
-//   minTime: 20000, // 20 seconds between requests
-// });
-
 
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Function to Extract Text from PDF
-// async function extractTextFromPdf(pdfUrl) {
-//   try {
-//     const response = await axios.get(pdfUrl, { responseType: "arraybuffer" });
-//     const dataBuffer = new Uint8Array(response.data);
-//     const loadingTask = pdfjs.getDocument(dataBuffer);
-//     const pdfDocument = await loadingTask.promise;
-//     let text = "";
-//     for (let i = 1; i <= pdfDocument.numPages; i++) {
-//       const page = await pdfDocument.getPage(i);
-//       const textContent = await page.getTextContent();
-//       text += textContent.items.map((item) => item.str).join(" ");
-//     }
-//     // console.log("Text extracted from PDF:", text);
-//     return text;
-//   } catch (error) {
-//     console.error("Error extracting text from PDF:", error.message);
-//     throw new Error("Failed to extract text from PDF");
-//   }
-// }
-
-// const genAI = new GoogleGenerativeAI(`${OPENAI_API_KEY}`);
-// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-// const summarizeText = limiter.wrap(async (text) => {
-//   return new Promise(async (resolve, reject) => {
-//     try {
-//       const prompt = `Summarize the following text in 3 sentences:\n\n"${text}"`;
-//       const result = await model.generateContent(prompt);
-//       const googleSummary = result.response.text();
-//       resolve(googleSummary || "Summarization failed.");
-//     } catch (error) {
-//       console.error("Error with summarization:", error.message);
-//       reject(new Error("Failed to summarize text"));
-//     }
-//   });
-// });
-
-
-// import summarizeRoutes from "./routes/summarizeRoute";
-// app.use("/api", summarizeRoutes);
-
-// ✅ Endpoint to Summarize a PDF from a URL
-// app.post("/api/summarize-url", async (req, res) => {
-//   try {
-//     const { pdfUrl } = req.body;
-//     if (!pdfUrl) {
-//       return res.status(400).json({ error: "PDF URL is required" });
-//     }
-//     const text = await extractTextFromPdf(pdfUrl);
-//     const summary = await summarizeText(text);
-//     res.json({ summary });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message || "An error occurred while processing the PDF." });
-//   }
-// });
 
 // ✅ API Routes
 app.use("/api/auth", authRouter);
@@ -187,9 +125,6 @@ app.use("/api/stat", stats);
 app.use("/api/profile", profile);
 app.use("/api/class-notes",ClassNotes)
 app.use("/api/class-notes", classNotesRouter);
-
-
-import summarizeRoutes from "./routes/summarizeRoute.js";
 app.use("/api", summarizeRoutes);
 
 

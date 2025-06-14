@@ -3,7 +3,6 @@ import { summarizePdfFromUrl } from "../Controllers/Pdf_FolderController/summari
 
 const router = express.Router();
 
-// POST /api/summarize-url
 router.post("/summarize-url", summarizePdfFromUrl);
 
 export default router;
