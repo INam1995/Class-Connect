@@ -3,7 +3,7 @@ import User from '../../models/User.js'; // Ensure the .js extension is included
 import OTP from '../../models/OTP.js'; // Include the .js extension
 import jwt from 'jsonwebtoken';
 import otpGenerator from 'otp-generator';
-import mailSender from '../../utils/mailSender.js';  // Include the .js extension
+import mailSender from '../../utils/MailSender.js';  // Include the .js extension
 import { passwordUpdated } from '../../mail/templates/passwordUpdate.js';
 import { emitUserRegistered } from '../../index.js';
 import Notification from '../../models/Notification.js'; // Include the .js extension

@@ -7,8 +7,7 @@ import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import connectDB from "./utils/database.js";
-// import connectDB from "./models/db.js";
+import connectDB from "./utils/Database.js";
 import authRouter from "./routes/authRoutes.js";
 import folderRouter from "./routes/folderRoutes.js";
 import downloadPdf from "./routes/downloadRoutes.js";
@@ -42,6 +41,8 @@ const io = new Server(server, {
 app.set("io", io);
 // Initialize all socket events
 // initWhiteboardSocket(io);
+
+
 
 // ✅ Middleware to attach `io` to requests
 app.use((req, res, next) => {

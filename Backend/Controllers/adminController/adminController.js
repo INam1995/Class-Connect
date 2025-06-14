@@ -1,7 +1,7 @@
 import User from "../../models/User.js";
 import Folder from "../../models/Folder.js";
 import mongoose from 'mongoose';
-import { emitUpdatedStats } from "../../utils/stat.js";
+import { emitUpdatedStats } from "../../utils/Stat.js";
 
 export const getAllUsers = async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 import express from 'express';
-import { getUserStats, getStats, search } from '../Controllers/adminController/statsController.js'; // Import your stats controller
-import {getActivityLog ,getOverallActivityStats} from '../Controllers/adminController/useractivity.js'
+import { getUserStats, getStats, search } from '../Controllers/AdminController/statsController.js'; // Import your stats controller
+import {getActivityLog ,getOverallActivityStats} from '../Controllers/AdminController/useractivity.js'
 const router = express.Router();
 
 // Get user statistics

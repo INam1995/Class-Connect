@@ -5,7 +5,7 @@ import {
   getPollsByFolder,
   deletePoll,
   unvotePoll
-} from "../Controllers/chatController/pollController.js"; // ✅ Add `.js` if not present
+} from "../Controllers/ChatController/pollController.js"; // ✅ Add `.js` if not present
 
 
 
@@ -22,7 +22,7 @@ import {
   saveMessages,
   editMessage ,
   deleteSelectedMessages
-} from "../Controllers/chatController/chatController.js"; // ✅ Import controllers
+} from "../Controllers/ChatController/chatController.js"; // ✅ Import controllers
 // import {AuthMiddleware} from "../middleware/authMiddleware.js";
 import {AuthMiddleware} from "../middleware/authMiddleware.js";
 

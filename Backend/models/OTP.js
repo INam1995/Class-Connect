@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import otpTemplate from '../mail/templates/emailVerificationTemplate.js';
 
-import mailSender from '../utils/mailSender.js';
+import mailSender from '../utils/MailSender.js';
 
 
 const OTPSchema = new mongoose.Schema({
