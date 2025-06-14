@@ -50,52 +50,14 @@ const summarizeText = limiter.wrap(async (text) => {
 });
 
 
-// app.post("/api/summarize-url", async (req, res) => {
-//   try {
-//     const { pdfUrl } = req.body;
-//     if (!pdfUrl) {
-//       return res.status(400).json({ error: "PDF URL is required" });
-//     }
-//     const text = await extractTextFromPdf(pdfUrl);
-//     const summary = await summarizeText(text);
-//     res.json({ summary });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: error.message || "An error occurred while processing the PDF." });
-//   }
-// });
-
-
-// Controller function for the route
-// export const summarizePdfFromUrl = async (req, res) => {
-//     console.log("Summarization Request:", req.header);
-//   try {
-//     const { pdfUrl } = req.body;
-//     // console.log("PDF URL:", req);
-//     if (!pdfUrl) return res.status(400).json({ error: "PDF URL is required" });
-
-//     const text = await extractTextFromPdf(pdfUrl);
-//     const summary = await summarizeText(text);
-
-//     res.json({ summary });
-//   } 
-//   catch (error) {
-//     console.error("Summarization Error:", error.message);
-//     res.status(500).json({ error: error.message || "Summarization failed." });
-//   }
-// };
-
 
 export const summarizePdfFromUrl = async (req, res) => {
   try {
-    // console.log("Raw Body:", req.body); // Add this debug line
-    
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({ error: "Request body is empty" });
     }
 
     const { pdfUrl } = req.body;
-    console.log("Extracted PDF URL:", pdfUrl); // Debug what was extracted
     
     if (!pdfUrl) {
       return res.status(400).json({ error: "PDF URL is required in body" });
