@@ -316,9 +316,6 @@ const FolderDetail = () => {
     >
       Start Chat
     </button>
-
-
-
                   {/* Notification Dropdown */}
                 {showNotifications && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 border border-gray-200">
