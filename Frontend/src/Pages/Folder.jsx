@@ -6,15 +6,11 @@ import { IoIosNotifications } from "react-icons/io";
 import { useDropzone } from "react-dropzone";
 import { FaFilePdf, FaEllipsisV } from "react-icons/fa";
 import Navbar from "../Components/Navbar.jsx";
-import { useNavigate } from "react-router-dom"; // ✅ Add this
-
-
-
-  
+import { useNavigate } from "react-router-dom";
 
 const FolderDetail = () => {
   // const userId = localStorage.getItem("userId");
-    const navigate = useNavigate(); // ✅ Add this
+  const navigate = useNavigate(); // ✅ Add this
   const { folderId } = useParams();
   const [folder, setFolder] = useState({ 
     name: "", 
@@ -150,35 +146,17 @@ const FolderDetail = () => {
   };
 
   const handleSummarize = async (pdfUrl) => {
-    // try {
-    //   setLoading(true);
-    //   // const response = await axios.post('/api/summarize-url', { pdfUrl });
-    //   const response = await fetch('/api/summarize-url', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ pdfUrl }), // Make sure this matches backend expectation
-    //   });
-    //   const data = await response.json();
-    // setSummary(data.summary);
-    // setShowModal(true);
-    //   // setSummary(response.data.summary);
-    //   // setShowModal(true);
-    // } 
-    const payload = { pdfUrl }; // Explicit payload structure
-  console.log("Sending:", payload); // Debug what's being sent
+    const payload = { pdfUrl };
     try {
-    const response = await fetch('/api/summarize-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    setSummary(data.summary);
-    setShowModal(true);
-   }
-    catch (error) {
+      const response = await fetch('/api/summarize-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      setSummary(data.summary);
+      setShowModal(true);
+    } catch (error) {
       console.error(error);
       alert('Error summarizing PDF');
     } finally {
@@ -516,7 +494,7 @@ const FolderDetail = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+                  className="bg-orange-500 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
                 >
                   Close
                 </button>
