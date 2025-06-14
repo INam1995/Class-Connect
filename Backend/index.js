@@ -2,11 +2,6 @@ import express from "express";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
-import axios from "axios";
-import * as pdfjs from "pdfjs-dist";
-import Bottleneck from "bottleneck";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
 import connectDB from "./utils/Database.js";
 import authRouter from "./routes/authRoutes.js";
 import folderRouter from "./routes/folderRoutes.js";
@@ -21,17 +16,14 @@ import notificationsRoutes from "./routes/noti.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
 // import { initSocket as initWhiteboardSocket } from './Controllers/whiteboardController.js';
-import classNotesRouter from "./routes/classNotesRoutes.js"; // ✅ Add this import
+import classNotesRouter from "./routes/classNotesRoutes.js";
 import summarizeRoutes from "./routes/summarizeRoute.js";
-
-
-
-
 import profile from "./routes/userRoute.js";
 import ClassNotes from "./routes/classNotesRoutes.js";
+
+
 const app = express();
 const server = http.createServer(app);
-const OPENAI_API_KEY = process.env.API_KEY4;
 
 // ✅ Initialize Socket.io
 const io = new Server(server, {
@@ -42,8 +34,11 @@ const io = new Server(server, {
   },
 });
 app.set("io", io);
+
 // Initialize all socket events
 // initWhiteboardSocket(io);
+
+
 // ✅ Middleware to attach `io` to requests
 app.use((req, res, next) => {
   req.io = io;
@@ -52,7 +47,6 @@ app.use((req, res, next) => {
 
 // ✅ Connect to Database
 connectDB();
-
 
 app.use(express.json());
 app.use(cors({
@@ -107,9 +101,6 @@ io.on("connection", (socket) => {
 });
 
 
-app.use(express.urlencoded({ extended: true }));
-
-
 // ✅ API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/folders", folderRouter);
@@ -128,9 +119,7 @@ app.use("/api/class-notes", classNotesRouter);
 app.use("/api", summarizeRoutes);
 
 
-
 // ✅ Start Server
-
 export const emitUserRegistered = (userName) => {
   io.emit('user-registered', { message: `New user registered: ${userName}` });
 };
@@ -142,6 +131,7 @@ export const emitFileUploaded = (fileName) => {
 export const emitFileDownloaded = (fileName) => {
   io.emit('file-downloaded', { message: `⬇️ ${fileName} has been downloaded.` });
 };
+
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
   console.log(` Server is running on port ${port}`);

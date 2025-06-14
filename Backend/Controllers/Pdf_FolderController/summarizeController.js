@@ -3,6 +3,7 @@ import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+
 const OPENAI_API_KEY = process.env.API_KEY4;
 
 // Initialize Generative AI Model
@@ -32,12 +33,6 @@ export const extractTextFromPdf = async (pdfUrl) => {
   return text;
 };
 
-// Summarize the text using Gemini API
-// const summarizeText = limiter.wrap(async (text) => {
-//   const prompt = `Summarize the following text in 3 sentences:\n\n"${text}"`;
-//   const result = await model.generateContent(prompt);
-//   return result.response.text() || "Summarization failed.";
-// });
 
 
 const summarizeText = limiter.wrap(async (text) => {
