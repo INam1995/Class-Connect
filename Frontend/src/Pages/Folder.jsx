@@ -150,12 +150,35 @@ const FolderDetail = () => {
   };
 
   const handleSummarize = async (pdfUrl) => {
+    // try {
+    //   setLoading(true);
+    //   // const response = await axios.post('/api/summarize-url', { pdfUrl });
+    //   const response = await fetch('/api/summarize-url', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({ pdfUrl }), // Make sure this matches backend expectation
+    //   });
+    //   const data = await response.json();
+    // setSummary(data.summary);
+    // setShowModal(true);
+    //   // setSummary(response.data.summary);
+    //   // setShowModal(true);
+    // } 
+    const payload = { pdfUrl }; // Explicit payload structure
+  console.log("Sending:", payload); // Debug what's being sent
     try {
-      setLoading(true);
-      const response = await axios.post('/api/summarize-url', { pdfUrl });
-      setSummary(response.data.summary);
-      setShowModal(true);
-    } catch (error) {
+    const response = await fetch('/api/summarize-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    setSummary(data.summary);
+    setShowModal(true);
+   }
+    catch (error) {
       console.error(error);
       alert('Error summarizing PDF');
     } finally {
