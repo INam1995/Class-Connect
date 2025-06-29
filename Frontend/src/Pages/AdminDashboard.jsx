@@ -9,7 +9,7 @@ import Notifications from "../Components/Notification";
 import StatisticsCards from "../Components/AdminComponents/StatisticsCards";
 import UsersTable from "../Components/AdminComponents/UsersTable";
 import Role from "../Components/AdminComponents/roles";
-import UserActivityGraph from "../Components/AdminComponents/useractivity";
+import UserActivityGraph from "../Components/AdminComponents/UserActivity";
 import Navbar  from "../Components/Navbar";
 import Location from "../Components/Location";
 import MultiLevelDropdown from "../Components/AdminComponents/MultiLevelDropdown";
@@ -302,25 +302,23 @@ const AdminDashboard = () => {
       ) : (
         <>
           <Row className="mb-4">
-  <Col md={12}>
-    <UserActivityGraph />
-  </Col>
-</Row>
-<Row className="mb-4">
-  <Col md={12}>
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: '10px',
-      overflow: 'hidden',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-      height: '400px' // reduce height here
-    }}>
-      <Location />
-    </div>
-  </Col>
-</Row>
-
-
+        <Col md={12}>
+          <UserActivityGraph />
+        </Col>
+      </Row>
+          <Row className="mb-4">
+            <Col md={12}>
+              <div style={{
+                border: '1px solid #ddd',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                height: '400px' // reduce height here
+              }}>
+                <Location />
+              </div>
+            </Col>
+          </Row>
           <Row>
             <Col md={3}>
               <Notifications notifications={notifications} />

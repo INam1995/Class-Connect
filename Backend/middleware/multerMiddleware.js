@@ -3,12 +3,11 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// Define __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url); // Get the current file's URL
 const __dirname = path.dirname(__filename); // Get the directory name
-
 // Define where to store the uploaded files
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
+// const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Save the uploaded files inside the 'uploads/pdfs' directory
     const folderId = req.params.folderId; // Use folderId from URL parameters
@@ -31,9 +30,21 @@ const uploadPdf = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
     // Accept only PDF files
-    if (file.mimetype === 'application/pdf') {
+    // if (file.mimetype === 'application/pdf') {
+    //   cb(null, true);
+    // } 
+    const allowedMimeTypes = [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/vnd.ms-powerpoint', // ppt
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // pptx
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
-    } 
+    }
     else {
       cb(new Error('Invalid file type, only PDF files are allowed.'));
     }

@@ -1,5 +1,5 @@
 import express from 'express';
-import { getPdfs , uploadPdfToFolder, updatePdfProgress } from '../Controllers/Pdf_FolderController/pdfController.js';
+import { getPdfs , uploadPdfToFolder, updatePdfProgress } from '../Controllers/Pdf&FolderController/pdfController.js';
 import {AuthMiddleware} from '../middleware/authMiddleware.js'
 import uploadPdf from '../middleware/multerMiddleware.js';
 

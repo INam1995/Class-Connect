@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { io } from 'socket.io-client';
 import { useParams } from "react-router-dom";
@@ -36,13 +36,11 @@ const FolderDetail = () => {
   // Socket.IO connection and notifications
   useEffect(() => {
     socket.on('connect', () => {
-      console.log('Connected to Socket.IO server');
+      // console.log('Connected to Socket.IO server');
     });
-
     socket.on('notification', (data) => {
       setNotifications(prev => [...prev, data]);
     });
-
     return () => {
       socket.off('notification');
     };
@@ -64,7 +62,6 @@ const FolderDetail = () => {
         setLoading(false);
       }
     };
-
     fetchFolderData();
   }, [folderId]);
 
@@ -103,7 +100,6 @@ const FolderDetail = () => {
           responseType: "blob",
         }
       );
-
       const blob = new Blob([response.data], { type: "application/pdf" });
       const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
@@ -118,11 +114,9 @@ const FolderDetail = () => {
 
   const handleUploadPdf = async () => {
     if (!pdfFile) return;
-
     const formData = new FormData();
     formData.append("pdf", pdfFile);
     formData.append("folderId", folderId);
-
     try {
       setUploading(true);
       const token = localStorage.getItem("token");
@@ -132,7 +126,6 @@ const FolderDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       setFolder(prev => ({
         ...prev,
         pdfs: [...prev.pdfs, response.data.pdf],
@@ -164,66 +157,52 @@ const FolderDetail = () => {
     }
   };
 
-
   const handleToggleCompletion = async (pdfId, markAsComplete) => {
-  try {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
-
-    // Update backend
-    await axios.patch(
-      `/api/folders/${folderId}/${pdfId}/progress`,
-      { completed: markAsComplete },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    // Update local state
-    setFolder(prev => {
-      const updatedPdfs = prev.pdfs.map(pdf => {
-        if (pdf._id === pdfId) {
-          return { ...pdf, userCompleted: markAsComplete };
-        }
-        return pdf;
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+      // Update backend
+      await axios.patch(
+        `/api/folders/${folderId}/${pdfId}/progress`,
+        { completed: markAsComplete },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Update local state
+      setFolder(prev => {
+        const updatedPdfs = prev.pdfs.map(pdf => {
+          if (pdf._id === pdfId) {
+            return { ...pdf, userCompleted: markAsComplete };
+          }
+          return pdf;
+        });
+        // Calculate new progress
+        const totalPdfs = updatedPdfs.length;
+        const completedPdfs = updatedPdfs.filter(pdf => pdf.userCompleted).length;
+        const userProgressPercentage = totalPdfs > 0 
+          ? Math.round((completedPdfs / totalPdfs) * 100) 
+          : 0;
+        return {
+          ...prev,
+          pdfs: updatedPdfs,
+          completedPdfs,
+          totalPdfs,
+          userProgressPercentage
+        };
       });
-
-      // Calculate new progress
-      const totalPdfs = updatedPdfs.length;
-      const completedPdfs = updatedPdfs.filter(pdf => pdf.userCompleted).length;
-      const userProgressPercentage = totalPdfs > 0 
-        ? Math.round((completedPdfs / totalPdfs) * 100) 
-        : 0;
-
-      return {
-        ...prev,
-        pdfs: updatedPdfs,
-        completedPdfs,
-        totalPdfs,
-        userProgressPercentage
-      };
-    });
-
-  } catch (error) {
-    console.error("Error updating progress:", error);
-  }
-};
+    } catch (error) {
+      console.error("Error updating progress:", error);
+    }
+  };
   
-
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
-  const members = [
-    { name: "Alerted Goodwin", role: "Product Designer" },
-    { name: "Sommy Jones", role: "Reducing Director" },
-    { name: "Nick Mortinson", role: "Front-End Developer" },
-    { name: "Donielin Frost", role: "Game Engineer" },
-    { name: "John Doe", role: "UX Designer" },
-  ];
+  
 
   return (
     <>
       <Navbar className="fixed top-0 left-0 w-full z-50"/>
-      {/* <div className="p-6 bg-gray-50 min-h-screen font-sans pt-20"> */}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Section - Upload & Recent */}
@@ -457,24 +436,6 @@ const FolderDetail = () => {
                     {folder.completedPdfs || 0} of {folder.totalPdfs || 0} documents completed
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {/* Members Section */}
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Joined Members</h2>
-              <div className="space-y-4">
-                {members.map((member, index) => (
-                  <div key={index} className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
-                      {member.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-medium">{member.name}</p>
-                      <p className="text-sm text-gray-500">{member.role}</p>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           </div>

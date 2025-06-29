@@ -10,7 +10,7 @@ import {
   getFolderById,
   getFolderWithUserProgress,
   updateUserProgress
-} from "../Controllers/Pdf_FolderController/folderController.js"; // ✅ Import controllers
+} from "../Controllers/Pdf&FolderController/folderController.js"; // ✅ Import controllers
 
 const router = express.Router();
 

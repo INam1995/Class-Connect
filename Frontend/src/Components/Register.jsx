@@ -86,7 +86,6 @@ const Register = () => {
     <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
       <div className="bg-white p-4 rounded shadow-lg w-100" style={{ maxWidth: "400px" }}>
         <h2 className="text-center text-primary">Register</h2>
-
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <input

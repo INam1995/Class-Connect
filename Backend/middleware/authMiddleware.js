@@ -6,11 +6,9 @@ export const AuthMiddleware  =async(req, res, next) => {
   if (!token1) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
-
   try {
     const decoded = jwt.verify(token1, process.env.SECRET);
-
-    req.user = await User.findById(decoded._id); // Fetch user from DB
+    req.user = await User.findById(decoded._id);
     if (!req.user) {
       return res.status(403).json({ message: "Invalid token: No user found" });
     }
@@ -33,6 +31,7 @@ export const isSuperAdmin = (req, res, next) => {
   }
   next();
 };
+
 export const isAdmin = (req, res, next) => {
   if (!req.user || (req.user.role !== 'admin' && req.user.role !== 'superadmin')) {
     return res.status(403).json({ message: 'Access denied. Admins only.' });
