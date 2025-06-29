@@ -18,111 +18,54 @@ export const getPdfs = async (req, res) => {
 };
 
 
-// export const uploadPdfToFolder = async (req, res) => {
-//   const { folderId } = req.params; 
-//   try {
-//     const folder = await Folder.findById(folderId).populate('members');
-//     if (!folder) {
-//       return res.status(404).json({ message: "Folder not found" });
-//     }
-//     const file = req.file;
-//     if (!file) {
-//       return res.status(400).json({ message: "No file uploaded" });
-//     }
-//     // Upload the file to Cloudinary
-//     const result = await cloudinary.uploader.upload(file.path, {
-//       resource_type: 'auto',
-//       folder: `pdfs/${folderId}`, 
-//       timeout: 60000,
-//       type: "upload",
-//     });
-
-//     if (!folder.pdfs) {
-//       folder.pdfs = []; 
-//     }
-//     // Save the PDF information to the folder
-//     const pdf = {
-//       name: file.originalname, 
-//       path: result.secure_url, 
-//       publicId: result.public_id, 
-//       createdAt: new Date(),
-//     };
-//     folder.pdfs.push(pdf);
-//     await folder.save();
-
-//     io.emit('notification', {
-//       type: 'PDF_UPLOADED',
-//       message: `A new PDF "${file.originalname}" has been uploaded to the folder "${folder.name}".`,
-//       folderId: folder._id,
-//     });
-
-//     res.status(200).json({ message: "PDF uploaded successfully", pdf });
-//   } 
-//   catch (error) {
-//     console.error("Error uploading PDF:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-
 export const uploadPdfToFolder = async (req, res) => {
-  const { folderId } = req.params;
-
+  const { folderId } = req.params; 
   try {
     const folder = await Folder.findById(folderId).populate('members');
     if (!folder) {
       return res.status(404).json({ message: "Folder not found" });
     }
-
     const file = req.file;
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
+    // Upload the file to Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      resource_type: 'auto',
+      folder: `pdfs/${folderId}`, 
+      timeout: 60000,
+      type: "upload",
+    });
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: 'auto',
-        folder: `pdfs/${folderId}`,
-        timeout: 60000,
-        type: "upload",
-      },
-      async (error, result) => {
-        if (error) {
-          console.error("Cloudinary upload error:", error);
-          return res.status(500).json({ message: "Cloudinary upload error" });
-        }
+    if (!folder.pdfs) {
+      folder.pdfs = []; 
+    }
+    // Save the PDF information to the folder
+    const pdf = {
+      name: file.originalname, 
+      path: result.secure_url, 
+      publicId: result.public_id, 
+      createdAt: new Date(),
+    };
+    folder.pdfs.push(pdf);
+    await folder.save();
 
-        if (!folder.pdfs) {
-          folder.pdfs = [];
-        }
+    io.emit('notification', {
+      type: 'PDF_UPLOADED',
+      message: `A new PDF "${file.originalname}" has been uploaded to the folder "${folder.name}".`,
+      folderId: folder._id,
+    });
 
-        const pdf = {
-          name: file.originalname,
-          path: result.secure_url,
-          publicId: result.public_id,
-          createdAt: new Date(),
-        };
-
-        folder.pdfs.push(pdf);
-        await folder.save();
-
-        io.emit('notification', {
-          type: 'PDF_UPLOADED',
-          message: `A new file "${file.originalname}" has been uploaded to the folder "${folder.name}".`,
-          folderId: folder._id,
-        });
-
-        return res.status(200).json({ message: "File uploaded successfully", pdf });
-      }
-    );
-
-    uploadStream.end(file.buffer);
-  } catch (error) {
-    console.error("Error uploading file:", error);
+    res.status(200).json({ message: "PDF uploaded successfully", pdf });
+  } 
+  catch (error) {
+    console.error("Error uploading PDF:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
 
 
 

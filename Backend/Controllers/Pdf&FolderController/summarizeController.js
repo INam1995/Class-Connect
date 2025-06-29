@@ -3,10 +3,8 @@ import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-
 const OPENAI_API_KEY = process.env.API_KEY4;
 
-// Initialize Generative AI Model
 const genAI = new GoogleGenerativeAI(OPENAI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -17,7 +15,6 @@ const limiter = new Bottleneck({
 });
 
 
-// Function to extract text from PDF URL
 export const extractTextFromPdf = async (pdfUrl) => {
   const response = await axios.get(pdfUrl, { responseType: "arraybuffer" });
   const dataBuffer = new Uint8Array(response.data);
@@ -33,8 +30,6 @@ export const extractTextFromPdf = async (pdfUrl) => {
   return text;
 };
 
-
-
 const summarizeText = limiter.wrap(async (text) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -49,16 +44,12 @@ const summarizeText = limiter.wrap(async (text) => {
   });
 });
 
-
-
 export const summarizePdfFromUrl = async (req, res) => {
   try {
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({ error: "Request body is empty" });
     }
-
     const { pdfUrl } = req.body;
-    
     if (!pdfUrl) {
       return res.status(400).json({ error: "PDF URL is required in body" });
     }

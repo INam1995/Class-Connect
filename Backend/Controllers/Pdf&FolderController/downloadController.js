@@ -22,7 +22,6 @@ export const downloadPDF = async (req, res) => {
             pdf.downloadedBy.push(userId);
             await folder.save(); 
         }
-
         emitFileDownloaded( userId); 
         // Set response headers
         res.setHeader('Content-Disposition', `attachment; filename="${pdf.name}"`);

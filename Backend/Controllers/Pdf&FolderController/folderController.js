@@ -109,8 +109,8 @@ export const getFolderById = async (req, res) => {
   try {
     const folderId = req.params.folderId;
     const folder = await Folder.findById(folderId)
-      .populate('createdBy', 'name email') // Populate creator details
-      .populate('members', 'name email')   // Populate member details
+      .populate('createdBy', 'name email') 
+      .populate('members', 'name email')  
       .exec();
 
 
@@ -210,16 +210,12 @@ export const updateUserProgress = async (req, res) => {
 export const getMyFolders = async (req, res) => {
   try {
     const userId = req.user._id;
-    
-    // Get folders with progress calculation
     const createdFolders = await Folder.find({ createdBy: userId })
       .lean()
       .then(folders => folders.map(addProgressData(userId)));
-
     const joinedFolders = await Folder.find({ members: userId })
       .lean()
       .then(folders => folders.map(addProgressData(userId)));
-
     res.json({ createdFolders, joinedFolders });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
