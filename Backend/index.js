@@ -18,6 +18,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import classNotesRouter from "./routes/classNotesRoutes.js";
 import summarizeRoutes from "./routes/summarizeRoute.js";
 import profile from "./routes/userRoute.js";
+// import { initWhiteboardSocket } from "./Controllers/whiteboardController.js";
+import progressRouter from "./routes/progressRoutes.js";
 
 
 const app = express();
@@ -94,6 +96,7 @@ io.on("connection", (socket) => {
 // ✅ API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/folders", folderRouter);
+app.use("/api/pdfProgress", progressRouter); 
 app.use("/api/pdfs", pdfRoute);
 app.use("/api/chat", chatRoom);
 app.use("/api/answers", answerRouter);

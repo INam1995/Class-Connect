@@ -47,7 +47,7 @@ const FolderDetail = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `/api/folders/${folderId}/user-progress`,
+          `/api/pdfProgress/${folderId}/user-progress`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setFolder(response.data.folder);
@@ -68,23 +68,6 @@ const FolderDetail = () => {
       alert('Please upload only PDF files');
     }
   }, []);
-//   const onDrop = useCallback((acceptedFiles) => {
-//   const allowedTypes = [
-//     'application/pdf',
-//     'image/jpeg',
-//     'image/png',
-//     'image/gif',
-//     'image/webp',
-//     'application/vnd.ms-powerpoint',
-//     'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-//   ];
-
-//   if (acceptedFiles.length > 0 && allowedTypes.includes(acceptedFiles[0].type)) {
-//     setPdfFile(acceptedFiles[0]);
-//   } else {
-//     alert('Invalid file type. Please upload PDF, image, or PPT files.');
-//   }
-// }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { 'application/pdf': ['.pdf'] },
@@ -174,7 +157,7 @@ const FolderDetail = () => {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
       await axios.patch(
-        `/api/folders/${folderId}/${pdfId}/progress`,
+        `/api/pdfProgress/${folderId}/${pdfId}/progress`,
         { completed: markAsComplete },
         { headers: { Authorization: `Bearer ${token}` } }
       );

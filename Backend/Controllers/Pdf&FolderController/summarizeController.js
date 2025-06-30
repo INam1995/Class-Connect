@@ -14,13 +14,11 @@ const limiter = new Bottleneck({
   minTime: 20000,
 });
 
-
 export const extractTextFromPdf = async (pdfUrl) => {
   const response = await axios.get(pdfUrl, { responseType: "arraybuffer" });
   const dataBuffer = new Uint8Array(response.data);
   const loadingTask = pdfjs.getDocument(dataBuffer);
   const pdfDocument = await loadingTask.promise;
-  
   let text = "";
   for (let i = 1; i <= pdfDocument.numPages; i++) {
     const page = await pdfDocument.getPage(i);
