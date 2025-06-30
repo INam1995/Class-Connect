@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-export const AuthMiddleware  =async(req, res, next) => {
 
+export const AuthMiddleware  =async(req, res, next) => {
  const token1 = req.header("Authorization")?.replace("Bearer ", "").trim();
   if (!token1) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
@@ -12,19 +12,18 @@ export const AuthMiddleware  =async(req, res, next) => {
     if (!req.user) {
       return res.status(403).json({ message: "Invalid token: No user found" });
     }
-
     if (req.user.blocked) {
       return res.status(403).json({ message: "Your account is blocked. Contact the admin." });
     }
-
     next();
-  } catch (error) {
+  } 
+  catch (error) {
     return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
+
 export default AuthMiddleware;
 
-// Middleware to check if the user is the main admin
 export const isSuperAdmin = (req, res, next) => {
   if (!req.user || req.user.role !== 'superadmin') {
     return res.status(403).json({ message: 'Access denied. Only Super Admin can perform this action.' });

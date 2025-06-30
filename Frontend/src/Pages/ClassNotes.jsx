@@ -64,7 +64,7 @@ const ClassNotes = () => {
     try {
       setUploading(true);
       await axios.post(
-        `http://localhost:5000/api/class-notes/upload/${folderId}`,
+        `http://localhost:5000/api/class-notes/upload`,
         formData,
         {
           headers: {

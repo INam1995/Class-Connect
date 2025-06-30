@@ -17,10 +17,8 @@ export const votePoll = async (req, res) => {
   const { optionIndex } = req.body;
   const pollId = req.params.pollId;
   const userId = req.user._id;
-
   const poll = await Poll.findById(pollId);
   if (!poll) return res.status(404).json({ message: "Poll not found" });
-
   // Prevent duplicate vote
   const alreadyVoted = poll.options.some(opt => opt.votes.includes(userId));
   if (alreadyVoted) return res.status(400).json({ message: "Already voted" });
@@ -41,7 +39,6 @@ export const deletePoll = async (req, res) => {
   try {
     const poll = await Poll.findById(req.params.pollId);
     if (!poll) return res.status(404).json({ message: "Poll not found" });
-
     // Only the creator of the poll can delete it
     if (poll.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "You are not authorized to delete this poll" });

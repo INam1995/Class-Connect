@@ -9,15 +9,13 @@ import Navbar from "../Components/Navbar.jsx";
 import { useNavigate } from "react-router-dom";
 
 const FolderDetail = () => {
-  // const userId = localStorage.getItem("userId");
-  const navigate = useNavigate(); // ✅ Add this
+  const navigate = useNavigate();
   const { folderId } = useParams();
   const [folder, setFolder] = useState({ 
     name: "", 
     subject: "", 
     pdfs: [],
     description: "",
-    // createdBy: userId || "",
   });
   const [loading, setLoading] = useState(true);
   const [pdfFile, setPdfFile] = useState(null);
@@ -28,15 +26,13 @@ const FolderDetail = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [viewPdfUrl, setViewPdfUrl] = useState(null);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
-
   const socket = io("http://localhost:5000", {
     transports: ["websocket"],
   });
 
-  // Socket.IO connection and notifications
+  
   useEffect(() => {
     socket.on('connect', () => {
-      // console.log('Connected to Socket.IO server');
     });
     socket.on('notification', (data) => {
       setNotifications(prev => [...prev, data]);
@@ -46,7 +42,6 @@ const FolderDetail = () => {
     };
   }, []);
 
-  // Fetch folder data
   useEffect(() => {
     const fetchFolderData = async () => {
       try {
@@ -73,6 +68,23 @@ const FolderDetail = () => {
       alert('Please upload only PDF files');
     }
   }, []);
+//   const onDrop = useCallback((acceptedFiles) => {
+//   const allowedTypes = [
+//     'application/pdf',
+//     'image/jpeg',
+//     'image/png',
+//     'image/gif',
+//     'image/webp',
+//     'application/vnd.ms-powerpoint',
+//     'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+//   ];
+
+//   if (acceptedFiles.length > 0 && allowedTypes.includes(acceptedFiles[0].type)) {
+//     setPdfFile(acceptedFiles[0]);
+//   } else {
+//     alert('Invalid file type. Please upload PDF, image, or PPT files.');
+//   }
+// }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { 'application/pdf': ['.pdf'] },
@@ -161,13 +173,11 @@ const FolderDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const userId = localStorage.getItem("userId");
-      // Update backend
       await axios.patch(
         `/api/folders/${folderId}/${pdfId}/progress`,
         { completed: markAsComplete },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Update local state
       setFolder(prev => {
         const updatedPdfs = prev.pdfs.map(pdf => {
           if (pdf._id === pdfId) {
@@ -175,7 +185,6 @@ const FolderDetail = () => {
           }
           return pdf;
         });
-        // Calculate new progress
         const totalPdfs = updatedPdfs.length;
         const completedPdfs = updatedPdfs.filter(pdf => pdf.userCompleted).length;
         const userProgressPercentage = totalPdfs > 0 

@@ -6,7 +6,7 @@ import uploadPdf from "../middleware/multerMiddleware.js";
 const router = express.Router();
 
 router.get("/", getClassNotes);
-router.post("/upload/:folderId", AuthMiddleware, uploadPdf, uploadClassNote);
+router.post("/upload", AuthMiddleware, uploadPdf, uploadClassNote);
 router.post("/rate", AuthMiddleware, ratePdf);
 
 // ✅ New review submission route

@@ -1,6 +1,7 @@
 import Folder from '../../models/Folder.js';
 import cloudinary from '../../utils/Cloudinary.js'; 
 import { io } from '../../index.js'; 
+import { Readable } from 'stream';
 
 export const getPdfs = async (req, res) => {
   const { folderId } = req.params;
@@ -17,9 +18,19 @@ export const getPdfs = async (req, res) => {
   }
 };
 
+// Helper to convert buffer to stream
+const bufferToStream = (buffer) => {
+  const readable = new Readable();
+  readable.push(buffer);
+  readable.push(null);
+  return readable;
+};
 
 export const uploadPdfToFolder = async (req, res) => {
-  const { folderId } = req.params; 
+  const { folderId } = req.params;
+  if (!folderId) {
+    return res.status(400).json({ message: "Folder ID is required for this route" });
+  }
   try {
     const folder = await Folder.findById(folderId).populate('members');
     if (!folder) {
@@ -29,22 +40,34 @@ export const uploadPdfToFolder = async (req, res) => {
     if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    // Upload the file to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
-      resource_type: 'auto',
-      folder: `pdfs/${folderId}`, 
-      timeout: 60000,
-      type: "upload",
+    // Wrap stream upload inside a Promise to await it
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: 'auto',
+          folder: `pdfs/${folderId}`,
+          timeout: 60000,
+          type: 'upload',
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+      bufferToStream(file.buffer).pipe(uploadStream);
     });
-
     if (!folder.pdfs) {
-      folder.pdfs = []; 
+      folder.pdfs = [];
     }
-    // Save the PDF information to the folder
+
     const pdf = {
-      name: file.originalname, 
-      path: result.secure_url, 
-      publicId: result.public_id, 
+      name: file.originalname,
+      path: result.secure_url,
+      publicId: result.public_id,
+      folderId: folder._id,
       createdAt: new Date(),
     };
     folder.pdfs.push(pdf);

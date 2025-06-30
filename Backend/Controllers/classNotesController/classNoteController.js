@@ -2,17 +2,12 @@ import mongoose from "mongoose";
 import Pdf from "../../models/Pdf.js";
 import User from "../../models/User.js";
 
-
 export const getClassNotes = async (req, res) => {
   try {
    const notes = await Pdf.find({})
   .populate({ path: "uploadedBy", select: "name email" })
   .populate({ path: "reviews.user", select: "name email", strictPopulate: false }) // 🔧 FIXED
   .exec();
-
-
-
-
     const enhancedNotes = notes.map((note) => {
       const ratingCount = note.ratings?.length || 0;
       const avgRating = ratingCount
@@ -39,50 +34,61 @@ export const getClassNotes = async (req, res) => {
 };
 
 
-// ✅ Upload new class note
+
+import { Readable } from 'stream';
+import cloudinary from '../../utils/Cloudinary.js';
+
+const bufferToStream = (buffer) => {
+  const readable = new Readable();
+  readable.push(buffer);
+  readable.push(null);
+  return readable;
+};
 
 export const uploadClassNote = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-
-    const folderId = req.body.folderId;
-    const  topic  = req.body.topic;
-    const  uploadedBy  = req.body.uploadedBy; 
-    
-    if (!folderId || !topic) {
+    const { topic, uploadedBy } = req.body;
+    if (!topic || !uploadedBy) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-    
-    // Verify the user ID is a valid format
     if (!mongoose.Types.ObjectId.isValid(uploadedBy)) {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
-
-    // Convert to ObjectId
     const objectIdUserId = new mongoose.Types.ObjectId(uploadedBy);
-    const objectIdFolderId = new mongoose.Types.ObjectId(folderId);
-
-    // Find the user
     const user = await User.findById(objectIdUserId);
-    console.log("User query result:", user);
-    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: 'auto',
+          folder: `class_notes`,
+          timeout: 60000,
+          type: "upload",
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          }
+          else {
+            resolve(result);
+          }
+        }
+      );
+      bufferToStream(req.file.buffer).pipe(stream);
+    });
     const newNote = new Pdf({
       name: req.file.originalname,
-      path: `/uploads/pdfs/${req.params.folderId}/${req.file.filename}`,
-
-      folderId: objectIdFolderId,
+      path: result.secure_url,
+      publicId: result.public_id,
       uploadedBy: objectIdUserId,
       topic,
       ratings: [],
     });
-
     await newNote.save();
 
     res.status(201).json({
@@ -92,7 +98,6 @@ export const uploadClassNote = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        // Include other user fields you want to expose
       },
     });
   } catch (error) {
@@ -104,7 +109,6 @@ export const uploadClassNote = async (req, res) => {
   }
 };
 
-// ✅ Add rating to a PDF
 export const ratePdf = async (req, res) => {
   try {
     const { pdfId, rating } = req.body;
