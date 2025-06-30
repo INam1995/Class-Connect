@@ -87,11 +87,6 @@ export const uploadPdfToFolder = async (req, res) => {
   }
 };
 
-
-
-
-
-
 export const updatePdfProgress = async (req, res) => {
   const { folderId, pdfId } = req.params;
   const { completed } = req.body;
