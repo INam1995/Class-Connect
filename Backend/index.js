@@ -12,7 +12,7 @@ import answerRouter from "./routes/answerRoutes.js";
 import chatRoom from "./routes/chatRoutes.js";
 import ChatRoom from "./models/ChatModels/ChatRoom.js";
 import whiteboardRoutes from './routes/whiteboardRoutes.js';
-import notificationsRoutes from "./routes/noti.js";
+import notificationsRoutes from "./routes/notification.js";
 import stats from './routes/statRoute.js';
 import adminRoutes from "./routes/adminRoutes.js";
 import classNotesRouter from "./routes/classNotesRoutes.js";
