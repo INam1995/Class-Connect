@@ -9,7 +9,6 @@ export const getFolderWithUserProgress = async (req, res) => {
     }
     const userId = req.user._id;
     let completedCount = 0;
-    // Filter to only show current user's progress
     const pdfsWithUserProgress = folder.pdfs.map(pdf => {
       const userProgress = pdf.progressByUser.find(
         progress => progress.user.toString() === userId.toString()
@@ -24,8 +23,7 @@ export const getFolderWithUserProgress = async (req, res) => {
       };
     });
     const progressPercentage = folder.pdfs.length > 0 
-      ? Math.round((completedCount / folder.pdfs.length) * 100)
-      : 0;
+      ? Math.round((completedCount / folder.pdfs.length) * 100): 0;
     res.json({
       folder: {
         ...folder,
@@ -40,7 +38,6 @@ export const getFolderWithUserProgress = async (req, res) => {
   }
 };
 
-
 export const updateUserProgress = async (req, res) => {
   try {
     const { completed } = req.body;
@@ -53,12 +50,9 @@ export const updateUserProgress = async (req, res) => {
     if (!pdf) {
       return res.status(404).json({ message: 'PDF not found' });
     }
-
-    // Find or create user progress entry
     let userProgress = pdf.progressByUser.find(
       p => p.user.toString() === userId.toString()
     );
-
     if (userProgress) {
       userProgress.completed = completed;
       userProgress.updatedAt = new Date();
@@ -69,9 +63,7 @@ export const updateUserProgress = async (req, res) => {
         updatedAt: new Date()
       });
     }
-
     await folder.save();
-
     res.json({
       success: true,
       pdfId: req.params.pdfId,

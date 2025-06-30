@@ -2,6 +2,8 @@ import Folder from '../../models/Folder.js';
 import cloudinary from '../../utils/Cloudinary.js'; 
 import { io } from '../../index.js'; 
 import { Readable } from 'stream';
+import https from 'https';
+import { emitFileDownloaded } from '../../index.js'; 
 
 export const getPdfs = async (req, res) => {
   const { folderId } = req.params;
@@ -62,7 +64,6 @@ export const uploadPdfToFolder = async (req, res) => {
     if (!folder.pdfs) {
       folder.pdfs = [];
     }
-
     const pdf = {
       name: file.originalname,
       path: result.secure_url,
@@ -72,13 +73,11 @@ export const uploadPdfToFolder = async (req, res) => {
     };
     folder.pdfs.push(pdf);
     await folder.save();
-
     io.emit('notification', {
       type: 'PDF_UPLOADED',
       message: `A new PDF "${file.originalname}" has been uploaded to the folder "${folder.name}".`,
       folderId: folder._id,
     });
-
     res.status(200).json({ message: "PDF uploaded successfully", pdf });
   } 
   catch (error) {
@@ -93,8 +92,8 @@ export const updatePdfProgress = async (req, res) => {
   const userId = req.user._id;
   try {
     const folder = await Folder.findById(folderId);
-    if (!folder) {
-      return res.status(404).json({ message: 'Folder not found' });
+    if (!folder) { 
+      return res.status(404).json({ message: 'Folder not found' }); 
     }
     const pdf = folder.pdfs.id(pdfId);
     if (!pdf) {
@@ -103,7 +102,6 @@ export const updatePdfProgress = async (req, res) => {
     let userProgress = pdf.progressByUser.find(
       (entry) => entry.user.toString() === userId.toString()
     );
-
     if (userProgress) {
       userProgress.completed = completed;
       userProgress.updatedAt = new Date();
@@ -123,7 +121,43 @@ export const updatePdfProgress = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating PDF progress:', error);
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+export const downloadPDF = async (req, res) => {
+    try {
+        const fileUrl = decodeURIComponent(req.query.url);
+        const userId = req.user?._id; 
+        const pdfId = req.query.pdfId; 
+        if (!fileUrl || !pdfId ) {
+            return res.status(400).json({ message: 'File URL and PDF ID are required' });
+        }
+        const folder = await Folder.findOne({ "pdfs._id": pdfId });
+        if (!folder) {
+            return res.status(404).json({ message: 'Folder not found' });
+        }
+        const pdf = folder.pdfs.id(pdfId);
+        if (!pdf) {
+            return res.status(404).json({ message: 'PDF not found' });
+        }
+        if (userId && !pdf.downloadedBy.includes(userId)) {
+            pdf.downloadedBy.push(userId);
+            await folder.save(); 
+        }
+        emitFileDownloaded( userId); 
+        res.setHeader('Content-Disposition', `attachment; filename="${pdf.name}"`);
+        res.setHeader('Content-Type', 'application/pdf');
+        // Stream the file from Cloudinary
+        https.get(fileUrl, (fileStream) => {
+            fileStream.pipe(res);
+        }).on('error', (err) => {
+            console.error('Error fetching file:', err);
+            res.status(500).json({ message: 'Error downloading file' });
+        });
+    } 
+    catch (error) {
+        console.error('Download error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };

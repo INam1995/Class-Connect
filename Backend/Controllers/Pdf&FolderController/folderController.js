@@ -96,7 +96,6 @@ export const leaveFolder = async (req, res) => {
     // Remove the user from folder members
     folder.members = folder.members.filter((member) => member.toString() !== userId.toString());
     await folder.save();
-
     res.status(200).json({ message: "You have left the folder successfully" });
   } catch (error) {
     console.error("Error leaving folder:", error);
@@ -122,21 +121,6 @@ export const getFolderById = async (req, res) => {
   }
 };
 
-export const getMyFolders = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const createdFolders = await Folder.find({ createdBy: userId })
-      .lean()
-      .then(folders => folders.map(addProgressData(userId)));
-    const joinedFolders = await Folder.find({ members: userId })
-      .lean()
-      .then(folders => folders.map(addProgressData(userId)));
-    res.json({ createdFolders, joinedFolders });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
 export const getFolderMembers = async (req, res) => {
   try {
     const { folderId } = req.params;
@@ -151,22 +135,3 @@ export const getFolderMembers = async (req, res) => {
   }
 };
 
-// Helper function to calculate progress
-const addProgressData = (userId) => (folder) => {
-  const userPdfs = folder.pdfs.filter(pdf => 
-    pdf.progressByUser.some(progress => 
-      progress.user.toString() === userId.toString()
-    )
-  );
-  const completedPdfs = userPdfs.filter(pdf => 
-    pdf.progressByUser.find(p => p.user.toString() === userId.toString()).completed
-  );
-  return {
-    ...folder,
-    progressPercentage: folder.pdfs.length > 0 
-      ? Math.round((completedPdfs.length / folder.pdfs.length) * 100)
-      : 0,
-    completedCount: completedPdfs.length,
-    totalPdfs: folder.pdfs.length
-  };
-};

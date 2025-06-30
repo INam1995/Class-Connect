@@ -1,9 +1,8 @@
-import User from "../../models/User.js"; // Ensure .js extension is added
-import mailSender from "../../utils/MailSender.js"; // Ensure .js extension is added
+import User from "../../models/User.js"; 
+import mailSender from "../../utils/MailSender.js";
 import bcrypt from 'bcryptjs';
 
 import crypto from "crypto";
-
 
 export const resetPasswordToken = async (req, res) => {
 	try {

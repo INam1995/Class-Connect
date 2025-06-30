@@ -7,8 +7,9 @@ import {
 
 const router = express.Router();
 
-// Routes for user progress on PDFs within a folder
 router.get("/:folderId/user-progress", AuthMiddleware, getFolderWithUserProgress);
 router.patch("/:folderId/:pdfId/progress", AuthMiddleware, updateUserProgress);
 
 export default router;
+
+

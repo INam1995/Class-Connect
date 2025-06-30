@@ -1,14 +1,14 @@
 import bcrypt from 'bcryptjs';
-import User from '../../models/User.js'; // Ensure the .js extension is included
-import OTP from '../../models/OTP.js'; // Include the .js extension
+import User from '../../models/User.js'; 
+import OTP from '../../models/OTP.js'; 
 import jwt from 'jsonwebtoken';
 import otpGenerator from 'otp-generator';
-import mailSender from '../../utils/MailSender.js';  // Include the .js extension
+import mailSender from '../../utils/MailSender.js';  
 import { passwordUpdated } from '../../mail/templates/passwordUpdate.js';
 import { emitUserRegistered } from '../../index.js';
-import Notification from '../../models/Notification.js'; // Include the .js extension
+import Notification from '../../models/Notification.js';
 import dotenv from 'dotenv';
-import { sendVerificationEmail } from '../../models/OTP.js'; // ✅ Add this import
+import { sendVerificationEmail } from '../../models/OTP.js';
 
 dotenv.config();
 

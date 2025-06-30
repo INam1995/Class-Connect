@@ -8,8 +8,6 @@ const router = express.Router();
 router.get("/", getClassNotes);
 router.post("/upload", AuthMiddleware, uploadPdf, uploadClassNote);
 router.post("/rate", AuthMiddleware, ratePdf);
-
-// ✅ New review submission route
 router.post("/reviews/submit-review", AuthMiddleware, submitReview);
 
 export default router;

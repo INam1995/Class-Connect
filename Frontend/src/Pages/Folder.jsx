@@ -89,7 +89,7 @@ const FolderDetail = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `/api/download/pdf?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`,
+        `/api/pdfs/download?url=${encodeURIComponent(pdf.path)}&pdfId=${pdf._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "blob",

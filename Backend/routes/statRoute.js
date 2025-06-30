@@ -3,12 +3,10 @@ import { getUserStats, getStats, search } from '../Controllers/AdminController/s
 import {getActivityLog ,getOverallActivityStats} from '../Controllers/AdminController/useractivity.js'
 const router = express.Router();
 
-// Get user statistics
 router.get('/stats', getUserStats);
 router.get('/search', search);
-
 router.get('/getStats', getStats);
-
 router.get('/activity', getActivityLog);
 router.get('/allactivity', getOverallActivityStats);
+
 export default router;

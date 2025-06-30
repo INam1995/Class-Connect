@@ -2,13 +2,10 @@ import axios from "axios";
 import * as pdfjs from "pdfjs-dist";
 import Bottleneck from "bottleneck";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
 const OPENAI_API_KEY = process.env.API_KEY4;
-
 const genAI = new GoogleGenerativeAI(OPENAI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-// Bottleneck Rate Limiter
+//bottleneck rate limiter
 const limiter = new Bottleneck({
   maxConcurrent: 1,
   minTime: 20000,
@@ -57,10 +54,13 @@ export const summarizePdfFromUrl = async (req, res) => {
       res.json({ summary });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: error.message || "An error occurred while processing the PDF." });
+      res.status(500).json({ error: error.message || 
+        "An error occurred while processing the PDF." });
     }
   } catch (error) {
     console.error("Full error:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
+

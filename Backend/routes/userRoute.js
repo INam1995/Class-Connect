@@ -1,11 +1,10 @@
 import express from 'express';
-import { getUserProfile } from '../Controllers/ProfileController/profileController.js'; // Import the controller
-import { updateEmail ,updatePassword} from '../Controllers/ProfileController/settingController.js'; // Import the controller for email and password updates
+import { getUserProfile } from '../Controllers/ProfileController/profileController.js'; 
+import { updateEmail ,updatePassword} from '../Controllers/ProfileController/settingController.js';
 const router = express.Router();
 
-// Get user profile details
-router.get('/user/:userId', getUserProfile); // Call the controller to handle this route
-router.put('/:userId/email', updateEmail); // Call the controller to handle this route
-router.put('/:userId/password', updatePassword); // Call the controller to handle this route
+router.get('/user/:userId', getUserProfile); 
+router.put('/:userId/email', updateEmail); 
+router.put('/:userId/password', updatePassword); 
 
 export default router;

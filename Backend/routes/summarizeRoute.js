@@ -1,5 +1,6 @@
 import express from "express";
-import { summarizePdfFromUrl } from "../Controllers/Pdf&FolderController/summarizeController.js"; // Import the controller function
+import { summarizePdfFromUrl } 
+from "../Controllers/Pdf&FolderController/summarizeController.js";
 
 const router = express.Router();
 

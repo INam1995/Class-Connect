@@ -3,7 +3,6 @@ import otpTemplate from '../mail/templates/emailVerificationTemplate.js';
 
 import mailSender from '../utils/MailSender.js';
 
-
 const OTPSchema = new mongoose.Schema({
 	email: {
 		type: String,
@@ -16,13 +15,11 @@ const OTPSchema = new mongoose.Schema({
 	createdAt: {
 		type: Date,
 		default: Date.now,
-		expires: 60 * 5, // The document will be automatically deleted after 5 minutes of its creation time
+		expires: 60 * 5, 
 	},
 });
 
-// Define a function to send emails
 async function sendVerificationEmail(email, otp) {
-	// Send the email
 	try {
 		const mailResponse = await mailSender(
 			email,
