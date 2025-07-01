@@ -1,4 +1,3 @@
-
 import User from '../../models/User.js';
 import Folder from '../../models/Folder.js';
 import mongoose from 'mongoose';

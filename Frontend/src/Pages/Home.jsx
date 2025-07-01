@@ -1,6 +1,3 @@
-// LearnifyHomePage.jsx
-import React from "react";
-import { Star } from "lucide-react";
 import NavbarComponent from "../Components/Navbar"; // Adjust path if needed
 import { Link } from "react-router-dom"; // Importing Link for navigation
 
