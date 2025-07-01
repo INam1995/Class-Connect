@@ -1,5 +1,5 @@
-import User from "../../models/user.js";
-import Folder from "../../models/folder.js"; // Assuming this is your File model
+import User from "../../models/User.js";
+import Folder from "../../models/Folder.js"; // Assuming this is your File model
 export const search = async (req, res)=>{
   try {
     const { query } = req.query;

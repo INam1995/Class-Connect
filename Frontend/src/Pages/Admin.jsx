@@ -10,7 +10,7 @@ import StatisticsCards from "../Components/AdminComponents/StatisticsCards.jsx";
 import UsersTable from "../Components/AdminComponents/UsersTable.jsx";
 import Role from "../Components/AdminComponents/roles.jsx";
 import { Form } from "react-bootstrap";
-import UserActivityGraph from "../Components/AdminComponents/useractivity.jsx";
+import UserActivityGraph from "../Components/AdminComponents/UserActivity.jsx";
 import Navbar  from "../Components/Navbar";
 import Location from "../Components/AdminComponents/Location.jsx";
 import MultiLevelDropdown from "../Components/AdminComponents/MultiLevelDropdown.jsx";

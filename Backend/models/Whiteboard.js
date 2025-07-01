@@ -1,4 +1,3 @@
-// models/Whiteboard.js
 import mongoose from 'mongoose';
 
 const whiteboardSchema = new mongoose.Schema({
@@ -21,7 +20,6 @@ const whiteboardSchema = new mongoose.Schema({
   }
 });
 
-// Update the updatedAt field before saving
 whiteboardSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();

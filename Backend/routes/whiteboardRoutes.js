@@ -1,4 +1,3 @@
-// routes/whiteboardRoutes.js
 import express from 'express';
 import { getWhiteboard, saveWhiteboard } from '../Controllers/whiteboardController.js';
 

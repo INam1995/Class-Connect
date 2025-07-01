@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import Navbar from "../Components/Navbar";
 
 const ClassNotes = () => {
   const reviewRefs = useRef({});
@@ -63,7 +64,7 @@ const ClassNotes = () => {
     try {
       setUploading(true);
       await axios.post(
-        `http://localhost:5000/api/class-notes/upload/${folderId}`,
+        `http://localhost:5000/api/class-notes/upload`,
         formData,
         {
           headers: {
@@ -139,6 +140,8 @@ const ClassNotes = () => {
   const isAnyReviewOpen = Object.values(showReviewInput).some(Boolean);
 
   return (
+    <>
+    <Navbar className="fixed top-0 left-0 w-full z-50"/>
     <div className="min-h-screen bg-[#fef6f3] p-6 relative">
       <h2 className="text-4xl font-bold text-[#222] text-center mb-10">
         🎓 <span className="text-[#f26d4f]">Class Notes</span> Hub
@@ -326,6 +329,7 @@ const ClassNotes = () => {
         );
       })}
     </div>
+    </>
   );
 };
 

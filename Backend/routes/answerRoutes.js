@@ -1,7 +1,7 @@
 
 import express from "express";
-import Answer from "../models/Answer.js";
-import Question from "../models/Question.js";
+import Answer from "../models/DiscussionModels/Answer.js";
+import Question from "../models/DiscussionModels/Question.js";
 
 const router = express.Router();
 

@@ -24,4 +24,4 @@ const mailSender = async (email, title, body) => {
     }
 };
 
-export default mailSender; // ✅ Default export
+export default mailSender; 

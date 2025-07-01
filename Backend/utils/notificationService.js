@@ -1,4 +1,3 @@
-// notificationService.js
 import nodemailer from 'nodemailer';
 
 // Create reusable transporter object using SMTP transport
@@ -22,7 +21,8 @@ export const sendNotification = (to, message) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
-    } else {
+    } 
+    else {
       console.log('Email sent: ' + info.response);
     }
   });

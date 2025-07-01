@@ -1,17 +1,15 @@
-import React from "react";
 import { Dropdown, ButtonGroup } from "react-bootstrap";
 import {useState} from 'react'
 const MultiLevelDropdown = ({ setFilterType, setRoleFilter }) => {
   const [selectedFilter, setSelectedFilter] = useState("none");
-
   const handleFilterChange = (filter) => {
     setSelectedFilter(filter);
     setFilterType(filter);
     if (filter !== "role") {
-      setRoleFilter(""); // Reset role filter if not selecting a role
+      setRoleFilter(""); 
     }
   };
-
+  
   return (
     <Dropdown as={ButtonGroup}>
       <Dropdown.Toggle variant="primary">

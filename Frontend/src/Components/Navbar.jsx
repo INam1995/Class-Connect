@@ -1,4 +1,3 @@
-import React from "react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
@@ -62,14 +61,19 @@ function NavbarComponent() {
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>
-  <Dropdown.Header>{user?.username || "User"}</Dropdown.Header>
-  <Dropdown.Item as={Link} to={`/profile/${user?._id}`}>
-     Profile
-  </Dropdown.Item>
-    <Dropdown.Item as={Link} to="/Dashboard">Dashboard</Dropdown.Item> 
-   <Dropdown.Divider />
-   <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
- </Dropdown.Menu>
+                  <Dropdown.Header>
+                    {user?.username || "User"}</Dropdown.Header>
+                  <Dropdown.Item as={Link} to={`/profile/${user?._id}`}>
+                    Profile
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/Dashboard">
+                    Dashboard
+                  </Dropdown.Item> 
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout}>
+                    Logout
+                  </Dropdown.Item>
+                </Dropdown.Menu>
               </Dropdown>
             ) : (
               <Nav.Link as={Link} to="/register" style={navLinkStyle}>SignUp / SignIn</Nav.Link>

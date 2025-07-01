@@ -6,8 +6,8 @@ const folderSchema = new mongoose.Schema(
     subject: { type: String, required: true },
     uniqueKey: { type: String, unique: true, required: true },
     // description: { type: String, default: "" ,required: true},
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Ensure createdBy is set
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Reference to the User model
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, 
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], 
     pdfs: [
       {
         name: { type: String, required: true },
@@ -19,12 +19,11 @@ const folderSchema = new mongoose.Schema(
             date: { type: Date, default: Date.now },
           },
         ],
-        // **Progress Tracking Fields**
         progressByUser: [
           {
             user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-            completed: { type: Boolean, default: false }, // Track if user marked it as completed
-            updatedAt: { type: Date, default: Date.now }, // Timestamp when progress was updated
+            completed: { type: Boolean, default: false }, 
+            updatedAt: { type: Date, default: Date.now },
           },
         ],
       },
